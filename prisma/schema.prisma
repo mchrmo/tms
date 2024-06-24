@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model UserRole {
+  id    Int    @id @default(autoincrement())
+  name  String
+  users User[]
+}
+
+model User {
+  id                 Int                  @id @default(autoincrement())
+  clerk_id           String               @unique
+  name               String
+  email              String               @unique
+  role_id            Int                  @default(2)
+  role               UserRole             @relation(fields: [role_id], references: [id])
+  OrganizationMember OrganizationMember[]
+}
+
+model Organization {
+  id        Int                  @id @default(autoincrement())
+  parent_id Int?
+  name      String
+  type      OrganizationType
+  parent    Organization?        @relation("OrganizationParent", fields: [parent_id], references: [id])
+  children  Organization[]       @relation("OrganizationParent")
+  members   OrganizationMember[]
+}
+
+enum OrganizationType {
+  main
+  custom
+}
+
+model OrganizationMember {
+  id              Int                  @id @default(autoincrement())
+  user_id         Int
+  manager_id      Int?
+  organization_id Int
+  position_name   String
+  user            User                 @relation(fields: [user_id], references: [id])
+  manager         OrganizationMember?  @relation("MemberManager", fields: [manager_id], references: [id])
+  subordinates    OrganizationMember[] @relation("MemberManager")
+  organization    Organization         @relation(fields: [organization_id], references: [id])
+}

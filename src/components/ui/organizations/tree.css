@@ -1,0 +1,8 @@
+/* custom-tree.css */
+
+
+.node__root, .node__branch, .node__leaf {
+  stroke-width: 1 !important;
+  fill: black !important;
+}
+

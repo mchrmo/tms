@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+    {
+      "name": "APP",
+      "path": "./src/app"
+    },
+    {
+      "name": "Components",
+      "path": "./src/components"
+    },
+    {
+      "name": "lib",
+      "path": "./src/lib"
+    },
+    {
+      "name": "API",
+      "path": "./src/app/api"
+    }
+  ],
+  "settings": {}
+}
