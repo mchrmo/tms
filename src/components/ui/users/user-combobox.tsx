@@ -18,7 +18,7 @@ export default function UserCombobox() {
     setSelected(user);
 
     // OPTIONAL: close the combobox upon selection
-    // setOpen(false);
+    setOpen(false);
   }, []);
 
   const displayName = selected ? selected.name : 'Select product';
