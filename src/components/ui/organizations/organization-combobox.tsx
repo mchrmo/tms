@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { Organization } from "@prisma/client";
 import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
 import { useCallback, useState } from "react";
 import { Button } from "../button";
@@ -11,19 +11,19 @@ import { useQuery } from '@tanstack/react-query'
 
 const POPOVER_WIDTH = 'w-[250px]';
 
-export default function UserCombobox({onSelectResult, mode}: {onSelectResult: (user: User) => void; mode: 'assigned' | 'unassigned'}) {
+export default function OrganizationCombobox({onSelectResult}: {onSelectResult: (organization: Organization) => void;}) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<User | undefined>();
+  const [selected, setSelected] = useState<Organization | undefined>();
 
 
-  const handleSetActive = useCallback((user: User) => {
-    setSelected(user);
-    onSelectResult(user)
+  const handleSetActive = useCallback((organization: Organization) => {
+    setSelected(organization);
+    onSelectResult(organization)
     // OPTIONAL: close the combobox upon selection
     setOpen(false);
   }, []);
 
-  const displayName = selected ? selected.name : 'Vybrať užívateľa';
+  const displayName = selected ? selected.name : 'Vybrať organizáciu';
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -40,7 +40,7 @@ export default function UserCombobox({onSelectResult, mode}: {onSelectResult: (u
       </PopoverTrigger>
     
       <PopoverContent side="bottom" className={cn('p-0', POPOVER_WIDTH)}>
-        <Search selectedResult={selected} onSelectResult={handleSetActive} mode={mode} />
+        <Search selectedResult={selected} onSelectResult={handleSetActive} />
       </PopoverContent>
     </Popover>
   
@@ -50,21 +50,17 @@ export default function UserCombobox({onSelectResult, mode}: {onSelectResult: (u
 
 
 interface SearchProps {
-  selectedResult?: User;
-  onSelectResult: (user: User) => void;
-  mode: 'assigned' | 'unassigned' 
+  selectedResult?: Organization;
+  onSelectResult: (organization: Organization) => void;
 }
 
-export function Search({ selectedResult, onSelectResult, mode }: SearchProps) {
+export function Search({ selectedResult, onSelectResult }: SearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const users: User[] = [
-    {name: "User", clerk_id: "id", id: 10, email: "mail", role_id: 2}
-  ]
 
-  const handleSelectResult = (user: User) => {
+  const handleSelectResult = (organization: Organization) => {
     
-    onSelectResult(user);
+    onSelectResult(organization);
   };
 
   return (
@@ -81,7 +77,6 @@ export function Search({ selectedResult, onSelectResult, mode }: SearchProps) {
           query={searchQuery}
           selectedResult={selectedResult}
           onSelectResult={handleSelectResult}
-          mode={mode}
         />
     </Command>
   );
@@ -91,21 +86,19 @@ interface SearchResultsProps {
   query: string;
   selectedResult: SearchProps['selectedResult'];
   onSelectResult: SearchProps['onSelectResult'];
-  mode: 'assigned' | 'unassigned';
 }
 
 function SearchResults({
   query,
   selectedResult,
   onSelectResult,
-  mode
 }: SearchResultsProps) {
   const [debouncedSearchQuery] = useDebounce(query, 500);
 
   const enabled = !!debouncedSearchQuery;
 
-  const getUsers = async (search: string) => {
-		const res = await fetch(`/api/users/unassigned?search=${search}&mode=${mode}`);
+  const getOrganizations = async (search: string) => {
+		const res = await fetch(`/api/organizations?search=${search}`);
 		return res.json();
 	};
 
@@ -114,9 +107,9 @@ function SearchResults({
     isLoading: isLoadingOrig,
     isError,
     error
-  } = useQuery<User[]>({
-    queryKey: ['searchUsers', debouncedSearchQuery],
-    queryFn: () => getUsers(debouncedSearchQuery),
+  } = useQuery<Organization[]>({
+    queryKey: ['searchOrganizations', debouncedSearchQuery],
+    queryFn: () => getOrganizations(debouncedSearchQuery),
     // enabled,
   });
 
@@ -130,24 +123,24 @@ function SearchResults({
       {/* TODO: these should have proper loading aria */}
       {isLoading && <div className="p-4 text-sm">Hľadám...</div>}
       {!isError && !isLoading && !data?.length && (
-        <div className="p-4 text-sm">Nenašiel sa žiadny užívateľ</div>
+        <div className="p-4 text-sm">Nenašla sa organizácia</div>
       )}
       {isError && <div className="p-4 text-sm">Niečo sa pokazilo...</div>}
 
-      {data?.map((user) => {
+      {data?.map((organization) => {
         return (
           <CommandItem
-            key={user.id}
-            onSelect={() => onSelectResult(user)}
-            value={user.name}
+            key={organization.id}
+            onSelect={() => onSelectResult(organization)}
+            value={organization.name}
           >
             <Check
               className={cn(
                 'mr-2 h-4 w-4',
-                selectedResult?.id === user.id ? 'opacity-100' : 'opacity-0'
+                selectedResult?.id === organization.id ? 'opacity-100' : 'opacity-0'
               )}
             />
-            {user.name}
+            {organization.name}
           </CommandItem>
         );
       })}

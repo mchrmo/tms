@@ -8,6 +8,8 @@ export default async function Home() {
     <>
       <div >
         <ViewHeadline>Prehľad</ViewHeadline>
+        
+        <span>Tu sa bude nachádzať prehľad vybraných admin informácií</span>
       </div>
     </>
   );

@@ -5,16 +5,21 @@ import { NextRequest, NextResponse } from 'next/server';
 export const GET = async (request: NextRequest) => {
 
   const search = request.nextUrl.searchParams.get("search")
-  
-    
+  let mode = request.nextUrl.searchParams.get("mode")
+
+  if(mode !== 'assigned' && mode !== 'unassigned') {
+    mode = 'unassigned'
+  }
+
   const users = await prisma.user.findMany({
     where: {
-      OrganizationMember: { none: {} },
+      OrganizationMember: mode == 'unassigned' ? {none: {}} : {some: {}},
       name: {
         contains: search ? search : ''
       }
     }
   })
+
     
-    return NextResponse.json(users, { status: 200 });
+  return NextResponse.json(users, { status: 200 });
 };

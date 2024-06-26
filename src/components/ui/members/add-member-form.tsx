@@ -8,9 +8,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ComboboxDemo } from "../combobox";
 import {Autocomplete, AutocompleteItem} from "@nextui-org/react";
 import {useAsyncList} from "@react-stately/data";
-import { User } from "@prisma/client";
+import { Organization, User } from "@prisma/client";
 import UserCombobox from "../users/user-combobox";
+import OrganizationCombobox from "../organizations/organization-combobox";
+import { BaseSyntheticEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
+import OrganizationMemberCombobox, { OrganizationMemberWithUser } from "./member-combobox";
 
+
+export type MemberFormData = {
+  user_id?: number;
+  manager_id?: number;
+  organization_id?: number;
+  position_name?: string
+}
 
 const formSchema = z.object({
   userId: z.number(),
@@ -19,27 +29,40 @@ const formSchema = z.object({
 })
 
 
-export default function AddMemberForm({ }) {
+export default function AddMemberForm({formData, setFormData}: {formData: MemberFormData, setFormData: Dispatch<SetStateAction<MemberFormData>>}) {
 
-  const initialState = { message: null, errors: {}};
-  // const [state, dispatch] = useFormState<State<RegistrationFields>, FormData>(create_user, initialState);
 
+  const onUserSelect = (user: User) => {
+
+    setFormData((data) => ({
+      ...data,
+      user_id: user.id
+    }))
+  }
+
+  const onManagerSelect = (member: OrganizationMemberWithUser) => {
+    
+    setFormData((data) => ({
+      ...data,
+      manager_id: member.user_id
+    }))
+  }
+
+  const onOrgSelect = (organization: Organization) => {
+    setFormData((data) => ({
+      ...data,
+      organization_id: organization.id
+    }))
+  }
   
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    mode: "onChange"
-  })
+  const onPositionChange = (e: BaseSyntheticEvent) => {
+    
+    setFormData((data) => ({
+      ...data,
+      position_name: e.target.value
+    }))
+  }
 
-  let list = useAsyncList<User>({
-    async load({signal, filterText}) {
-      let res = await fetch(`/api/users/unassigned/?search=${filterText}`, {signal});
-      let json = await res.json();
-      
-      return {
-        items: json        
-      };
-    },
-  });
 
   return (
 
@@ -49,23 +72,34 @@ export default function AddMemberForm({ }) {
           Užívateľ
         </Label>
 
-        <UserCombobox></UserCombobox>
-        {/* <Input
-          id="name"
-          defaultValue="Pedro Duarte"
-          className="col-span-3"
-        /> */}
+        <UserCombobox onSelectResult={onUserSelect} mode="unassigned"></UserCombobox>
       </div>
-      {/* <div className="grid grid-cols-4 items-center gap-4">
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="name" className="text-right">
+          Organizácia
+        </Label>
+
+        <OrganizationCombobox onSelectResult={onOrgSelect}></OrganizationCombobox>
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="name" className="text-right">
+          Nadriadený
+        </Label>
+
+        <OrganizationMemberCombobox onSelectResult={onManagerSelect}></OrganizationMemberCombobox>
+      </div>
+
+      <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="username" className="text-right">
-          Username
+          Pozícia
         </Label>
         <Input
-          id="username"
-          defaultValue="@peduarte"
-          className="col-span-3"
+          id="position"
+          placeholder="Pozíca"
+          className="w-[250px]"
+          onChange={onPositionChange}
         />
-      </div> */}
+      </div>
     </form>
 
   )

@@ -14,6 +14,9 @@ const mailService = nodemailer.createTransport({
 
 export async function sendWelcomeEmail(email: string, password: string) {
 
+  console.log("Sending email to ", email);
+  
+
   const mail = await mailService.sendMail({
       from: 'support@flexishop.online',
       to: email,

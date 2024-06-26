@@ -65,7 +65,7 @@ export default function RegistrationForm() {
                 <FormItem>
                   <FormLabel>Meno a priezvisko</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -15,13 +15,28 @@ import {
 } from "@/components/ui/table"
 import Link from "next/link";
 import AddMember from "./add-member";
+import { revalidatePath } from "next/cache";
+import { useRouter } from "next/navigation";
+import { Button } from "../button";
 
 export default function MemberDetail({member, subs}: {member: OrganizationMemberDetail, subs: OrganizationMemberSubordinate}) {
   
-  
+  const { push } = useRouter();
+
   if(!member) return 
 
 
+
+  const onMemberRemove = async () => {
+
+    await fetch('/api/organizations/members?id='+member.id , {
+      method: "DELETE",
+    })
+
+    // revalidatePath('/organizations')
+    push('/organizations')
+
+  }
 
 
   return (
@@ -55,11 +70,16 @@ export default function MemberDetail({member, subs}: {member: OrganizationMember
         </TableBody>
       </Table>
 
-
-
       <div className="flex items-center justify-between mt-10 mb-3">
         <h3 className="text-xl">Podriadení:</h3>
-        <AddMember/>
+        
+        <div className="flex gap-5">
+          <AddMember defaultValues={{manager: member}}/>
+          {
+            !subs.length ? <Button onClick={onMemberRemove} variant={"destructive"}>Vymazať člena</Button> : ""
+          }
+        </div>
+        
       </div>
 
       <Table className="">

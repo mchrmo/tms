@@ -2,6 +2,7 @@ import { createUser } from "../db/users";
 import { createUser as createClerkUser } from "../clerk";
 
 import { sendWelcomeEmail } from "./mail.service";
+import { User, clerkClient } from "@clerk/nextjs/server";
 
 export default class UserService {
 
@@ -10,8 +11,13 @@ export default class UserService {
 
     const password =  Math.random().toString(36).slice(-8);
   
-  
-    const clerkUser = await createClerkUser(name, email, password)
+    let clerkUser: User | undefined;
+    const clerkUsers = await clerkClient.users.getUserList({ emailAddress: [email] })
+    if(clerkUsers.totalCount > 0) clerkUser = clerkUsers.data[0]
+    else clerkUser = await createClerkUser(name, email, password)
+
+    if(!clerkUser) throw new Error("Clerk user was not found")
+
     const user = await createUser({name, email, clerk_id: clerkUser.id})
     sendWelcomeEmail(email, password)
 

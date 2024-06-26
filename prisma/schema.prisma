@@ -11,6 +11,7 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model UserRole {
@@ -32,7 +33,7 @@ model User {
 model Organization {
   id        Int                  @id @default(autoincrement())
   parent_id Int?
-  name      String
+  name      String               @unique
   type      OrganizationType
   parent    Organization?        @relation("OrganizationParent", fields: [parent_id], references: [id])
   children  Organization[]       @relation("OrganizationParent")

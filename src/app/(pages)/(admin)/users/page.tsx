@@ -23,7 +23,6 @@ export default async function Users() {
 
   const users = await getUserList();
   
-  console.log(users[0].OrganizationMember[0].organization.name);
   
   return (
     <>
@@ -56,9 +55,9 @@ export default async function Users() {
                 <TableCell>{userRolesMap[u.role.name]}</TableCell>
                 <TableCell>{u.OrganizationMember.length ? u.OrganizationMember[0].organization.name : ''}</TableCell>
                 <TableCell>{u.clerk_id}</TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <button>Text</button>
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             )
 

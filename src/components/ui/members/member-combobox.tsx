@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
 import { useCallback, useState } from "react";
 import { Button } from "../button";
@@ -8,22 +8,25 @@ import { PopoverContent } from "../popover";
 import { Command, CommandInput, CommandItem, CommandList } from "../command";
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query'
+import { Payload } from "@prisma/client/runtime/library";
 
 const POPOVER_WIDTH = 'w-[250px]';
 
-export default function UserCombobox({onSelectResult, mode}: {onSelectResult: (user: User) => void; mode: 'assigned' | 'unassigned'}) {
+export type OrganizationMemberWithUser = Prisma.OrganizationMemberGetPayload<{include: { user: true}}>
+
+export default function OrganizationMemberCombobox({onSelectResult}: {onSelectResult: (organizationMember: OrganizationMemberWithUser) => void;}) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<User | undefined>();
+  const [selected, setSelected] = useState<OrganizationMemberWithUser | undefined>();
 
 
-  const handleSetActive = useCallback((user: User) => {
-    setSelected(user);
-    onSelectResult(user)
+  const handleSetActive = useCallback((organizationMember: OrganizationMemberWithUser) => {
+    setSelected(organizationMember);
+    onSelectResult(organizationMember)
     // OPTIONAL: close the combobox upon selection
     setOpen(false);
   }, []);
 
-  const displayName = selected ? selected.name : 'Vybrať užívateľa';
+  const displayName = selected ? selected.user.name : 'Vybrať organizáciu';
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -40,7 +43,7 @@ export default function UserCombobox({onSelectResult, mode}: {onSelectResult: (u
       </PopoverTrigger>
     
       <PopoverContent side="bottom" className={cn('p-0', POPOVER_WIDTH)}>
-        <Search selectedResult={selected} onSelectResult={handleSetActive} mode={mode} />
+        <Search selectedResult={selected} onSelectResult={handleSetActive} />
       </PopoverContent>
     </Popover>
   
@@ -50,21 +53,17 @@ export default function UserCombobox({onSelectResult, mode}: {onSelectResult: (u
 
 
 interface SearchProps {
-  selectedResult?: User;
-  onSelectResult: (user: User) => void;
-  mode: 'assigned' | 'unassigned' 
+  selectedResult?: OrganizationMemberWithUser;
+  onSelectResult: (organizationMember: OrganizationMemberWithUser) => void;
 }
 
-export function Search({ selectedResult, onSelectResult, mode }: SearchProps) {
+export function Search({ selectedResult, onSelectResult }: SearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const users: User[] = [
-    {name: "User", clerk_id: "id", id: 10, email: "mail", role_id: 2}
-  ]
 
-  const handleSelectResult = (user: User) => {
+  const handleSelectResult = (organizationMember: OrganizationMemberWithUser) => {
     
-    onSelectResult(user);
+    onSelectResult(organizationMember);
   };
 
   return (
@@ -81,7 +80,6 @@ export function Search({ selectedResult, onSelectResult, mode }: SearchProps) {
           query={searchQuery}
           selectedResult={selectedResult}
           onSelectResult={handleSelectResult}
-          mode={mode}
         />
     </Command>
   );
@@ -91,21 +89,19 @@ interface SearchResultsProps {
   query: string;
   selectedResult: SearchProps['selectedResult'];
   onSelectResult: SearchProps['onSelectResult'];
-  mode: 'assigned' | 'unassigned';
 }
 
 function SearchResults({
   query,
   selectedResult,
   onSelectResult,
-  mode
 }: SearchResultsProps) {
   const [debouncedSearchQuery] = useDebounce(query, 500);
 
   const enabled = !!debouncedSearchQuery;
 
-  const getUsers = async (search: string) => {
-		const res = await fetch(`/api/users/unassigned?search=${search}&mode=${mode}`);
+  const getOrganizationMembers = async (search: string) => {
+		const res = await fetch(`/api/organizations/members?search=${search}`);
 		return res.json();
 	};
 
@@ -114,9 +110,9 @@ function SearchResults({
     isLoading: isLoadingOrig,
     isError,
     error
-  } = useQuery<User[]>({
-    queryKey: ['searchUsers', debouncedSearchQuery],
-    queryFn: () => getUsers(debouncedSearchQuery),
+  } = useQuery<OrganizationMemberWithUser[]>({
+    queryKey: ['searchMembers', debouncedSearchQuery],
+    queryFn: () => getOrganizationMembers(debouncedSearchQuery),
     // enabled,
   });
 
@@ -130,24 +126,24 @@ function SearchResults({
       {/* TODO: these should have proper loading aria */}
       {isLoading && <div className="p-4 text-sm">Hľadám...</div>}
       {!isError && !isLoading && !data?.length && (
-        <div className="p-4 text-sm">Nenašiel sa žiadny užívateľ</div>
+        <div className="p-4 text-sm">Nenašla sa organizácia</div>
       )}
       {isError && <div className="p-4 text-sm">Niečo sa pokazilo...</div>}
 
-      {data?.map((user) => {
+      {data?.map((organizationMember) => {
         return (
           <CommandItem
-            key={user.id}
-            onSelect={() => onSelectResult(user)}
-            value={user.name}
+            key={organizationMember.id}
+            onSelect={() => onSelectResult(organizationMember)}
+            value={organizationMember.user.name}
           >
             <Check
               className={cn(
                 'mr-2 h-4 w-4',
-                selectedResult?.id === user.id ? 'opacity-100' : 'opacity-0'
+                selectedResult?.id === organizationMember.id ? 'opacity-100' : 'opacity-0'
               )}
             />
-            {user.name}
+            {organizationMember.user.name}
           </CommandItem>
         );
       })}

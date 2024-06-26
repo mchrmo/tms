@@ -82,7 +82,7 @@ function CustomNode({ nodeDatum }: {nodeDatum: TreeNodeDatum}) {
     <>
       <g onMouseOver={() => setIsHovering(true)} onMouseOut={() => setIsHovering(false)}>
         <circle r={isHovering ? 7: 3} strokeWidth={2} fill={isHovering ? 'white' : 'black'} stroke="black" />
-        <text x="15" y="0" strokeWidth={isHovering ? 1 : 0.8}>{isHovering ? `${nodeDatum.name}, ${(nodeDatum.attributes && nodeDatum.attributes.pos)}` : (nodeDatum.attributes && nodeDatum.attributes.pos)}</text>
+        <text x="15" y="0" strokeWidth={isHovering ? 1 : 0.8}>{isHovering ? `${nodeDatum.name}` : (nodeDatum.attributes && nodeDatum.attributes.pos)}</text>
         <text strokeWidth="0.1" x="15" y="20">{nodeDatum.attributes && nodeDatum.attributes.org}</text>
       </g>
     </>
