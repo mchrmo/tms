@@ -1,11 +1,11 @@
 import { Organization } from "@prisma/client";
 import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
 import { useCallback, useState } from "react";
-import { Button } from "../button";
+import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { PopoverContent } from "../popover";
-import { Command, CommandInput, CommandItem, CommandList } from "../command";
+import { PopoverContent } from "../ui/popover";
+import { Command, CommandInput, CommandItem, CommandList, CommandSeparator } from "../ui/command";
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query'
 
@@ -65,7 +65,7 @@ export function Search({ selectedResult, onSelectResult }: SearchProps) {
 
   return (
     <Command
-      shouldFilter={true}
+      shouldFilter={false}
       className="h-auto rounded-lg border border-b-0 shadow-md"
     >
       <CommandInput
@@ -102,6 +102,20 @@ function SearchResults({
 		return res.json();
 	};
 
+
+  const createOrganization = async () => {
+    const res = await fetch(`/api/organizations`, {
+      method: 'POST',
+      body: JSON.stringify({
+        name: query.trim()
+      })
+    });
+
+    const newOrg = await res.json()
+    onSelectResult(newOrg)
+
+  }
+
   const {
     data,
     isLoading: isLoadingOrig,
@@ -122,10 +136,28 @@ function SearchResults({
     <CommandList>
       {/* TODO: these should have proper loading aria */}
       {isLoading && <div className="p-4 text-sm">Hľadám...</div>}
-      {!isError && !isLoading && !data?.length && (
-        <div className="p-4 text-sm">Nenašla sa organizácia</div>
-      )}
+
+      {
+        <>
+          <CommandItem
+              onSelect={() => createOrganization()}
+            >
+              Vytvoriť '{query}'
+          </CommandItem>
+          <CommandSeparator>
+
+          </CommandSeparator>
+        </>
+      }
+
+      {/* {!isError && !isLoading && !data?.length && (
+        <>
+          <div className="p-4 text-sm">Nenašla sa organizácia</div>
+        </>
+      )} */}
       {isError && <div className="p-4 text-sm">Niečo sa pokazilo...</div>}
+
+
 
       {data?.map((organization) => {
         return (
@@ -144,6 +176,7 @@ function SearchResults({
           </CommandItem>
         );
       })}
+      
     </CommandList>
   );
 }

@@ -1,11 +1,11 @@
 import { Prisma, User } from "@prisma/client";
 import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
 import { useCallback, useState } from "react";
-import { Button } from "../button";
+import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { PopoverContent } from "../popover";
-import { Command, CommandInput, CommandItem, CommandList } from "../command";
+import { PopoverContent } from "../ui/popover";
+import { Command, CommandInput, CommandItem, CommandList } from "../ui/command";
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query'
 import { Payload } from "@prisma/client/runtime/library";
@@ -26,7 +26,7 @@ export default function OrganizationMemberCombobox({onSelectResult}: {onSelectRe
     setOpen(false);
   }, []);
 
-  const displayName = selected ? selected.user.name : 'Vybrať organizáciu';
+  const displayName = selected ? selected.user.name : 'Vybrať nadriadeného';
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -105,9 +105,10 @@ function SearchResults({
 		return res.json();
 	};
 
+
   const {
     data,
-    isLoading: isLoadingOrig,
+    isLoading: isLoading,
     isError,
     error
   } = useQuery<OrganizationMemberWithUser[]>({
@@ -117,7 +118,6 @@ function SearchResults({
   });
 
   // To get around this https://github.com/TanStack/query/issues/3584
-  const isLoading = enabled && isLoadingOrig;
 
 
 
@@ -126,7 +126,7 @@ function SearchResults({
       {/* TODO: these should have proper loading aria */}
       {isLoading && <div className="p-4 text-sm">Hľadám...</div>}
       {!isError && !isLoading && !data?.length && (
-        <div className="p-4 text-sm">Nenašla sa organizácia</div>
+        <div className="p-4 text-sm">Nenašli sa členovia</div>
       )}
       {isError && <div className="p-4 text-sm">Niečo sa pokazilo...</div>}
 

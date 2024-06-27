@@ -13,7 +13,7 @@ import {
 import OrgTree from "./tree"
 import { OrgMembersTree, getMainOrganization } from "@/lib/db/organizations"
 import { useState } from "react"
-import { Button } from "../button"
+import { Button } from "../ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AddMember from "../members/add-member"
 

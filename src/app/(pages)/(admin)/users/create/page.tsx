@@ -2,7 +2,7 @@
 'use client'
 
 import ViewHeadline from "@/components/common/view-haedline";
-import RegistrationForm from "@/components/ui/users/registration-form";
+import RegistrationForm from "@/components/users/registration-form";
 
 
 

@@ -1,5 +1,5 @@
 import ViewHeadline from "@/components/common/view-haedline"
-import Organization from "@/components/ui/organizations/organization"
+import Organization from "@/components/organizations/organization"
 import { getMainOrganization } from "@/lib/db/organizations"
 
 

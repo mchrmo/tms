@@ -19,6 +19,8 @@ export default class UserService {
     if(!clerkUser) throw new Error("Clerk user was not found")
 
     const user = await createUser({name, email, clerk_id: clerkUser.id})
+    console.log(email, password);
+    
     sendWelcomeEmail(email, password)
 
     return user

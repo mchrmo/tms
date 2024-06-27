@@ -1,11 +1,11 @@
 import { User } from "@prisma/client";
 import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
 import { useCallback, useState } from "react";
-import { Button } from "../button";
+import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { PopoverContent } from "../popover";
-import { Command, CommandInput, CommandItem, CommandList } from "../command";
+import { PopoverContent } from "../ui/popover";
+import { Command, CommandInput, CommandItem, CommandList } from "../ui/command";
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query'
 
@@ -139,7 +139,7 @@ function SearchResults({
           <CommandItem
             key={user.id}
             onSelect={() => onSelectResult(user)}
-            value={user.name}
+            value={user.id.toString()}
           >
             <Check
               className={cn(

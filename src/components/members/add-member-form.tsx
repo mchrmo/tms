@@ -1,11 +1,11 @@
 'use client'
 
-import { Input } from "../input";
-import { Label } from "../label";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ComboboxDemo } from "../combobox";
+import { ComboboxDemo } from "../ui/combobox";
 import {Autocomplete, AutocompleteItem} from "@nextui-org/react";
 import {useAsyncList} from "@react-stately/data";
 import { Organization, User } from "@prisma/client";

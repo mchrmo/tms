@@ -36,7 +36,7 @@ export default async function Users() {
 
 
       <Table>
-        <TableCaption>Prehľad sysémových užívateľov.</TableCaption>
+        <TableCaption>Prehľad systémových užívateľov.</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="">Meno</TableHead>

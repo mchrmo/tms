@@ -7,9 +7,9 @@ import {  SubmitHandler, useForm } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../form";
-import { Button } from "../button";
-import { Input } from "../input";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 

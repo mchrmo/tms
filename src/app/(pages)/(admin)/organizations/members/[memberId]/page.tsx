@@ -1,4 +1,4 @@
-import MemberDetail from "@/components/ui/members/detail";
+import MemberDetail from "@/components/members/detail";
 import { getMember, getMemberSubordinates } from "@/lib/db/organizations";
 
 

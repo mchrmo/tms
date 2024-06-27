@@ -17,7 +17,7 @@ import Link from "next/link";
 import AddMember from "./add-member";
 import { revalidatePath } from "next/cache";
 import { useRouter } from "next/navigation";
-import { Button } from "../button";
+import { Button } from "../ui/button";
 
 export default function MemberDetail({member, subs}: {member: OrganizationMemberDetail, subs: OrganizationMemberSubordinate}) {
   

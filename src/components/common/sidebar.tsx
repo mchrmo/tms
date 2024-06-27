@@ -49,7 +49,7 @@ export default function Sidebar() {
                     }
                 </ul>
                 <div className="absolute bottom-0 left-0 justify-center hidden w-full p-4 space-x-4 bg-white lg:flex dark:bg-gray-800">
-                  <p>User layout</p>
+                  <p>admin layout</p>
                 </div>
               </div>
             </div>
