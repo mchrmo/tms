@@ -142,7 +142,7 @@ function SearchResults({
           <CommandItem
               onSelect={() => createOrganization()}
             >
-              Vytvoriť '{query}'
+              Vytvoriť "{query}"
           </CommandItem>
           <CommandSeparator>
 
