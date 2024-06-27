@@ -8,7 +8,8 @@ const mailService = nodemailer.createTransport({
   auth: {
       user: 'support@flexishop.online',
       pass: 'MGreenlord3'
-  }
+  },
+  secure: true
 })
 
 
