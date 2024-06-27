@@ -25,7 +25,9 @@ export async function sendWelcomeEmail(email: string, password: string) {
       html: `
         <h2>Pre prihlásenie použite nasledovné údaje: </h2>
         <p style="margin: 0">Email: <b>${email}</b> </p>
-        <p>Heslo: <b>${password}</b> </p>
+        <p style="margin: 0">Heslo: <b>${password}</b> </p>
+        <p>Prosím prihláste sa tu: <a href="https://tms-six-ruddy.vercel.app/sign-in">https://tms-six-ruddy.vercel.app</a></p>
+
       `,
   })  
 }
