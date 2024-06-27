@@ -30,4 +30,7 @@ export async function sendWelcomeEmail(email: string, password: string) {
 
       `,
   })  
+
+  console.log(mail.response);
+  
 }
