@@ -2,8 +2,12 @@ import prisma from "../prisma";
 import { Prisma } from "@prisma/client";
 
 
+const mockDelay = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
 
 export async function getUserList() {
+
   const users = await prisma.user.findMany({
     include: {
       role: true,

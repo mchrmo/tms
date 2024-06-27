@@ -5,7 +5,7 @@ import Email from 'vercel-email';
 
 export const GET = async () => {
 
-    await sendWelcomeEmail('chrmo.keepsmart@gmail.com', "TEST")
+    // await sendWelcomeEmail('chrmo.keepsmart@gmail.com', "TEST")
 
 
     
