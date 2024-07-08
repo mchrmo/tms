@@ -16,6 +16,7 @@ import AddMemberForm, { MemberFormData } from "./add-member-form";
 import { OrganizationMember } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { useToast } from "../ui/use-toast";
+import { useRouter } from "next/navigation";
 
 
 type DefaultValues = {
@@ -29,7 +30,7 @@ export default function AddMember({children, defaultValues}: {children?: ReactNo
   const addBtnText = children ? children : "Pridať" 
   const [open, setOpen] = useState(false)
   const [formData, setFormData] = useState<MemberFormData>({})
-
+  const router = useRouter()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -44,13 +45,12 @@ export default function AddMember({children, defaultValues}: {children?: ReactNo
 
     if(res.ok) {
       setOpen(false)
-
-
+      router.refresh()
     } else {
       
     }
 
-    window.location.reload()
+    
   }
 
 

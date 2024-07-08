@@ -10,13 +10,18 @@ import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query'
 import { Payload } from "@prisma/client/runtime/library";
 
-const POPOVER_WIDTH = 'w-[250px]';
+const POPOVER_WIDTH = 'w-full';
 
 export type OrganizationMemberWithUser = Prisma.OrganizationMemberGetPayload<{include: { user: true}}>
 
-export default function OrganizationMemberCombobox({onSelectResult}: {onSelectResult: (organizationMember: OrganizationMemberWithUser) => void;}) {
+export default function OrganizationMemberCombobox({onSelectResult, label, defaultValue: _def}: 
+  {
+    onSelectResult: (organizationMember: OrganizationMemberWithUser) => void, 
+    label?: string
+    defaultValue?: OrganizationMemberWithUser
+  }) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<OrganizationMemberWithUser | undefined>();
+  const [selected, setSelected] = useState<OrganizationMemberWithUser | undefined>(_def);
 
 
   const handleSetActive = useCallback((organizationMember: OrganizationMemberWithUser) => {
@@ -26,7 +31,7 @@ export default function OrganizationMemberCombobox({onSelectResult}: {onSelectRe
     setOpen(false);
   }, []);
 
-  const displayName = selected ? selected.user.name : 'Vybrať nadriadeného';
+  const displayName = selected ? selected.user.name : (label ? label : 'Vybrať');
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

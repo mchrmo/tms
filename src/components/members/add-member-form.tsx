@@ -44,7 +44,7 @@ export default function AddMemberForm({formData, setFormData}: {formData: Member
     
     setFormData((data) => ({
       ...data,
-      manager_id: member.user_id
+      manager_id: member.id
     }))
   }
 
@@ -71,22 +71,25 @@ export default function AddMemberForm({formData, setFormData}: {formData: Member
         <Label htmlFor="name" className="text-right">
           Užívateľ
         </Label>
-
-        <UserCombobox onSelectResult={onUserSelect} mode="unassigned"></UserCombobox>
+        <div className="col-span-2">
+          <UserCombobox onSelectResult={onUserSelect} mode="unassigned"></UserCombobox>
+        </div>
       </div>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="name" className="text-right">
           Organizácia
         </Label>
-
-        <OrganizationCombobox onSelectResult={onOrgSelect}></OrganizationCombobox>
+        <div className="col-span-2">
+          <OrganizationCombobox onSelectResult={onOrgSelect}></OrganizationCombobox>
+        </div>
       </div>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="name" className="text-right">
           Nadriadený
         </Label>
-
-        <OrganizationMemberCombobox onSelectResult={onManagerSelect}></OrganizationMemberCombobox>
+        <div className="col-span-2">
+          <OrganizationMemberCombobox onSelectResult={onManagerSelect}></OrganizationMemberCombobox>
+        </div>
       </div>
 
       <div className="grid grid-cols-4 items-center gap-4">
@@ -96,7 +99,7 @@ export default function AddMemberForm({formData, setFormData}: {formData: Member
         <Input
           id="position"
           placeholder="Pozíca"
-          className="w-[250px]"
+          className="w-full col-span-2"
           onChange={onPositionChange}
         />
       </div>

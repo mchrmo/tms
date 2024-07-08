@@ -28,7 +28,8 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest) => {
   const data = await request.json()
   
-
+  console.log(data);
+  
   // auth().protect()
   const newMember = await prisma.organizationMember.create({
     data: data

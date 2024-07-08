@@ -1,5 +1,6 @@
 import { UserButton } from "@clerk/nextjs"
 import { currentUser } from "@clerk/nextjs/server"
+import SignOut from "./buttons/sign-out"
 
 
 export default async function Navbar() {
@@ -14,17 +15,18 @@ export default async function Navbar() {
                     <h1 className="text-3xl  text-primary-500">TMS</h1>
                     <div>
                       <div className="flex items-center gap-5">
-                        <button type="button" data-dropdown-toggle="notification-dropdown" className="p-2 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700">
+                        {/* <button type="button" data-dropdown-toggle="notification-dropdown" className="p-2 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700">
                           <span className="sr-only">View notifications</span>
                           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
-                        </button>
+                        </button> */}
                         <div className="flex gap-3">
                           {
                               user &&
                               <span className="text-lg">{user.firstName} {user.lastName}</span>
                           }
-                          <UserButton afterSwitchSessionUrl="/sign-in" afterSignOutUrl="/sign-in"></UserButton>
                         </div>
+                        <SignOut iconOnly></SignOut>
+
                       </div>
 
                     </div>

@@ -1,11 +1,15 @@
 import MemberDetail from "@/components/members/detail";
 import { getMember, getMemberSubordinates } from "@/lib/db/organizations";
+import { isRole } from "@/lib/utils";
+import { auth } from "@clerk/nextjs/server";
 
 
 export default async function MemberPage({ params }: {params: {memberId: string}}) {
 
-  const id = parseInt(params.memberId);
+  const { sessionClaims } = auth()
+  const isAdmin = isRole(sessionClaims, 'admin')
 
+  const id = parseInt(params.memberId);
   const member = await getMember(id)
 
   if(!member) return <span>Člen s ID {id} sa nemašiel</span> 
@@ -15,7 +19,7 @@ export default async function MemberPage({ params }: {params: {memberId: string}
   
   return (
     <>
-      <MemberDetail member={member} subs={subs}></MemberDetail>
+      <MemberDetail member={member} subs={subs} isAdmin={isAdmin}></MemberDetail>
     </>
   )
 }

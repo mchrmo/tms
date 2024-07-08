@@ -31,6 +31,20 @@ export async function getUserList() {
   return users
 }
 
+export async function getUserByClerkId(clerkId: string) {
+
+  const user = await prisma.user.findUnique({
+    where: {
+      clerk_id: clerkId
+    },
+    include: {
+      OrganizationMember: true
+    }
+  });
+
+  return user
+}
+
 export async function createUser(data: Prisma.UserCreateInput) {
 
   const user = await prisma.user.create({
@@ -47,3 +61,18 @@ export async function createUser(data: Prisma.UserCreateInput) {
 
   return user
 }
+
+
+export async function getUserRole(roleId: number) {
+
+  const role = await prisma.userRole.findUnique({
+    where: {
+      id: roleId
+    }
+  })
+
+  return role
+
+  
+}
+

@@ -1,6 +1,6 @@
 'use client'
 
-import { RegistrationFields, State, create_user } from "@/lib/actions/user.actions";
+import { createUserAction, RegistrationFields, State } from "@/lib/actions/user.actions";
 import { useEffect } from "react";
 import { useFormState } from "react-dom";
 import {  SubmitHandler, useForm } from "react-hook-form";
@@ -23,7 +23,7 @@ const formSchema = z.object({
 export default function RegistrationForm() {
 
   const initialState = { message: null, errors: {}};
-  const [state, dispatch] = useFormState<State<RegistrationFields>, FormData>(create_user, initialState);
+  const [state, dispatch] = useFormState<State<RegistrationFields>, FormData>(createUserAction, initialState);
 
   const { toast } = useToast()
 
@@ -57,7 +57,7 @@ export default function RegistrationForm() {
       <Form {...form}>
         <form action={dispatch} className="space-y-8">
 
-          <div className="flex items-end gap-3 lg:gap-6">
+          <div className="flex  gap-3 lg:gap-6 flex-col md:flex-row md:items-end">
             <FormField
               control={form.control}
               name="name"

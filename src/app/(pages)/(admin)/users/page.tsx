@@ -1,4 +1,3 @@
-import { getUserList } from "@/lib/db/users"
 import { User, clerkClient } from "@clerk/nextjs/server"
 import {
   Table,
@@ -17,6 +16,7 @@ import { Plus } from "lucide-react"
 import AddButton from "@/components/common/buttons/add-button"
 import { userRolesMap } from "@/models/User"
 import { Separator } from "@/components/ui/separator"
+import { getUserList } from "@/lib/db/user.repository"
 
 
 export default async function Users() {

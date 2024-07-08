@@ -9,7 +9,7 @@ import { Command, CommandInput, CommandItem, CommandList } from "../ui/command";
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query'
 
-const POPOVER_WIDTH = 'w-[250px]';
+const POPOVER_WIDTH = 'w-full';
 
 export default function UserCombobox({onSelectResult, mode}: {onSelectResult: (user: User) => void; mode: 'assigned' | 'unassigned'}) {
   const [open, setOpen] = useState(false);

@@ -9,7 +9,7 @@ import { Command, CommandInput, CommandItem, CommandList, CommandSeparator } fro
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query'
 
-const POPOVER_WIDTH = 'w-[250px]';
+const POPOVER_WIDTH = 'w-full';
 
 export default function OrganizationCombobox({onSelectResult}: {onSelectResult: (organization: Organization) => void;}) {
   const [open, setOpen] = useState(false);

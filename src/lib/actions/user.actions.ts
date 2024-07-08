@@ -2,12 +2,8 @@
 
 
 import { z } from 'zod';
-import { createUser as createClerkUser } from "../clerk";
-import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { createUser } from '@/lib/db/users'
-import { sendWelcomeEmail } from '../services/mail.service';
-import UserService from '../services/user.service';
+import { create_user } from '../services/user.service';
 
 
 export type State<T> = {
@@ -26,15 +22,15 @@ const RegistrationFormSchema = z.object({
 
 })
 
-const userService = new UserService()
 
-export async function create_user(prevState: State<RegistrationFields>, formData: FormData) {
+export async function createUserAction(prevState: State<RegistrationFields>, formData: FormData) {
 
+  const roleId = 2
   const name = formData.get('name') as string
   const email = formData.get('email') as string
 
   try {
-    const user = await userService.create_user({name, email})
+    const user = await create_user({name, email, roleId})
     revalidatePath('/users')
     return {
       errors: {},

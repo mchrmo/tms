@@ -2,8 +2,6 @@
 
 import ViewHeadline from "@/components/common/view-haedline";
 import { OrganizationMemberDetail, OrganizationMemberSubordinate } from "@/lib/db/organizations";
-import prisma from "@/lib/prisma";
-import { OrganizationMember, Prisma, User } from "@prisma/client";
 import {
   Table,
   TableBody,
@@ -15,13 +13,13 @@ import {
 } from "@/components/ui/table"
 import Link from "next/link";
 import AddMember from "./add-member";
-import { revalidatePath } from "next/cache";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 
-export default function MemberDetail({member, subs}: {member: OrganizationMemberDetail, subs: OrganizationMemberSubordinate}) {
+export default function MemberDetail({member, subs, isAdmin}: {member: OrganizationMemberDetail, subs: OrganizationMemberSubordinate, isAdmin?: boolean}) {
   
-  const { push } = useRouter();
+
+  const router = useRouter();
 
   if(!member) return 
 
@@ -33,9 +31,8 @@ export default function MemberDetail({member, subs}: {member: OrganizationMember
       method: "DELETE",
     })
 
-    // revalidatePath('/organizations')
-    push('/organizations')
-
+    router.push('/organizations')
+    router.refresh()
   }
 
 
@@ -72,14 +69,18 @@ export default function MemberDetail({member, subs}: {member: OrganizationMember
 
       <div className="flex items-center justify-between mt-10 mb-3">
         <h3 className="text-xl">Podriadení:</h3>
-        
-        <div className="flex gap-5">
-          <AddMember defaultValues={{manager: member}}/>
-          {
-            !subs.length ? <Button onClick={onMemberRemove} variant={"destructive"}>Vymazať člena</Button> : ""
-          }
-        </div>
-        
+        {
+          isAdmin && 
+
+          <div className="flex gap-5">
+            <AddMember defaultValues={{manager: member}}/>
+            <Button onClick={onMemberRemove} variant={"destructive"} style={{pointerEvents: "auto"}}
+              disabled={!!subs.length} title={ subs.length ? "Člen nesmie mať žiadnych podriadených aby ho bolo možné vymazať" : "" }
+            >
+              Vymazať člena
+            </Button>
+          </div>
+        }
       </div>
 
       <Table className="">
