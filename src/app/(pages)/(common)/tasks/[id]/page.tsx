@@ -19,7 +19,7 @@ export default async function Task({ params }: {params: {id: string}}) {
 
   return (
     <>
-      <ViewHeadline>Úloha "{task.name}"</ViewHeadline>
+      <ViewHeadline>Úloha &quot;{task.name}&quot;</ViewHeadline>
 
 
 
