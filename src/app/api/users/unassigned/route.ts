@@ -16,6 +16,9 @@ export const GET = async (request: NextRequest) => {
       OrganizationMember: mode == 'unassigned' ? {none: {}} : {some: {}},
       name: {
         contains: search ? search : ''
+      },
+      role_id: {
+        not: 1
       }
     }
   })

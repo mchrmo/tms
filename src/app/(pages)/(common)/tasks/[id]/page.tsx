@@ -6,6 +6,7 @@ import { getMainOrganization } from "@/lib/db/organizations"
 import { getTask, getTaskList } from "@/lib/db/task.repository"
 import { isRole } from "@/lib/utils"
 import { auth } from "@clerk/nextjs/server"
+import { revalidatePath } from "next/cache"
 
 
 export default async function Task({ params }: {params: {id: string}}) {

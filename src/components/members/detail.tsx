@@ -15,9 +15,11 @@ import Link from "next/link";
 import AddMember from "./add-member";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
+import { useToast } from "../ui/use-toast";
 
 export default function MemberDetail({member, subs, isAdmin}: {member: OrganizationMemberDetail, subs: OrganizationMemberSubordinate, isAdmin?: boolean}) {
   
+  const {toast} = useToast()
 
   const router = useRouter();
 
@@ -26,13 +28,25 @@ export default function MemberDetail({member, subs, isAdmin}: {member: Organizat
 
 
   const onMemberRemove = async () => {
-
-    await fetch('/api/organizations/members?id='+member.id , {
+    
+    fetch('/api/organizations/members?id='+member.id , {
       method: "DELETE",
     })
+    .then(res => {
+      if(!res.ok) throw new Error(res.statusText)
 
-    router.push('/organizations')
-    router.refresh()
+      return res
+    })
+    .then((res) => {
+      router.push('/organizations')
+      router.refresh()
+    }).catch(err => {
+      toast({
+        title: "Chyba",
+        description: "Člena sa nepodarilo odstrániť"
+      })
+    })
+
   }
 
 

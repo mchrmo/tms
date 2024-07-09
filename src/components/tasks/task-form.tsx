@@ -24,7 +24,7 @@ type FormInputs = {
   status: TaskStatus
 }
 
-export default function TaskForm({defaultValues: _def}: {defaultValues?: any}) {
+export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: () => void,defaultValues?: any}) {
 
   const edit = _def ? true : false
 
@@ -45,7 +45,7 @@ export default function TaskForm({defaultValues: _def}: {defaultValues?: any}) {
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
 
-    await fetch('/api/tasks', {
+    fetch('/api/tasks', {
       method: edit ? "PATCH" : "POST",
       body: JSON.stringify(data)
     }).then(res => {
@@ -56,12 +56,12 @@ export default function TaskForm({defaultValues: _def}: {defaultValues?: any}) {
 
       router.refresh() 
       router.back() 
-
-
+      return res
     }).catch(err => {
+      
       toast({
         title: "Chyba",
-        description: "Úlohu sa nepodarilo vytvoriť",
+        description: "Úlohu sa nepodarilo " + (edit ? "upraviť" : "vytvoriť"),
       })  
   
     })
