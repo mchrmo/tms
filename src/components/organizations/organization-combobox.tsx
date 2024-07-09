@@ -8,6 +8,7 @@ import { PopoverContent } from "../ui/popover";
 import { Command, CommandInput, CommandItem, CommandList, CommandSeparator } from "../ui/command";
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query'
+import { ApiError } from "next/dist/server/api-utils";
 
 const POPOVER_WIDTH = 'w-full';
 
@@ -104,15 +105,24 @@ function SearchResults({
 
 
   const createOrganization = async () => {
-    const res = await fetch(`/api/organizations`, {
+
+    if(query.length < 2) {
+      alert("Názov musí obsahovať min. 2 znaky.")
+      return
+    }
+    
+    fetch(`/api/organizations`, {
       method: 'POST',
       body: JSON.stringify({
         name: query.trim()
       })
-    });
+    }).then(res => {
+      if(!res.ok) throw new Error("Nepodarilo sa vytvoriť organizáciu")
 
-    const newOrg = await res.json()
-    onSelectResult(newOrg)
+      return res.json()
+    })
+    .then(newOrg => onSelectResult(newOrg))
+    .catch(err => alert(err.message));
 
   }
 

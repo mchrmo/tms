@@ -16,12 +16,13 @@ import { useState } from "react"
 import { Button } from "../ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AddMember from "../members/add-member"
+import { isRole } from "@/lib/utils"
+import { auth, getAuth } from "@clerk/nextjs/server"
 
 
 
-export default function Organization({orgData}: {orgData: OrgMembersTree[]}) {
-  
-  const [open, setOpen] = useState(false)
+export default function Organization({orgData, isAdmin}: {orgData: OrgMembersTree[], isAdmin: boolean}) {
+
 
   return (
     <div className="flex justify-center">
@@ -38,10 +39,18 @@ export default function Organization({orgData}: {orgData: OrgMembersTree[]}) {
             <OrgTree data={orgData[0]}></OrgTree>
           </div>
           :
+          (
           <div className="flex flex-col gap-5">
-            <span className="text-lg">Hlavnú organizáciu začnite pridaním primátora</span>
-            <AddMember>Pridať primátora</AddMember>
+            <span className="text-lg">{
+              isAdmin ?
+                "Hlavnú organizáciu začnite pridaním prvého člena"
+              :
+                "Hlavná organizácia neobsahuje žiadnych členov"
+            }</span>
+            { isAdmin && <AddMember>Pridať prvého člena</AddMember>}
           </div>
+          )
+
         }      
       </TabsContent>
       <TabsContent value="custom" className="flex justify-center">

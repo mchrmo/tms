@@ -23,6 +23,10 @@ export const fetchCache = 'force-no-store'
 export default async function MyTasks() {
   const {userId} = auth()
   const user = await getUserByClerkId(userId!)
+
+  if(!user?.OrganizationMember.length) {
+    return <span className="text-lg">Zatiaľ ste neboli priradený do žiadnej organizácie. Počkajte, kým Vám administrátor vytvorí zaradenie.</span>
+  }
   const memberId = user?.OrganizationMember[0].id
 
   
