@@ -1,7 +1,7 @@
 "use client"
 
 import { Task } from "@prisma/client"
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
+import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table"
 
 import {
   Table,
@@ -15,6 +15,12 @@ import { format } from "date-fns"
 import { DATE_FORMAT } from "@/lib/utils"
 import Link from "next/link"
 import clsx from "clsx"
+import { useEffect, useState } from "react"
+import { Input } from "../ui/input"
+import { useQuery } from "@tanstack/react-query"
+import { useDebounce } from "use-debounce"
+import { Button } from "../ui/button"
+import { ArrowUpDown } from "lucide-react"
 
 
 const columns: ColumnDef<Task>[] = [
@@ -29,12 +35,23 @@ const columns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: "Vznik",
+    // header: "Vznik",
     cell: (props) => format(props.getValue() as Date, DATE_FORMAT),
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Vznik
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
   },
   {
     accessorKey: "status",
-    header: "Status",
+    // header: "Status",
     cell: (props) => {
       const val = props.getValue()
       return <span className={clsx("font-bold",{
@@ -42,12 +59,35 @@ const columns: ColumnDef<Task>[] = [
         'text-yellow-600': val !== 'DONE',
       })}>{val as string}</span>
     },
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Status
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
   },
   
   {
     accessorKey: "deadline",
-    header: "Termín",
+    // header: "Termín",
     cell: (props) => format(props.getValue() as Date, DATE_FORMAT),
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Termín
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+
   },
   {
     accessorKey: "creator.user.name",
@@ -67,15 +107,69 @@ const columns: ColumnDef<Task>[] = [
 
 export default function TasksTable({data}: {data: Task[]}) {
 
+  const [filter, setFilter] = useState<string | undefined>()
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [debouncedSearchQuery] = useDebounce(filter, 500);
+
+  const loadTasks = async () => {
+    
+    const search = debouncedSearchQuery ? debouncedSearchQuery : ''
+    const res = await fetch(`/api/tasks?search=${search}`)
+    return await res.json();
+  }
+
+  const { data: tasks, isLoading, isError, refetch } = useQuery<Task[]>({
+    queryKey: ['tasks', debouncedSearchQuery],
+    queryFn: () => loadTasks()
+  });
+
+
+
+  return (
+    <div>
+
+      <div className="flex items-center py-4">
+        <Input
+          placeholder="Filter..."
+          // value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            setFilter(event.target.value)
+          }
+          className="max-w-sm"
+        />
+      </div>
+      {isLoading && <p>Loading...</p>}
+
+      {tasks && (
+        <TasksTableRender data={tasks} />
+      )}
+      
+    </div>
+  )
+  
+}
+
+
+function TasksTableRender({data}: {data: Task[]}) {
+
+  const [sorting, setSorting] = useState<SortingState>([])
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
+
   })
 
 
   return (
-      <div className="rounded-md border">
+    <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -124,7 +218,6 @@ export default function TasksTable({data}: {data: Task[]}) {
             )}
           </TableBody>
         </Table>
-      </div>  
+      </div> 
   )
-  
 }

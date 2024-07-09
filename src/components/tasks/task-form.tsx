@@ -54,6 +54,7 @@ export default function TaskForm({defaultValues: _def}: {defaultValues?: any}) {
         description: "Úloha bola " + (edit ? "upravená" : "vytvorená"),
       })  
 
+      router.refresh() 
       router.back() 
 
 

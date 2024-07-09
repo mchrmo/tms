@@ -6,7 +6,6 @@ import { unstable_noStore as noStore } from 'next/cache';
 
 
 export async function getTaskList(filter?: Prisma.TaskWhereInput) {
-  noStore();  
 
   const tasks = await prisma.task.findMany({
     include: {
@@ -21,9 +20,9 @@ export async function getTaskList(filter?: Prisma.TaskWhereInput) {
       }
     },
     where: filter ? filter : {},
-    orderBy: {
-      deadline: 'asc'
-    }
+    // orderBy: {
+    //   deadline: 'asc'
+    // }
   });
 
   return tasks

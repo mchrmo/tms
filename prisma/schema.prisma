@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -90,6 +91,9 @@ model Task {
   TaskUpdate        TaskUpdate[]
   TaskComment       TaskComment[]
   SubTasks          Task[]              @relation("ParentTask")
+
+  @@fulltext([name])
+
 }
 
 model TaskUpdate {
