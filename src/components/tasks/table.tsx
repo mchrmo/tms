@@ -105,7 +105,7 @@ const columns: ColumnDef<Task>[] = [
 ]
 
 
-export default function TasksTable({data}: {data: Task[]}) {
+export default function TasksTable({data, disableFilter}: {data?: Task[], disableFilter?: boolean}) {
 
   const [filter, setFilter] = useState<string | undefined>()
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -120,7 +120,8 @@ export default function TasksTable({data}: {data: Task[]}) {
 
   const { data: tasks, isLoading, isError, refetch } = useQuery<Task[]>({
     queryKey: ['tasks', debouncedSearchQuery],
-    queryFn: () => loadTasks()
+    queryFn: () => loadTasks(),
+    enabled: !data && !disableFilter,
   });
 
 
@@ -128,22 +129,28 @@ export default function TasksTable({data}: {data: Task[]}) {
   return (
     <div>
 
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter..."
-          // value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            setFilter(event.target.value)
-          }
-          className="max-w-sm"
-        />
-      </div>
+      {
+        !disableFilter && 
+        <div className="flex items-center py-4">
+          <Input
+            placeholder="Filter..."
+            // value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              setFilter(event.target.value)
+            }
+            className="max-w-sm"
+          />
+        </div>
+      }
       {isLoading && <p>Loading...</p>}
 
-      {tasks && (
-        <TasksTableRender data={tasks} />
+      {(tasks && !disableFilter) && (
+        <TasksTableRender data={data ? data : tasks} />
       )}
       
+      {data && (
+        <TasksTableRender data={data} />
+      )}
     </div>
   )
   

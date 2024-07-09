@@ -30,7 +30,7 @@ export default async function Tasks() {
 
 
 
-      <TasksTable data={tasks} ></TasksTable>
+      <TasksTable></TasksTable>
 
     </>
   )

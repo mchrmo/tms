@@ -44,7 +44,7 @@ export default async function MyTasks() {
 
       <div>
         <h2 className="text-xl mb-2">Moje úlohy</h2>
-        <TasksTable data={myTasks}></TasksTable>
+        <TasksTable data={myTasks} disableFilter={true}></TasksTable>
       </div>
       
 
@@ -55,7 +55,7 @@ export default async function MyTasks() {
             <AddButton>Pridať</AddButton>
           </Link>
         </div>
-        <TasksTable data={createdTasks}></TasksTable>
+        <TasksTable data={createdTasks} disableFilter={true}></TasksTable>
       </div>
 
     </div>
