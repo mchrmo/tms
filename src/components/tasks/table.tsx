@@ -1,6 +1,6 @@
 "use client"
 
-import { Task } from "@prisma/client"
+import { Task, TaskPriority } from "@prisma/client"
 import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table"
 
 import {
@@ -12,15 +12,16 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { format } from "date-fns"
-import { DATE_FORMAT } from "@/lib/utils"
+import { DATE_FORMAT, TASK_PRIORITIES_MAP } from "@/lib/utils"
 import Link from "next/link"
 import clsx from "clsx"
 import { useEffect, useState } from "react"
 import { Input } from "../ui/input"
-import { useQuery } from "@tanstack/react-query"
+import { Query, useQuery, UseQueryResult } from "@tanstack/react-query"
 import { useDebounce } from "use-debounce"
 import { Button } from "../ui/button"
 import { ArrowUpDown } from "lucide-react"
+import { useTasks } from "@/lib/hooks/task.hooks"
 
 
 const columns: ColumnDef<Task>[] = [
@@ -50,6 +51,11 @@ const columns: ColumnDef<Task>[] = [
     },
   },
   {
+    accessorKey: "priority",
+    header: "Priorita",
+    cell: (props) => TASK_PRIORITIES_MAP[props.getValue() as TaskPriority],
+  },
+  {
     accessorKey: "status",
     // header: "Status",
     cell: (props) => {
@@ -70,8 +76,7 @@ const columns: ColumnDef<Task>[] = [
         </Button>
       )
     },
-  },
-  
+  }, 
   {
     accessorKey: "deadline",
     // header: "Termín",
@@ -105,64 +110,12 @@ const columns: ColumnDef<Task>[] = [
 ]
 
 
-export default function TasksTable({data, disableFilter}: {data?: Task[], disableFilter?: boolean}) {
-
-  const [filter, setFilter] = useState<string | undefined>()
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [debouncedSearchQuery] = useDebounce(filter, 500);
-
-  const loadTasks = async () => {
-    
-    const search = debouncedSearchQuery ? debouncedSearchQuery : ''
-    const res = await fetch(`/api/tasks?search=${search}`)
-    return await res.json();
-  }
-
-  const { data: tasks, isLoading, isError, refetch } = useQuery<Task[]>({
-    queryKey: ['tasks', debouncedSearchQuery],
-    queryFn: () => loadTasks(),
-    enabled: !data && !disableFilter,
-  });
-
-
-
-  return (
-    <div>
-
-      {
-        !disableFilter && 
-        <div className="flex items-center py-4">
-          <Input
-            placeholder="Filter..."
-            // value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              setFilter(event.target.value)
-            }
-            className="max-w-sm"
-          />
-        </div>
-      }
-      {isLoading && <p>Loading...</p>}
-
-      {(tasks && !disableFilter) && (
-        <TasksTableRender data={data ? data : tasks} />
-      )}
-      
-      {data && (
-        <TasksTableRender data={data} />
-      )}
-    </div>
-  )
-  
-}
-
-
-function TasksTableRender({data}: {data: Task[]}) {
+export default function TasksTable({query}: {query: UseQueryResult<Task[]>}) {
 
   const [sorting, setSorting] = useState<SortingState>([])
 
   const table = useReactTable({
-    data,
+    data: query.data ? query.data : [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -219,7 +172,12 @@ function TasksTableRender({data}: {data: Task[]}) {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className=" text-center">
-                  Žiadne úlohy.
+                  {
+                    query.isLoading ? 
+                      "Načítavanie..."
+                      :
+                      "Žiadne úlohy."
+                  }
                 </TableCell>
               </TableRow>
             )}

@@ -4,6 +4,12 @@ import { SessionResource } from '@clerk/types'
 
 export const DATE_FORMAT = "dd.MM.yyyy"
 
+export const TASK_PRIORITIES_MAP = {
+  "LOW": "Nízka",
+  "MEDIUM": "Stredná",
+  "HIGH": "Vysoká",
+  "CRITICAL": "Kritická"
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

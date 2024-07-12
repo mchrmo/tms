@@ -38,6 +38,8 @@ export async function sendWelcomeEmail(email: string, password: string) {
   //     `,
   // })  
 
+  const url = process.env.NEXT_PUBLIC_URL
+
 
   await sgMail.send({
     from: 'support@flexishop.online',
@@ -47,7 +49,7 @@ export async function sendWelcomeEmail(email: string, password: string) {
       <h2>Pre prihlásenie použite nasledovné údaje: </h2>
       <p style="margin: 0">Email: <b>${email}</b> </p>
       <p style="margin: 0">Heslo: <b>${password}</b> </p>
-      <p>Prosím prihláste sa tu: <a href="https://tms-six-ruddy.vercel.app/sign-in">https://tms-six-ruddy.vercel.app</a></p>
+      <p>Prosím prihláste sa tu: <a href="${url}/sign-in">${url}</a></p>
     `
   })
 
