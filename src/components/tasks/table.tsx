@@ -92,7 +92,7 @@ export default function TasksTable({
 }: {
   query: UseQueryResult<Task[]>
   setColumnFilters?: Dispatch<SetStateAction<ColumnFiltersState>>
-  columnFilters: ColumnFiltersState
+  columnFilters?: ColumnFiltersState
 }) {
 
   const [sorting, setSorting] = useState<SortingState>([])

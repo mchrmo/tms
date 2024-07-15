@@ -33,7 +33,7 @@ function MyAssignedTasks() {
 
 
   return (
-    <TasksTable query={query} ></TasksTable>
+    <TasksTable  query={query} ></TasksTable>
   )
 
 }
