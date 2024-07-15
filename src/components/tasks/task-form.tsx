@@ -13,8 +13,9 @@ import { FormField, FormItem } from "../ui/form";
 import { useRouter } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { useToast } from "../ui/use-toast";
+import { useCreateTask, useUpdateTask } from "@/lib/hooks/task.hooks";
 
-type FormInputs = {
+export type TaskFormInputs = {
   id?: number ;
   name: string;
   description: string;
@@ -28,7 +29,7 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
 
   const edit = _def ? true : false
 
-  const defaultValues: FormInputs = {...{
+  const defaultValues: TaskFormInputs = {...{
     id: undefined,
     name: '',
     description: '',
@@ -38,34 +39,21 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
     status: "TODO"
   }, ...(_def ? _def : {})}
 
-  const {register, handleSubmit, watch, reset, setValue, control} = useForm<FormInputs>({defaultValues})
+  const {register, handleSubmit, watch, reset, setValue, control} = useForm<TaskFormInputs>({defaultValues})
   const router = useRouter()
-  const {toast} = useToast()
 
-
-  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-
-    fetch('/api/tasks', {
-      method: edit ? "PATCH" : "POST",
-      body: JSON.stringify(data)
-    }).then(res => {
-      toast({
-        title: "Správa",
-        description: "Úloha bola " + (edit ? "upravená" : "vytvorená"),
-      })  
-
-      router.refresh() 
-      router.back() 
-      return res
-    }).catch(err => {
-      
-      toast({
-        title: "Chyba",
-        description: "Úlohu sa nepodarilo " + (edit ? "upraviť" : "vytvoriť"),
-      })  
   
-    })
+  const updateTask = useUpdateTask(_def ? _def.id : 0);
+  const createTask = useCreateTask();
+
+  const onSubmit: SubmitHandler<TaskFormInputs> = async (data) => {
     
+    if(edit) {
+      updateTask.mutate(data)
+    } else {
+      createTask.mutate(data)
+      
+    }
 }
 
   const onCancel = () => {
@@ -73,9 +61,16 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
 
   }
   
-  const onDateSelect = (fieldName: keyof FormInputs, date?: Date) => {
+  const onDateSelect = (fieldName: keyof TaskFormInputs, date?: Date) => {
     setValue(fieldName, date ? date : '')
   }
+
+  if (createTask.isSuccess || updateTask.isSuccess) { 
+    router.back()
+    updateTask.reset()
+    createTask.reset()
+  }
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="my-8 flex flex-col lg:grid grid-cols-12  gap-4 ">
@@ -159,7 +154,6 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
       <div className="space-x-3 col-span-full">
         <Button variant="secondary" type="button" onClick={() => {onCancel();}}>Zrušiť</Button>
         <Button type="submit" >Uložiť</Button>
-
       </div>
 
 

@@ -1,63 +1,39 @@
 
-import { DATE_FORMAT } from "@/lib/utils"
-import { Task } from "@prisma/client"
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { format } from "date-fns"
+"use client";
+
 import Link from "next/link"
 import TasksTable from "./table"
 import { auth } from "@clerk/nextjs/server"
 import { getUserByClerkId } from "@/lib/db/user.repository"
 import { getTaskList } from "@/lib/db/task.repository"
 import AddButton from "../common/buttons/add-button"
+import { useMyTasks } from "@/lib/hooks/task.hooks"
 
 export const fetchCache = 'force-no-store'
 
-export default async function MyTasks() {
-  const {userId} = auth()
-  const user = await getUserByClerkId(userId!)
-
-  if(!user?.OrganizationMember.length) {
-    return <span className="text-lg">Zatiaľ ste neboli priradený do žiadnej organizácie. Počkajte, kým Vám administrátor vytvorí zaradenie.</span>
-  }
-  const memberId = user?.OrganizationMember[0].id
-
-  
-  const myTasks = await getTaskList({
-    assignee_id: memberId  
-  })
-
-  const createdTasks = await getTaskList({
-    creator_id: memberId,
-  })
+export default function MyTasks() {
 
 
   return (
     <div className="w-full p-5 space-y-8">
-
       <div>
         <h2 className="text-xl mb-2">Moje úlohy</h2>
-        <TasksTable data={myTasks} disableFilter={true}></TasksTable>
+        <MyAssignedTasks></MyAssignedTasks>
       </div>
-      
-
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xl ">Sledované úlohy</h2>
-          <Link href={'/tasks/create'}>
-            <AddButton>Pridať</AddButton>
-          </Link>
-        </div>
-        <TasksTable data={createdTasks} disableFilter={true}></TasksTable>
-      </div>
-
     </div>
   )
+}
+
+
+
+function MyAssignedTasks() {
+
+  
+  const query = useMyTasks()
+
+
+  return (
+    <TasksTable  query={query} ></TasksTable>
+  )
+
 }
