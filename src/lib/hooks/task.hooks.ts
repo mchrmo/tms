@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Task, TaskUpdate } from "@prisma/client";
 import { TaskFormInputs } from "@/components/tasks/task-form";
 import { useToast } from "@/components/ui/use-toast";
+import { ColumnFiltersState } from "@tanstack/react-table";
 
 
 const tasksApiClient = getApiClient('/tasks')
@@ -37,20 +38,34 @@ export const useTask = () => {
 
 }
 
-export const useTasks = (query?: string) => {
+export const useTasks = (filter?: ColumnFiltersState) => {
 
-  const getTasksFn = async (query?: string) => {
+
+  const params: {[key: string]: any} = {}
+  let query = ''
+
+  if(filter) {
+
+    filter.forEach((f, i) => {
+      params[f.id] = f.value
+      query += `${f.id}=${f.value}`
+      if(i < filter.length-1) query += '&' 
+    })
+  }
+
+
+
+
+  const getTasksFn = async (params: {[key: string]: string}) => {
     const response = await tasksApiClient.get('', {
-      params: {
-        search: query ? query : ''
-      }
+      params
     })
     return response.data
   }
 
   return useQuery<Task[]>({
-    queryKey: taskQueryKeys.searched(query ? query : ''),
-    queryFn: () => getTasksFn(query),
+    queryKey: taskQueryKeys.searched(query),
+    queryFn: () => getTasksFn(params),
   })
 
 }

@@ -5,36 +5,39 @@ import { useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
 import TasksTable from "./table";
 import { Input } from "../ui/input";
+import { ColumnFiltersState } from "@tanstack/react-table";
 
 
 
 export default function FilteredTaskTable() {
 
-  const [filter, setFilter] = useState<string | undefined>()
-  const [debouncedSearchQuery] = useDebounce(filter, 500);
 
-  const query = useTasks(debouncedSearchQuery)
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [debouncedColumnFilters] = useDebounce(
+    columnFilters,
+    1000
+  );
 
+  const query = useTasks(debouncedColumnFilters)
 
   useEffect(() => {
+    console.log('debouncedColumnFilters', debouncedColumnFilters);
     query.refetch()
-  }, [debouncedSearchQuery])
+
+  }, [debouncedColumnFilters])
 
 
   return (
     <div>
       <div className="flex items-center py-4">
-          <Input
-            placeholder="Filter..."
-            onChange={(event) =>
-              setFilter(event.target.value)
-            }
-            className="max-w-sm"
-          />
         </div>
 
 
-        <TasksTable query={query} />
+        <TasksTable 
+          query={query}
+          setColumnFilters={setColumnFilters}
+          columnFilters={columnFilters}
+        />
 
     </div>
 
