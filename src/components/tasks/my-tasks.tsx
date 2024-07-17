@@ -33,7 +33,7 @@ function MyAssignedTasks() {
 
 
   return (
-    <TasksTable  query={query} ></TasksTable>
+    <TasksTable data={query.data ? query.data : []} isError={query.isError} isLoading={query.isLoading}></TasksTable>
   )
 
 }
