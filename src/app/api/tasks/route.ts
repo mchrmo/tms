@@ -1,72 +1,73 @@
 import { getTaskList } from "@/lib/db/task.repository";
 import { getUserByClerkId } from "@/lib/db/user.repository";
+import { TASK_COLUMNS_PATHS } from "@/lib/models/task.model";
 import prisma from "@/lib/prisma";
 import { create_task, update_task } from "@/lib/services/task.service";
 import { auth } from "@clerk/nextjs/server";
-import { Prisma } from "@prisma/client";
+import { Prisma, Task, TaskPriority, TaskStatus } from "@prisma/client";
 import { NextApiRequest } from "next";
 import { NextRequest, NextResponse } from "next/server";
+import { parseArgs } from "util";
 import { z } from "zod";
 
 
 export const GET = async (request: NextRequest) => {
+
+
   const params = request.nextUrl.searchParams
 
   const where: Prisma.TaskWhereInput = {}
   
+  const sortBy = params.get('sortBy')
+  
+  let sort: Prisma.TaskOrderByWithRelationAndSearchRelevanceInput = {
+    status: 'asc'
+  }
+
+  if(sortBy) {
+    const sortDirection = params.get('sortDirection') == 'desc' ? 'desc' : 'asc'
+    if(sortBy in TASK_COLUMNS_PATHS) {
+      sort = TASK_COLUMNS_PATHS[sortBy](sortDirection)
+    }
+  }
+
+
+  
+  // return NextResponse.json({error: "Tesst error."}, {status: 400})
 
   params.forEach((value, key) => {
-    
+
     switch(key) {
-      case 'name':
-        where.name = {contains: value}
+      case 'priority':
+        where.priority = {equals: value as TaskPriority}
         break;
-
-      // case 'createdAt': 
-      //   where.createdAt = {
-      //     gte: new Date(value)
-      //   }
-      case 'creator_name':
-        where.creator = { user: {name: {contains: value}}}
+      case 'status':
+        where.status = {equals: value as TaskStatus}
         break;
-
-      case 'assignee_name':
-        where.assignee = { user: {name: {contains: value}}}  
-        break;
-
-      case 'organization_name':
-        where.organization = {name: {contains: value}}
+      default:
+        if(key in TASK_COLUMNS_PATHS) {
+          const path = TASK_COLUMNS_PATHS[key]({contains: value})
+          Object.assign(where, path)
+        }
+        
         break;
     }
     
 
 
   });
-  
-  // console.log(where);
 
+  console.log(sort);
+  
   const userId = auth().userId
   if(!userId) {
       return NextResponse.json({error: "Access denied."}, {status: 401})
   }
 
+  const tasks = await getTaskList(where, sort)
+  // const tasks: Task[] = []
 
-  
-  // if(search) {
-  //   where.organization = {
-  //     name: {
-  //       contains: search
-  //     }
-  //   }
-
-  //   where.name = {
-  //     contains: search
-  //   }
-  // }
-
-
-  const tasks = await getTaskList(where)
-  
+  await new Promise(resolve => setTimeout(resolve, 1000));
   return NextResponse.json(tasks, { status: 200 });
 };
 

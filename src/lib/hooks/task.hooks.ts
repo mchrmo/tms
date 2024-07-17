@@ -1,11 +1,11 @@
 import { useParams } from "next/navigation";
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { getApiClient } from "@/lib/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Task, TaskUpdate } from "@prisma/client";
 import { TaskFormInputs } from "@/components/tasks/task-form";
 import { useToast } from "@/components/ui/use-toast";
-import { ColumnFiltersState } from "@tanstack/react-table";
+import { ColumnFiltersState, ColumnSort } from "@tanstack/react-table";
 
 
 const tasksApiClient = getApiClient('/tasks')
@@ -38,23 +38,25 @@ export const useTask = () => {
 
 }
 
-export const useTasks = (filter?: ColumnFiltersState) => {
-
+export const useTasks = (filter?: ColumnFiltersState, sort?: ColumnSort) => {
+  const { toast } = useToast()
 
   const params: {[key: string]: any} = {}
-  let query = ''
+  let urlQuery = ''
 
   if(filter) {
 
     filter.forEach((f, i) => {
       params[f.id] = f.value
-      query += `${f.id}=${f.value}`
-      if(i < filter.length-1) query += '&' 
+      urlQuery += `${f.id}=${f.value}`
+      if(i < filter.length-1) urlQuery += '&' 
     })
   }
 
-
-
+  if(sort) {
+    params['sortBy'] = sort.id
+    params['sortDirection'] = sort.desc ? 'desc' : 'asc'
+  }
 
   const getTasksFn = async (params: {[key: string]: string}) => {
     const response = await tasksApiClient.get('', {
@@ -63,11 +65,20 @@ export const useTasks = (filter?: ColumnFiltersState) => {
     return response.data
   }
 
-  return useQuery<Task[]>({
-    queryKey: taskQueryKeys.searched(query),
+  const query = useQuery<Task[]>({
+    queryKey: taskQueryKeys.searched(urlQuery),
     queryFn: () => getTasksFn(params),
   })
 
+  useEffect(() => {
+    if(!query.error) return
+    toast({
+      title: "Chyba",
+      description: `Nepodarilo sa načítať úlohy - kód chyby: ${query.error.name}`
+    })
+  }, [query.error])
+
+  return query 
 }
 
 export const useUpdateTask = (id: number) => {
