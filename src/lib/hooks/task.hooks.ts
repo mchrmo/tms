@@ -6,6 +6,7 @@ import { Task, TaskUpdate } from "@prisma/client";
 import { TaskFormInputs } from "@/components/tasks/task-form";
 import { useToast } from "@/components/ui/use-toast";
 import { ColumnFiltersState, ColumnSort } from "@tanstack/react-table";
+import { AxiosError } from "axios";
 
 
 const tasksApiClient = getApiClient('/tasks')
@@ -131,7 +132,14 @@ export const useCreateTask = () => {
         title: "Úloha vytvorená!"
       })
     },
-    onError: (err, newTask, context?: any) => {
+    onError: (err: AxiosError<{error: string}>, newTask, context?: any) => {
+      const errMessage = err.response?.data ? err.response.data.error : err.message
+
+      toast({
+        title: "Chyba",
+        description: errMessage
+      })
+
       queryClient.setQueryData(taskQueryKeys.all, context.previousTask)
     },
     onSettled: () => {

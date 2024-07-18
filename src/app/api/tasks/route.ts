@@ -80,10 +80,14 @@ export const POST = async (request: NextRequest) => {
   }
 
   const user = await getUserByClerkId(userId)
+  if(!user?.OrganizationMember.length) {
+    return NextResponse.json({error: "Užívateľ nie je súčasťou žiadnej organizácie."}, {status: 400})
+  }
+
   const memberId = user?.OrganizationMember[0].id
 
   if(!memberId) {
-    return NextResponse.json({error: "Invalid member id."}, {status: 400})
+    return NextResponse.json({error: "Užívateľ nie je súčasťou žiadnej organizácie."}, {status: 400})
   }
   
   const schema = z.object({

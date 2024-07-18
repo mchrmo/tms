@@ -1,6 +1,8 @@
 "use client"
  
 import { format } from "date-fns"
+import { sk } from "date-fns/locale";
+
 import { Calendar as CalendarIcon } from "lucide-react"
  
 import { cn, DATE_FORMAT } from "@/lib/utils"
@@ -38,6 +40,7 @@ export function DatePicker({date, setDate}: {date: Date, setDate: (date?: Date) 
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <Calendar
+          locale={sk}
           mode="single"
           selected={date}
           onSelect={setDate}
