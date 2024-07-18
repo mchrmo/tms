@@ -14,6 +14,10 @@ export const GET = async (request: NextRequest) => {
   }
 
   const user = await getUserByClerkId(userId)
+  if(user?.OrganizationMember) {
+    return NextResponse.json([], { status: 200 });
+  }
+  
   const memberId = user?.OrganizationMember[0].id
 
   
