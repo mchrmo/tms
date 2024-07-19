@@ -33,8 +33,6 @@ export const GET = async (request: NextRequest) => {
 
 
   
-  // return NextResponse.json({error: "Tesst error."}, {status: 400})
-
   params.forEach((value, key) => {
 
     switch(key) {
@@ -57,7 +55,6 @@ export const GET = async (request: NextRequest) => {
 
   });
 
-  console.log(sort);
   
   const userId = auth().userId
   if(!userId) {
@@ -67,7 +64,7 @@ export const GET = async (request: NextRequest) => {
   const tasks = await getTaskList(where, sort)
   // const tasks: Task[] = []
 
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  // await new Promise(resolve => setTimeout(resolve, 1000));
   return NextResponse.json(tasks, { status: 200 });
 };
 

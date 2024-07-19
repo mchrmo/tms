@@ -1,12 +1,20 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react"
 import { getApiClient } from "@/lib/api-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
 import { Task, TaskUpdate } from "@prisma/client";
 import { TaskFormInputs } from "@/components/tasks/task-form";
 import { useToast } from "@/components/ui/use-toast";
 import { ColumnFiltersState, ColumnSort } from "@tanstack/react-table";
 import { AxiosError } from "axios";
+
+interface MyInt {
+  id: number;
+  title: string;
+  description: string;
+  completed: boolean;
+  // Add other fields as necessary
+}
 
 
 const tasksApiClient = getApiClient('/tasks')
@@ -21,9 +29,10 @@ export const taskQueryKeys = {
   assigned: () => [...taskQueryKeys.all, 'assigned']
 };
 
-export const useTask = () => {
+export const useTask = (id?: number, queryOptions?: Partial<UseQueryOptions>) => {
 
-  const { id } = useParams();
+  if(!queryOptions) {queryOptions = {}}
+
 
   const getTaskFn = async () => {
     const response = await tasksApiClient.get<Task>(`/${id}`);
@@ -31,11 +40,17 @@ export const useTask = () => {
   };
 
 
-  return useQuery({
-    queryKey: taskQueryKeys.detail(Number(id)),
+  return useQuery<Task, Error>({
+    queryKey: taskQueryKeys.detail(Number(id)), 
     queryFn: getTaskFn,
-    retry: 1,
+    enabled: !!id
   });
+  
+  // return useQuery({
+  //   queryKey: taskQueryKeys.detail(Number(id)),
+  //   queryFn: () => getTaskFn(id ? id : 0),
+  //   ...queryOptions
+  // });
 
 }
 

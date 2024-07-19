@@ -33,6 +33,7 @@ import { ArrowUpDown, ChevronDown, ChevronLeftIcon, ChevronRightIcon, ChevronsLe
 import Filter from "../common/table/filter"
 import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP } from "@/lib/models/task.model"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
+import LoadingSpinner from "../ui/loading-spinner"
 
 
 const columns: ColumnDef<Task>[] = [
@@ -217,7 +218,7 @@ export default function TasksTable({
                 <TableCell colSpan={columns.length} className=" text-center">
                   {
                     (isLoading) ? 
-                      "Načítavanie..."
+                      <span> <LoadingSpinner/></span>
                       :
                       (
                         isError ? "Nepodarilo sa načítať úlohy." : "Žiadne úlohy."
@@ -247,9 +248,6 @@ export default function TasksTable({
 export function DataTablePagination<TData>({
   table,
 }: {table: TableType<TData>}) {
-
-  console.log(table.getState().pagination);
-  
 
   return (
     <div className="flex items-center justify-between px-2">

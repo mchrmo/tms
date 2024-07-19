@@ -10,10 +10,12 @@ import OrganizationMemberCombobox from "../members/member-combobox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { TaskPriority, TaskStatus } from "@prisma/client";
 import { FormField, FormItem } from "../ui/form";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { useToast } from "../ui/use-toast";
-import { useCreateTask, useUpdateTask } from "@/lib/hooks/task.hooks";
+import { useCreateTask, useTask, useUpdateTask } from "@/lib/hooks/task.hooks";
+import LoadingSpinner from "../ui/loading-spinner";
+import { useEffect, useState } from "react";
 
 export type TaskFormInputs = {
   id?: number ;
@@ -22,10 +24,17 @@ export type TaskFormInputs = {
   deadline: Date;
   assignee_id: Number | null,
   priority: TaskPriority,
-  status: TaskStatus
+  status: TaskStatus,
+  parent_id: Number | null
 }
 
 export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: () => void,defaultValues?: any}) {
+  const [parentId, setParentId] = useState<number>()
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const parent = useTask(parentId)
 
   const edit = _def ? true : false
 
@@ -36,12 +45,29 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
     deadline: new Date(),
     assignee_id: null,
     priority: 'LOW',
-    status: "TODO"
+    status: "TODO",
+    parent_id: null
   }, ...(_def ? _def : {})}
 
-  const {register, handleSubmit, watch, reset, setValue, control} = useForm<TaskFormInputs>({defaultValues})
-  const router = useRouter()
+  
 
+  useEffect(() => {
+    const parentId = searchParams.get('parent_id')
+    if(parent) setParentId(parseInt(parentId as string))
+
+  }, [])
+
+  // if(!edit) {
+  //   if(parent_id && typeof parseInt(parent_id) == 'number') {
+  //     defaultValues.parent_id = parseInt(parent_id)
+  //   }
+  // }
+
+  
+
+
+  const {register, handleSubmit, watch, reset, setValue, control} = useForm<TaskFormInputs>({defaultValues})
+  
   
   const updateTask = useUpdateTask(_def ? _def.id : 0);
   const createTask = useCreateTask();
@@ -52,12 +78,11 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
       updateTask.mutate(data)
     } else {
       createTask.mutate(data)
-      
     }
 }
 
   const onCancel = () => {
-    router.back() 
+    router.push('/tasks') 
 
   }
   
@@ -66,7 +91,7 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
   }
 
   if (createTask.isSuccess || updateTask.isSuccess) { 
-    router.back()
+    router.push('/tasks')
     updateTask.reset()
     createTask.reset()
   }
@@ -151,13 +176,10 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
 
       
 
-      <div className="space-x-3 col-span-full">
+      <div className="space-x-3 col-span-full flex">
         <Button variant="secondary" type="button" onClick={() => {onCancel();}}>Zrušiť</Button>
         <Button type="submit" >Uložiť</Button>
       </div>
-
-
-
     </form>
   )
 
