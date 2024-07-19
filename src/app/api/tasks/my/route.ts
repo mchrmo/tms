@@ -14,8 +14,13 @@ export const GET = async (request: NextRequest) => {
   }
 
   const user = await getUserByClerkId(userId)
-  const memberId = user?.OrganizationMember[0].id
 
+  if(!user?.OrganizationMember.length) {
+    return NextResponse.json([], { status: 200 });
+  }
+  
+  const memberId = user?.OrganizationMember[0].id
+  
   
   const tasks = await getTaskList({
     assignee_id: memberId  

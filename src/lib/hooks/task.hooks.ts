@@ -1,11 +1,20 @@
 import { useParams } from "next/navigation";
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { getApiClient } from "@/lib/api-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
 import { Task, TaskUpdate } from "@prisma/client";
 import { TaskFormInputs } from "@/components/tasks/task-form";
 import { useToast } from "@/components/ui/use-toast";
-import { ColumnFiltersState } from "@tanstack/react-table";
+import { ColumnFiltersState, ColumnSort } from "@tanstack/react-table";
+import { AxiosError } from "axios";
+
+interface MyInt {
+  id: number;
+  title: string;
+  description: string;
+  completed: boolean;
+  // Add other fields as necessary
+}
 
 
 const tasksApiClient = getApiClient('/tasks')
@@ -20,9 +29,10 @@ export const taskQueryKeys = {
   assigned: () => [...taskQueryKeys.all, 'assigned']
 };
 
-export const useTask = () => {
+export const useTask = (id?: number, queryOptions?: Partial<UseQueryOptions>) => {
 
-  const { id } = useParams();
+  if(!queryOptions) {queryOptions = {}}
+
 
   const getTaskFn = async () => {
     const response = await tasksApiClient.get<Task>(`/${id}`);
@@ -30,31 +40,39 @@ export const useTask = () => {
   };
 
 
-  return useQuery({
-    queryKey: taskQueryKeys.detail(Number(id)),
+  return useQuery<Task, Error>({
+    queryKey: taskQueryKeys.detail(Number(id)), 
     queryFn: getTaskFn,
-    retry: 1,
+    enabled: !!id
   });
+  
+  // return useQuery({
+  //   queryKey: taskQueryKeys.detail(Number(id)),
+  //   queryFn: () => getTaskFn(id ? id : 0),
+  //   ...queryOptions
+  // });
 
 }
 
-export const useTasks = (filter?: ColumnFiltersState) => {
-
+export const useTasks = (filter?: ColumnFiltersState, sort?: ColumnSort) => {
+  const { toast } = useToast()
 
   const params: {[key: string]: any} = {}
-  let query = ''
+  let urlQuery = ''
 
   if(filter) {
 
     filter.forEach((f, i) => {
       params[f.id] = f.value
-      query += `${f.id}=${f.value}`
-      if(i < filter.length-1) query += '&' 
+      urlQuery += `${f.id}=${f.value}`
+      if(i < filter.length-1) urlQuery += '&' 
     })
   }
 
-
-
+  if(sort) {
+    params['sortBy'] = sort.id
+    params['sortDirection'] = sort.desc ? 'desc' : 'asc'
+  }
 
   const getTasksFn = async (params: {[key: string]: string}) => {
     const response = await tasksApiClient.get('', {
@@ -63,11 +81,20 @@ export const useTasks = (filter?: ColumnFiltersState) => {
     return response.data
   }
 
-  return useQuery<Task[]>({
-    queryKey: taskQueryKeys.searched(query),
+  const query = useQuery<Task[]>({
+    queryKey: taskQueryKeys.searched(urlQuery),
     queryFn: () => getTasksFn(params),
   })
 
+  useEffect(() => {
+    if(!query.error) return
+    toast({
+      title: "Chyba",
+      description: `Nepodarilo sa načítať úlohy - kód chyby: ${query.error.name}`
+    })
+  }, [query.error])
+
+  return query 
 }
 
 export const useUpdateTask = (id: number) => {
@@ -120,7 +147,14 @@ export const useCreateTask = () => {
         title: "Úloha vytvorená!"
       })
     },
-    onError: (err, newTask, context?: any) => {
+    onError: (err: AxiosError<{error: string}>, newTask, context?: any) => {
+      const errMessage = err.response?.data ? err.response.data.error : err.message
+
+      toast({
+        title: "Chyba",
+        description: errMessage
+      })
+
       queryClient.setQueryData(taskQueryKeys.all, context.previousTask)
     },
     onSettled: () => {

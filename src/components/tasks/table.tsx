@@ -1,29 +1,39 @@
 "use client"
 
-import { Task, TaskPriority } from "@prisma/client"
-import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table"
+import { Task, TaskPriority, TaskStatus } from "@prisma/client"
+import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, PaginationState, SortingState, Table as TableType, useReactTable } from "@tanstack/react-table"
 
 import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+
+
 import { format } from "date-fns"
-import { DATE_FORMAT, TASK_PRIORITIES_MAP } from "@/lib/utils"
+import { DATE_FORMAT } from "@/lib/utils"
 import Link from "next/link"
 import clsx from "clsx"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { Input } from "../ui/input"
-import { Query, useQuery, UseQueryResult } from "@tanstack/react-query"
-import { useDebounce } from "use-debounce"
 import { Button } from "../ui/button"
-import { ArrowUpDown } from "lucide-react"
-import { useTasks } from "@/lib/hooks/task.hooks"
-import { Label } from "../ui/label"
+import { ArrowUpDown, ChevronDown, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ChevronUp } from "lucide-react"
 import Filter from "../common/table/filter"
+import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP } from "@/lib/models/task.model"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
+import LoadingSpinner from "../ui/loading-spinner"
 
 
 const columns: ColumnDef<Task>[] = [
@@ -40,31 +50,41 @@ const columns: ColumnDef<Task>[] = [
     accessorKey: "createdAt",
     header: "Vznik",
     cell: (props) => format(props.getValue() as Date, DATE_FORMAT),
-    enableColumnFilter: false
+    enableColumnFilter: false,
   },
   {
     accessorKey: "priority",
     header: "Priorita",
     cell: (props) => TASK_PRIORITIES_MAP[props.getValue() as TaskPriority],
-    enableColumnFilter: false
+    meta: {
+      filterVariant: 'select',
+      selectOptions: (Object.keys(TASK_PRIORITIES_MAP) as TaskPriority[]).map((k) => ({title: TASK_PRIORITIES_MAP[k], value: k}))
+    }
   },
   {
     accessorKey: "status",
     header: "Status",
-    enableColumnFilter: false,
     cell: (props) => {
       const val = props.getValue()
       return <span className={clsx("font-bold",{
-        'text-green-600': val === 'DONE',
-        'text-yellow-600': val !== 'DONE',
-      })}>{val as string}</span>
+        'text-green-700': val === 'DONE',
+        'text-yellow-600': ['WAITING', 'INPROGRESS'].includes(val as string),
+        'text-green-500': val == 'CHECKREQ',
+      })}>{TASK_STATUSES_MAP[val as TaskStatus]}</span>
     },
+    meta: {
+      filterVariant: 'select',
+      selectOptions: (Object.keys(TASK_STATUSES_MAP) as TaskStatus[]).map((k) => ({title: TASK_STATUSES_MAP[k], value: k}))
+    }
   }, 
   {
     accessorKey: "deadline",
     header: "Termín",
     cell: (props) => format(props.getValue() as Date, DATE_FORMAT),
-    enableColumnFilter: false
+    enableColumnFilter: false,
+    meta: {
+      filterVariant: 'range',
+    }
   },
   {
     id: 'creator_name',
@@ -86,72 +106,56 @@ const columns: ColumnDef<Task>[] = [
 
 
 export default function TasksTable({
-  query,
+  data,
+  isLoading,
+  isError,
   setColumnFilters,
-  columnFilters
+  columnFilters,
+  setSorting,
+  sorting,
+  setPagination,
+  pagination
 }: {
-  query: UseQueryResult<Task[]>
+  data: Task[],
+  isLoading: boolean,
+  isError: boolean
   setColumnFilters?: Dispatch<SetStateAction<ColumnFiltersState>>
-  columnFilters?: ColumnFiltersState
+  columnFilters?: ColumnFiltersState,
+  setSorting?: Dispatch<SetStateAction<SortingState>>
+  sorting?: SortingState
+  setPagination?: Dispatch<SetStateAction<PaginationState>>
+  pagination?: PaginationState
 }) {
-
-  const [sorting, setSorting] = useState<SortingState>([])
-
 
 
   const table = useReactTable({
-    data: query.data ? query.data : [],
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
 
     onColumnFiltersChange: setColumnFilters,
     manualFiltering: true,
 
+    onSortingChange: setSorting,
+    manualSorting: true,
+
+    onPaginationChange: setPagination,
+    manualPagination: true,
 
     state: {
       sorting,
-      columnFilters
+      columnFilters,
+      pagination
     },
-
   })
 
+  
 
   return (
     <div>
-      <div className="columns-1 md:columns-2 lg:columns-3">
-        {/* {table.getHeaderGroups()[0].headers.map(
-          (header) =>
-            !header.isPlaceholder &&
-            header.column.getCanFilter() && (
-              <div key={header.id} className="">
-                <Label className="block font-semibold text-lg">
-                  {`${flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}`}
-                  :
-                </Label>
-                <Input
-                  className="w-full"
-                  placeholder={`Filter ${flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )} ...`}
-                  value={(header.column.getFilterValue() as string) || ""}
-                  onChange={(e) => {
-                    header.column?.setFilterValue(e.target.value);
-                  }}
-                />
-              </div>
-          )
-        )} */}
-        {/* {table.getHeaderGroups()[0].headers.map(
-          (header) => <Filter key={header.column.id} header={header}></Filter>
-        )} */}
-      </div>
       <div className="rounded-md border min-w-[800px]">
         
         <Table>
@@ -161,14 +165,24 @@ export default function TasksTable({
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id} className="align-top">
-                      <h4 className="text-medium py-1">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                      </h4>
+                      <div className="flex cursor-pointer" onClick={header.column.getToggleSortingHandler()}>
+                        <h4 className="text-medium py-1" >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                        </h4>
+                        <span className="pt-1">
+                        {{
+                            asc: <ChevronUp/>,
+                            desc: <ChevronDown/>,
+                          }[header.column.getIsSorted() as string] ?? null}
+
+                        </span>
+                      </div>
+
                       {
                         setColumnFilters && <Filter header={header}></Filter>
                       }
@@ -180,7 +194,7 @@ export default function TasksTable({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {(table.getRowModel().rows?.length && !isLoading) ? (
               table.getRowModel().rows.map((row) => {
                                 
                 return (
@@ -203,10 +217,15 @@ export default function TasksTable({
               <TableRow>
                 <TableCell colSpan={columns.length} className=" text-center">
                   {
-                    query.isLoading ? 
-                      "Načítavanie..."
+                    (isLoading) ? 
+                      <span> <LoadingSpinner/></span>
                       :
-                      "Žiadne úlohy."
+                      (
+                        isError ? "Nepodarilo sa načítať úlohy." : "Žiadne úlohy."
+                      )
+                  }
+                  {
+                    // isError && "Nepodarilo sa načítať úlohy"
                   }
                 </TableCell>
               </TableRow>
@@ -214,7 +233,92 @@ export default function TasksTable({
           </TableBody>
         </Table>
       </div> 
+      {
+        setPagination && 
+        <div className="my-3">
+          <DataTablePagination table={table} />
+        </div>
+      }
     </div>
     
+  )
+}
+
+
+export function DataTablePagination<TData>({
+  table,
+}: {table: TableType<TData>}) {
+
+  return (
+    <div className="flex items-center justify-between px-2">
+      <div className="flex-1 text-sm text-muted-foreground">
+        {table.getFilteredSelectedRowModel().rows.length} of{" "}
+        {table.getFilteredRowModel().rows.length} row(s) selected.
+      </div>
+      <div className="flex items-center space-x-6 lg:space-x-8">
+        <div className="flex items-center space-x-2">
+          <p className="text-sm font-medium">Rows per page</p>
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => {
+              table.setPageSize(Number(value))
+            }}
+          >
+            <SelectTrigger className="h-8 w-[70px]">
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {[15, 20, 30, 40, 50].map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`}>
+                  {pageSize}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+          Page {table.getState().pagination.pageIndex + 1} of{" "}
+          {table.getPageCount()}
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            className="hidden h-8 w-8 p-0 lg:flex"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <span className="sr-only">Go to first page</span>
+            <ChevronsLeftIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <span className="sr-only">Go to previous page</span>
+            <ChevronLeftIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <span className="sr-only">Go to next page</span>
+            <ChevronRightIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="hidden h-8 w-8 p-0 lg:flex"
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={!table.getCanNextPage()}
+          >
+            <span className="sr-only">Go to last page</span>
+            <ChevronsRightIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }

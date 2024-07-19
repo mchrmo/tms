@@ -10,3 +10,18 @@ declare global {
     };
   }
 }
+
+
+import '@tanstack/react-table' 
+
+export type SelectOptionDef = {
+  title: string,
+  value: string
+} 
+
+declare module '@tanstack/react-table' {
+  interface ColumnMeta {
+    filterVariant?: 'select' | 'range',
+    selectOptions?: SelectOptionDef[]
+  }
+}

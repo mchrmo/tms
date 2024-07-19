@@ -5,15 +5,18 @@ import { Task } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import ViewHeadline from "../common/view-haedline";
 import TaskForm from "./task-form";
+import LoadingSpinner from "../ui/loading-spinner";
+import { useParams } from "next/navigation";
 
 
 export default function TaskDetail({ params }: {params: {id: string}}) {
 
-  const getTask = useTask()
+  const paras = useParams()
+  const getTask = useTask(parseInt(params.id))
 
   
 
-  if(getTask.isLoading) return <span>Úloha sa načitáva</span> 
+  if(getTask.isLoading) return <span>Úloha sa načitáva <LoadingSpinner></LoadingSpinner></span> 
 
   return (
     <>
