@@ -8,7 +8,7 @@ type CreateTaskReqs = {
   name: string;
   priority: TaskPriority;
   description: string;
-  parentId?: number | null;
+  parent_id?: number | null;
   organization_id?: number;
   creator_id: number;
   assignee_id?: number;
@@ -28,7 +28,7 @@ export async function create_task(taskData: CreateTaskReqs) {
     name: taskData.name,
     priority: taskData.priority,
     description: taskData.description,
-    parent_id: taskData.parentId ? taskData.parentId : null,
+    parent_id: taskData.parent_id,
     organization_id,
     assignee_id,
     creator_id: taskData.creator_id,
@@ -38,15 +38,15 @@ export async function create_task(taskData: CreateTaskReqs) {
   
   const task = await createTask(newTaskData);
 
-  const createUpdate = await createTaskUpdate({
-    description: "Úloha vytvorená",
-    task: {
-      connect: {id: task.id}
-    }, 
-    user: {
-      connect: {id: task.creator?.user_id}
-    }
-  })
+  // const createUpdate = await createTaskUpdate({
+  //   description: "Úloha vytvorená",
+  //   task: {
+  //     connect: {id: task.id}
+  //   }, 
+  //   user: {
+  //     connect: {id: task.creator?.user_id}
+  //   }
+  // })
 
 
   return task

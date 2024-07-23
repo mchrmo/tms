@@ -16,6 +16,7 @@ import { useToast } from "../ui/use-toast";
 import { useCreateTask, useTask, useUpdateTask } from "@/lib/hooks/task.hooks";
 import LoadingSpinner from "../ui/loading-spinner";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export type TaskFormInputs = {
   id?: number ;
@@ -28,15 +29,12 @@ export type TaskFormInputs = {
   parent_id: Number | null
 }
 
-export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: () => void,defaultValues?: any}) {
+export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: boolean, onUpdate?: () => void, defaultValues?: any}) {
   const [parentId, setParentId] = useState<number>()
 
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const parent = useTask(parentId)
-
-  const edit = _def ? true : false
 
   const defaultValues: TaskFormInputs = {...{
     id: undefined,
@@ -49,31 +47,26 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
     parent_id: null
   }, ...(_def ? _def : {})}
 
-  
-
-  useEffect(() => {
-    const parentId = searchParams.get('parent_id')
-    if(parent) setParentId(parseInt(parentId as string))
-
-  }, [])
-
-  // if(!edit) {
-  //   if(parent_id && typeof parseInt(parent_id) == 'number') {
-  //     defaultValues.parent_id = parseInt(parent_id)
-  //   }
-  // }
-
-  
-
-
   const {register, handleSubmit, watch, reset, setValue, control} = useForm<TaskFormInputs>({defaultValues})
-  
   
   const updateTask = useUpdateTask(_def ? _def.id : 0);
   const createTask = useCreateTask();
 
+  useEffect(() => {
+    const parentId = searchParams.get('parent_id')
+    if(parentId) setValue("parent_id" ,parseInt(parentId))
+  }, [])
+
+  useEffect(() => {
+    if (createTask.isSuccess || updateTask.isSuccess) { 
+      router.push('/tasks')
+      updateTask.reset()
+      createTask.reset()
+    }
+  }, [createTask.isSuccess, updateTask.isSuccess])
+  
+
   const onSubmit: SubmitHandler<TaskFormInputs> = async (data) => {
-    
     if(edit) {
       updateTask.mutate(data)
     } else {
@@ -90,15 +83,11 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
     setValue(fieldName, date ? date : '')
   }
 
-  if (createTask.isSuccess || updateTask.isSuccess) { 
-    router.push('/tasks')
-    updateTask.reset()
-    createTask.reset()
-  }
+
 
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="my-8 flex flex-col lg:grid grid-cols-12  gap-4 ">
+    <form onSubmit={handleSubmit(onSubmit)} className="my-8 flex flex-col lg:grid grid-cols-12  gap-4 ">    
 
       <div className="col-span-8 ">
         <Label htmlFor="task-name" >
@@ -138,7 +127,7 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
       </div>
 
       <div className="col-span-4">
-        <Label>Vytvoriť úlohu pre:</Label>
+        <Label>Úloha pre:</Label>
         <OrganizationMemberCombobox defaultValue={_def ? _def.assignee : null} onSelectResult={(member) => setValue('assignee_id' ,member.id)} label="Vybrať osobu"></OrganizationMemberCombobox>
       </div>
 
@@ -162,7 +151,6 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
         </FormField> 
       </div>
 
-
       <div className="col-span-full ">
         <Label htmlFor="task-description" >
           Popis
@@ -174,12 +162,12 @@ export default function TaskForm({onUpdate, defaultValues: _def}: {onUpdate?: ()
         />
       </div>
 
-      
 
       <div className="space-x-3 col-span-full flex">
         <Button variant="secondary" type="button" onClick={() => {onCancel();}}>Zrušiť</Button>
         <Button type="submit" >Uložiť</Button>
       </div>
+
     </form>
   )
 

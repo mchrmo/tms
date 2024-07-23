@@ -9,6 +9,7 @@ export const TASK_COLUMNS_PATHS: {[key: string]: (value: any) => any} = {
   creator_name: (value) => ({creator: {user: {name: value}}}),
   assignee_name: (value) => ({assignee: {user: {name: value}}}),
   organization_name: (value) => ({organization: {name: value}}),
+
 }
 
 export const TASK_PRIORITIES_MAP = {
