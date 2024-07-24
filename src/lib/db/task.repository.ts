@@ -1,6 +1,5 @@
 import { Prisma } from "@prisma/client";
 import prisma from "../prisma";
-import { unstable_noStore as noStore } from 'next/cache';
 
 
 
@@ -27,13 +26,15 @@ export async function getTaskList(filter?: Prisma.TaskWhereInput, sort?: Prisma.
 }
 
 export async function getTask(id: number) {
-  noStore();  
 
   const task = await prisma.task.findUnique({
     where: {id},
     include: {
       assignee: {
-        include: {user: true}
+        include: {user: true},
+      },
+      parent: {
+        select: {name: true, id: true}
       }
     }
   })

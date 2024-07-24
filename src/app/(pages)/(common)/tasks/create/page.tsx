@@ -1,13 +1,12 @@
 import ViewHeadline from "@/components/common/view-haedline";
-import TaskForm from "@/components/tasks/task-form";
+import CreateTask from "@/components/tasks/create";
 
-export default function CreateTask() {
+export default function CreateTaskPage() {
 
   return (
     <>
       <ViewHeadline>Nová úloha</ViewHeadline>
-      <TaskForm></TaskForm>
-
+      <CreateTask></CreateTask>
     </>
   )
 }

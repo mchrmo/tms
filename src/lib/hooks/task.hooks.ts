@@ -29,9 +29,8 @@ export const taskQueryKeys = {
   assigned: () => [...taskQueryKeys.all, 'assigned']
 };
 
-export const useTask = (id?: number, queryOptions?: Partial<UseQueryOptions>) => {
-
-  if(!queryOptions) {queryOptions = {}}
+export const useTask = (id?: number, options?: UseQueryOptions<Task, Error>) => {
+  const { toast } = useToast()
 
 
   const getTaskFn = async () => {
@@ -39,19 +38,25 @@ export const useTask = (id?: number, queryOptions?: Partial<UseQueryOptions>) =>
     return response.data;
   };
 
-
-  return useQuery<Task, Error>({
+  const query = useQuery<Task, Error>({
     queryKey: taskQueryKeys.detail(Number(id)), 
     queryFn: getTaskFn,
-    enabled: !!id
+    enabled: !!id,
+    ...options
   });
-  
-  // return useQuery({
-  //   queryKey: taskQueryKeys.detail(Number(id)),
-  //   queryFn: () => getTaskFn(id ? id : 0),
-  //   ...queryOptions
-  // });
 
+  useEffect(() => {
+    if(!query.error) return
+    toast({
+      title: "Chyba",
+      description: `Nepodarilo sa nájsť úlohu`
+    })
+  }, [query.error])
+
+
+  
+
+  return query
 }
 
 export const useTasks = (filter?: ColumnFiltersState, sort?: ColumnSort) => {
@@ -97,9 +102,46 @@ export const useTasks = (filter?: ColumnFiltersState, sort?: ColumnSort) => {
   return query 
 }
 
+export const useSubTasks = (parentId: number, sort?: ColumnSort) => {
+  const { toast } = useToast()
+
+  const params: {[key: string]: any} = {}
+  let urlQuery = ''
+
+
+  if(sort) {
+    params['sortBy'] = sort.id
+    params['sortDirection'] = sort.desc ? 'desc' : 'asc'
+  }
+  params['parent_id'] = parentId
+  
+  const getSubTasksFn = async (params: {[key: string]: string}) => {
+    const response = await tasksApiClient.get('', {
+      params
+    })
+    return response.data
+  }
+
+  const query = useQuery<Task[]>({
+    queryKey: taskQueryKeys.searched(urlQuery),
+    queryFn: () => getSubTasksFn(params),
+  })
+
+  useEffect(() => {
+    if(!query.error) return
+    toast({
+      title: "Chyba",
+      description: `Nepodarilo sa načítať úlohy - kód chyby: ${query.error.name}`
+    })
+  }, [query.error])
+
+  return query 
+}
+
 export const useUpdateTask = (id: number) => {
 
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   const updateTaskFn = async (updateTaskData: TaskFormInputs) => {
     const response = await tasksApiClient.patch(`/${id}`, updateTaskData)
@@ -113,6 +155,11 @@ export const useUpdateTask = (id: number) => {
       const previousUser = queryClient.getQueryData(taskQueryKeys.detail(id));
       queryClient.setQueryData(taskQueryKeys.detail(Number(id)), updatedUser);
       return { previousUser: previousUser, updatedUser: updatedUser };
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Úloha upravená!"
+      })
     },
     onError: (err, updatedUser, context?: any) => {
       queryClient.setQueryData(

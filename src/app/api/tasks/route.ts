@@ -21,7 +21,7 @@ export const GET = async (request: NextRequest) => {
   const sortBy = params.get('sortBy')
   
   let sort: Prisma.TaskOrderByWithRelationAndSearchRelevanceInput = {
-    status: 'asc'
+    createdAt: 'desc'
   }
 
   if(sortBy) {
@@ -42,6 +42,9 @@ export const GET = async (request: NextRequest) => {
       case 'status':
         where.status = {equals: value as TaskStatus}
         break;
+      case 'parent_id':
+        where.parent_id = parseInt(value)
+        break;  
       default:
         if(key in TASK_COLUMNS_PATHS) {
           const path = TASK_COLUMNS_PATHS[key]({contains: value})
@@ -55,6 +58,7 @@ export const GET = async (request: NextRequest) => {
 
   });
 
+  console.log(where);
   
   const userId = auth().userId
   if(!userId) {
@@ -96,6 +100,7 @@ export const POST = async (request: NextRequest) => {
     parent_id: z.number().or(z.null()).optional().default(null)
   });
 
+  
   
   const body = await request.json()
   const parsedSchema = schema.safeParse(body);
