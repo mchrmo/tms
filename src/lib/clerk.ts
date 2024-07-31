@@ -27,3 +27,17 @@ export const createClerkUser = async (name: string, email: string, password: str
   }
 };
 
+export const updateClerkUser = async (id: string, password: string): Promise<User> => {
+  try {
+
+    const user = await clerkClient.users.updateUser(id, {password})
+
+    return user
+  } catch (error) {
+    
+    console.log(error);
+    throw new Error("Nepodarilo sa vytvoriť užívatela")
+
+  }
+};
+

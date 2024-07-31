@@ -58,7 +58,6 @@ export const GET = async (request: NextRequest) => {
 
   });
 
-  console.log(where);
   
   const userId = auth().userId
   if(!userId) {

@@ -2,6 +2,9 @@ import prisma from "../prisma";
 import { Prisma } from "@prisma/client";
 
 
+export type User = Prisma.UserGetPayload<any>
+
+
 const mockDelay = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 

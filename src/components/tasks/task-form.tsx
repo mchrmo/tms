@@ -11,31 +11,45 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { TaskPriority, TaskStatus } from "@prisma/client";
 import { FormField, FormItem } from "../ui/form";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { revalidatePath } from "next/cache";
-import { useToast } from "../ui/use-toast";
 import { useCreateTask, useTask, useUpdateTask } from "@/lib/hooks/task.hooks";
-import LoadingSpinner from "../ui/loading-spinner";
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export type TaskFormInputs = {
   id?: number ;
   name: string;
   description: string;
   deadline: Date;
-  assignee_id: Number | null,
+  assignee_id: number | null,
   priority: TaskPriority,
   status: TaskStatus,
-  parent_id: Number | null
+  parent_id: number | null,
+  source: string
 }
+
+const taskSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  status: z.enum(["TODO", "IN_PROGRESS", "DONE"]).default("TODO"),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
+  description: z.string().min(1, "Description is required"),
+  parent_id: z.number().optional(),
+  organization_id: z.number().optional(),
+  creator_id: z.number(),
+  assignee_id: z.number().optional(),
+  source: z.string().default("Organizačná úloha"),
+  createdAt: z.date().optional(),
+  updateAt: z.date().optional(),
+  deadline: z.date(),
+  completition_date: z.date().optional(),
+});
 
 export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: boolean, onUpdate?: () => void, defaultValues?: any}) {
   const [parentId, setParentId] = useState<number>()
 
   const searchParams = useSearchParams();
   const router = useRouter();
-
-
+  
   const defaultValues: TaskFormInputs = {...{
     id: undefined,
     name: '',
@@ -44,10 +58,12 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
     assignee_id: null,
     priority: 'LOW',
     status: "TODO",
-    parent_id: null
+    parent_id: null,
+    source: ''
   }, ...(_def ? _def : {})}
 
-  const {register, handleSubmit, watch, reset, setValue, control} = useForm<TaskFormInputs>({defaultValues})
+
+  const {register, handleSubmit, watch, reset, setValue, control} = useForm<TaskFormInputs>({resolver: zodResolver(taskSchema), defaultValues})
   
   const updateTask = useUpdateTask(_def ? _def.id : 0);
   const createTask = useCreateTask();
@@ -82,8 +98,6 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
   const onDateSelect = (fieldName: keyof TaskFormInputs, date?: Date) => {
     setValue(fieldName, date ? date : '')
   }
-
-
 
 
   return (

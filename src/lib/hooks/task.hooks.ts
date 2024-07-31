@@ -53,9 +53,6 @@ export const useTask = (id?: number, options?: UseQueryOptions<Task, Error>) => 
     })
   }, [query.error])
 
-
-  
-
   return query
 }
 
