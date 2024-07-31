@@ -1,7 +1,7 @@
 "use client"
 
 import { Task, TaskPriority, TaskStatus } from "@prisma/client"
-import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, PaginationState, SortingState, Table as TableType, useReactTable } from "@tanstack/react-table"
+import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, Header, PaginationState, SortingState, Table as TableType, useReactTable } from "@tanstack/react-table"
 
 import {
   Table,
@@ -34,6 +34,7 @@ import Filter from "../common/table/filter"
 import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP } from "@/lib/models/task.model"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import LoadingSpinner from "../ui/loading-spinner"
+import TableComponent, { FilteredHeaderCell } from "../common/table/table"
 
 
 const columns: ColumnDef<Task>[] = [
@@ -44,7 +45,6 @@ const columns: ColumnDef<Task>[] = [
       const id = props.row.original.id
       return <Link className="link" href={'/tasks/'+id}>{props.getValue() as string}</Link>
     }
-
   },
   {
     accessorKey: "createdAt",
@@ -152,93 +152,18 @@ export default function TasksTable({
     },
   })
 
-  
+
+  const customHeader = (header: Header<Task, unknown>) => <FilteredHeaderCell key={header.id} header={header} />
 
   return (
     <div>
-      <div className="rounded-md border min-w-[800px]">
-        
-        <Table>
-          <TableHeader className="bg-gray-50">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} className="align-top">
-                      <div className="flex cursor-pointer" onClick={header.column.getToggleSortingHandler()}>
-                        <h4 className="text-medium py-1" >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                        </h4>
-                        <span className="pt-1">
-                        {{
-                            asc: <ChevronUp/>,
-                            desc: <ChevronDown/>,
-                          }[header.column.getIsSorted() as string] ?? null}
-
-                        </span>
-                      </div>
-
-                      {
-                        setColumnFilters && <Filter header={header}></Filter>
-                      }
-                      
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {(table.getRowModel().rows?.length && !isLoading) ? (
-              table.getRowModel().rows.map((row) => {
-                                
-                return (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => {
-                    
-                    return (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    )
-                  }
-                  )}
-                </TableRow>
-              )})
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className=" text-center">
-                  {
-                    (isLoading) ? 
-                      <span> <LoadingSpinner/></span>
-                      :
-                      (
-                        isError ? "Nepodarilo sa načítať úlohy." : "Žiadne úlohy."
-                      )
-                  }
-                  {
-                    // isError && "Nepodarilo sa načítať úlohy"
-                  }
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div> 
-      {
-        setPagination && 
-        <div className="my-3">
-          <DataTablePagination table={table} />
-        </div>
-      }
+      <TableComponent table={table} isError={isError} isLoading={isLoading}
+        templateParts={{
+          headerCell: setColumnFilters ? customHeader : undefined
+        }}
+      
+      >
+      </TableComponent>
     </div>
     
   )

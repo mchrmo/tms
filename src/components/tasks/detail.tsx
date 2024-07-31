@@ -41,8 +41,8 @@ export default function TaskDetail({ params }: {params: {id: string}}) {
           <TaskForm defaultValues={task.data} edit={true}></TaskForm>
 
           <div className="mt-3 space-y-4">
-            <div className="flex justify-between items-end ">
-              <h2>Podriadené úlohy</h2>
+            <div className="flex justify-between items-center ">
+              <h2 className="text-lg">Podriadené úlohy</h2>
               <Link href={`/tasks/create?parent_id=${task.data.id}`}><Button variant={'secondary'}>Vytvoriť pod úlohu</Button></Link>
             </div>
             <TasksTable data={subTasks.data ? subTasks.data : []} isLoading={subTasks.isLoading} isError={subTasks.isError}></TasksTable>

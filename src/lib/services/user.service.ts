@@ -1,5 +1,5 @@
-import { createUser, getUserRole } from "../db/user.repository";
-import { createClerkUser } from "../clerk";
+import { createUser, getUserByClerkId, getUserRole } from "../db/user.repository";
+import { createClerkUser, updateClerkUser } from "../clerk";
 
 import { sendWelcomeEmail } from "./mail.service";
 import { User, clerkClient } from "@clerk/nextjs/server";
@@ -22,11 +22,28 @@ export async function create_user({name, email, roleId}: {name: string, email: s
   const user = await createUser({name, email, clerk_id: clerkUser.id})
   console.log(email, password);
   
-  sendWelcomeEmail(email, password)
-  sendWelcomeEmail('mchrmo@gmail.com', password)
+  sendWelcomeEmail(email, email, password)
+  sendWelcomeEmail('mchrmo@gmail.com', email, password)
 
   return user
 
 }
 
+
+export async function reset_registration(clerk_id: string) {
+
+  const user = await getUserByClerkId(clerk_id)
+  if(!user) throw new Error("User was not found")
+
+  const password =  Math.random().toString(36).slice(-8);
+
+  let clerkUser: User | undefined;
+  clerkUser = await updateClerkUser(clerk_id, password)
+  
+  sendWelcomeEmail(user.email, user.email, password)
+  sendWelcomeEmail('mchrmo@gmail.com', user.email, password)
+
+  return clerkUser
+
+}
 
