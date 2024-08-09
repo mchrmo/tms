@@ -45,7 +45,7 @@ export default function TaskDetail({ params }: {params: {id: string}}) {
               <h2 className="text-lg">Podriadené úlohy</h2>
               <Link href={`/tasks/create?parent_id=${task.data.id}`}><Button variant={'secondary'}>Vytvoriť pod úlohu</Button></Link>
             </div>
-            <TasksTable data={subTasks.data ? subTasks.data : []} isLoading={subTasks.isLoading} isError={subTasks.isError}></TasksTable>
+            <TasksTable defaultFilters={[{id: 'parent_id', value: task.data.id}]}></TasksTable>
           </div>
           </>
         )

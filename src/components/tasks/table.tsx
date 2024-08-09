@@ -27,7 +27,7 @@ import { format } from "date-fns"
 import { DATE_FORMAT } from "@/lib/utils"
 import Link from "next/link"
 import clsx from "clsx"
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react"
 import { Button } from "../ui/button"
 import { ArrowUpDown, ChevronDown, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ChevronUp } from "lucide-react"
 import Filter from "../common/table/filter"
@@ -35,6 +35,9 @@ import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP } from "@/lib/models/task.model"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import LoadingSpinner from "../ui/loading-spinner"
 import TableComponent, { FilteredHeaderCell } from "../common/table/table"
+import { PaginatedResponse } from "@/lib/services/api.service"
+import { useTasks } from "@/lib/hooks/task.hooks"
+import TablePagination from "../common/table/pagination"
 
 
 const columns: ColumnDef<Task>[] = [
@@ -105,27 +108,25 @@ const columns: ColumnDef<Task>[] = [
 ]
 
 
-export default function TasksTable({
-  data,
-  isLoading,
-  isError,
-  setColumnFilters,
-  columnFilters,
-  setSorting,
-  sorting,
-  setPagination,
-  pagination
-}: {
-  data: Task[],
-  isLoading: boolean,
-  isError: boolean
-  setColumnFilters?: Dispatch<SetStateAction<ColumnFiltersState>>
-  columnFilters?: ColumnFiltersState,
-  setSorting?: Dispatch<SetStateAction<SortingState>>
-  sorting?: SortingState
-  setPagination?: Dispatch<SetStateAction<PaginationState>>
-  pagination?: PaginationState
-}) {
+export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFiltersState}) {
+
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(defaultFilters || [])
+  const [sorting, setSorting] = useState<SortingState>([{
+    id: 'deadline',
+    desc: true
+  }])
+  const [pagination, setPagination] = useState<PaginationState>({pageIndex: 0, pageSize: 10})
+
+  const query = useTasks(pagination, columnFilters, sorting[0])
+  const { isLoading, isError } = query
+
+  const data = useMemo(() => {
+    return query.data ? query.data.items : [];
+  }, [query.data]);
+  
+  // useEffect(() => {
+  //   query.refetch()
+  // }, [sorting, pagination])
 
 
   const table = useReactTable({
@@ -144,10 +145,12 @@ export default function TasksTable({
 
     onPaginationChange: setPagination,
     manualPagination: true,
+    rowCount: query.data?.totalCount,
+    pageCount: Math.ceil((query.data?.totalCount || 0) / (pagination.pageSize || 1)),
 
     state: {
-      sorting,
       columnFilters,
+      sorting,
       pagination
     },
   })
@@ -157,13 +160,15 @@ export default function TasksTable({
 
   return (
     <div>
-      <TableComponent table={table} isError={isError} isLoading={isLoading}
-        templateParts={{
-          headerCell: setColumnFilters ? customHeader : undefined
-        }}
-      
-      >
-      </TableComponent>
+      <div className="">
+        <TableComponent table={table} isError={isError} isLoading={isLoading}
+          templateParts={{
+            headerCell: customHeader
+          }}
+        >
+        </TableComponent>
+        <TablePagination table={table}></TablePagination>
+      </div>
     </div>
     
   )

@@ -13,6 +13,7 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import { ReactNode } from "react"
 import Filter from "./filter"
 import { cn } from "@/lib/utils"
+import TablePagination from "./pagination"
 
 
 interface CustomTableParts {
@@ -24,19 +25,21 @@ export default function TableComponent<TData>({
   table,
   isLoading,
   isError,
-  templateParts
+  templateParts,
+  pagination
 }: {
   table: TableType<TData>,
   isLoading: boolean,
   isError: boolean,
   children?: ReactNode,
-  templateParts?: CustomTableParts
+  templateParts?: CustomTableParts,
+  pagination?: boolean
 }) {
 
 
   return <>
-      <div className=" ">
-        <Table>
+      <div className="">
+        <Table className="">
           <TableHeader className="">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -77,7 +80,7 @@ export default function TableComponent<TData>({
                       <span> <LoadingSpinner/></span>
                       :
                       (
-                        isError ? "Nepodarilo sa načítať úlohy." : "Žiadne úlohy."
+                        isError ? "Chyba pri načítaní." : "Žiadne záznamy."
                       )
                   }
                 </TableCell>
@@ -85,6 +88,8 @@ export default function TableComponent<TData>({
             )}
           </TableBody>
         </Table>
+        { pagination && <TablePagination table={table} ></TablePagination>}
+
       </div>
   </>
 }

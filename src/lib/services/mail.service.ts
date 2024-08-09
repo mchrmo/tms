@@ -2,6 +2,7 @@
 
 // TWILIO BPS68FDK5PQVZ2VLLW6UKQ3C
 import Email from "vercel-email";
+import { getUser, getUserByClerkId } from "../db/user.repository";
 
 // const nodemailer = require('nodemailer');
 const sgMail = require('@sendgrid/mail')
@@ -40,4 +41,22 @@ export async function sendWelcomeEmail(email: string, login: string, password: s
   })
 
 
+}
+
+
+export async function sendAssigneeChangeNotification(user_id: number, taskName: string) {
+  
+  const user = await getUser(user_id)
+  if(!user) return
+  const text = `Bola Vám pridelená úloha: ${taskName}`
+  
+  const email = await sgMail.send({
+    from: 'support@flexishop.online',
+    to: user?.email,
+    subject: `Nová úloha`,
+    html: text
+  })  
+
+  console.log("email sent", user.email);
+  
 }

@@ -1,7 +1,6 @@
 import AddButton from "@/components/common/buttons/add-button"
 import ViewHeadline from "@/components/common/view-haedline"
 import Organization from "@/components/organizations/organization"
-import FilteredTaskTable from "@/components/tasks/filtere-table"
 import TasksTable from "@/components/tasks/table"
 import TaskForm from "@/components/tasks/task-form"
 import { getMainOrganization } from "@/lib/db/organizations"
@@ -31,7 +30,7 @@ export default async function Tasks() {
         }
       </div>
 
-      <FilteredTaskTable />
+      <TasksTable />
     </>
   )
 }

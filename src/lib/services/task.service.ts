@@ -1,6 +1,7 @@
 import { Prisma, Task, TaskPriority, TaskStatus } from "@prisma/client";
-import { createTask, createTaskUpdate, updateTask } from "../db/task.repository";
+import { createTask, createTaskUpdate, getTask, updateTask } from "../db/task.repository";
 import { getMember } from "../db/organizations";
+import { sendAssigneeChangeNotification } from "./mail.service";
 
 
 
@@ -38,6 +39,10 @@ export async function create_task(taskData: CreateTaskReqs) {
   
   const task = await createTask(newTaskData);
 
+  if(member) {
+    sendAssigneeChangeNotification(member?.user_id, taskData.name)
+  }
+
   // const createUpdate = await createTaskUpdate({
   //   description: "Úloha vytvorená",
   //   task: {
@@ -52,25 +57,42 @@ export async function create_task(taskData: CreateTaskReqs) {
   return task
 }
 
+type TaskUpdateRecord = {
+  title: string,
+  value: string
+}
 
 export async function update_task(taskData: Partial<Task>, userId?: number) {
 
   if(!taskData.id) return null
 
   const id = taskData.id
+  const originalTask = await getTask(id)
   const task = await updateTask(id, taskData);
 
-  if(userId) {
-    const createUpdate = await createTaskUpdate({
-      description: "Úloha vytvorená",
-      task: {
-        connect: {id: task.id}
-      }, 
-      user: {
-        connect: {id: userId}
-      }
-    })
+  const updates: string[] = []
+  if(taskData.assignee_id && taskData.assignee_id !== originalTask?.assignee_id) updates.push('assignee')
+  if(taskData.status && taskData.status !== originalTask?.status) updates.push('status')
+
+  if(updates.includes('assignee')) {
+    const member = await getMember(taskData.assignee_id!)
+    if(member) {
+      sendAssigneeChangeNotification(member?.user_id, taskData.name! || originalTask?.name!)
+    }
   }
+  // console.log(updates);
+  
+  // if(userId) {
+  //   const createUpdate = await createTaskUpdate({
+  //     description: "Úloha vytvorená",
+  //     task: {
+  //       connect: {id: task.id}
+  //     }, s
+  //     user: {
+  //       connect: {id: userId}
+  //     }
+  //   })
+  // }
 
 
 

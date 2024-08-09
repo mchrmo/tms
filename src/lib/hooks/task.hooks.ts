@@ -5,8 +5,9 @@ import { useMutation, useQuery, useQueryClient, UseQueryOptions, UseQueryResult 
 import { Task, TaskUpdate } from "@prisma/client";
 import { TaskFormInputs } from "@/components/tasks/task-form";
 import { useToast } from "@/components/ui/use-toast";
-import { ColumnFiltersState, ColumnSort } from "@tanstack/react-table";
+import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react-table";
 import { AxiosError } from "axios";
+import { PaginatedResponse } from "../services/api.service";
 
 interface MyInt {
   id: number;
@@ -56,24 +57,26 @@ export const useTask = (id?: number, options?: UseQueryOptions<Task, Error>) => 
   return query
 }
 
-export const useTasks = (filter?: ColumnFiltersState, sort?: ColumnSort) => {
+export const useTasks = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) => {
   const { toast } = useToast()
 
-  const params: {[key: string]: any} = {}
+  const params: {[key: string]: any} = {
+    page: pagination.pageIndex+1,
+    pageSize: pagination.pageSize
+  }
   let urlQuery = ''
 
   if(filter) {
 
     filter.forEach((f, i) => {
-      params[f.id] = f.value
+      params['filter_'+f.id] = f.value
       urlQuery += `${f.id}=${f.value}`
       if(i < filter.length-1) urlQuery += '&' 
     })
   }
 
   if(sort) {
-    params['sortBy'] = sort.id
-    params['sortDirection'] = sort.desc ? 'desc' : 'asc'
+    params['order_' + sort.id] = sort.desc ? 'desc' : 'asc'
   }
 
   const getTasksFn = async (params: {[key: string]: string}) => {
@@ -83,7 +86,7 @@ export const useTasks = (filter?: ColumnFiltersState, sort?: ColumnSort) => {
     return response.data
   }
 
-  const query = useQuery<Task[]>({
+  const query = useQuery<PaginatedResponse<Task>>({
     queryKey: taskQueryKeys.searched(urlQuery),
     queryFn: () => getTasksFn(params),
   })

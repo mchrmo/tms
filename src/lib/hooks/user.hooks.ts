@@ -1,10 +1,11 @@
 import { useToast } from "@/components/ui/use-toast"
-import { ColumnFiltersState, ColumnSort } from "@tanstack/react-table"
+import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react-table"
 import { getApiClient } from "../api-client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "@/lib/db/user.repository";
 import { useEffect } from "react";
 import { AxiosError } from "axios";
+import { PaginatedResponse } from "../services/api.service";
 
 const userApiClient = getApiClient('/users')
 
@@ -19,14 +20,16 @@ export const userQueryKeys = {
 };
 
 
-export const useUsers = (filter?: ColumnFiltersState, sort?: ColumnSort) => {
+export const useUsers = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) => {
   const { toast } = useToast()
 
-  const params: {[key: string]: any} = {}
+  const params: {[key: string]: any} = {
+    page: pagination.pageIndex+1,
+    pageSize: pagination.pageSize
+  }
   let urlQuery = ''
 
   if(filter) {
-
     filter.forEach((f, i) => {
       params["filter_" + f.id] = f.value
       urlQuery += `${f.id}=${f.value}`
@@ -35,19 +38,18 @@ export const useUsers = (filter?: ColumnFiltersState, sort?: ColumnSort) => {
   }
 
   if(sort) {
-    params['orderBy'] = sort.id
-    params['order'] = sort.desc ? 'desc' : 'asc'
+    params['order_' + sort.id] = sort.desc ? 'desc' : 'asc'
   }
 
 
   const getUsersFn = async (params: {[key: string]: string}) => {
-    const response = await userApiClient.get('', {
+    const response = await userApiClient.get<PaginatedResponse<User>>('', {
       params
     })
     return response.data
   }
 
-  const query = useQuery<User[]>({
+  const query = useQuery<PaginatedResponse<User>>({
     queryKey: userQueryKeys.searched(urlQuery),
     queryFn: () => getUsersFn(params),
   })
