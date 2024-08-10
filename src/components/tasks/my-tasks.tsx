@@ -28,12 +28,10 @@ export default function MyTasks() {
 
 function MyAssignedTasks() {
 
-  
-  const query = useMyTasks()
 
 
   return (
-    <TasksTable data={query.data ? query.data : []} isError={query.isError} isLoading={query.isLoading}></TasksTable>
+    <TasksTable ></TasksTable>
   )
 
 }

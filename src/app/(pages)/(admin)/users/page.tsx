@@ -11,7 +11,6 @@ import {
 import ViewHeadline from "@/components/common/view-haedline"
 import Link from "next/link"
 import AddButton from "@/components/common/buttons/add-button"
-import { userRolesMap } from "@/models/User"
 import { Separator } from "@/components/ui/separator"
 import { getUserList } from "@/lib/db/user.repository"
 import UsersTable from "@/components/users/table"

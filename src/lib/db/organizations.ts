@@ -1,4 +1,3 @@
-import { User } from "@/models/User";
 import prisma from "../prisma"
 import { OrganizationMember, Prisma } from "@prisma/client";
 
