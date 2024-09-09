@@ -71,10 +71,11 @@ const delete_taskReminder = async (taskReminder_id: number) => {
 }
 
 
-
-export default {
+const taskReminderService = {
   get_taskReminder,
   create_taskReminder,
   update_taskReminder,
   delete_taskReminder
 }
+
+export default taskReminderService

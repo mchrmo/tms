@@ -69,10 +69,11 @@ const delete_taskComment = async (taskComment_id: number) => {
 }
 
 
-
-export default {
+const taskCommentService = {
   get_taskComment,
   create_taskComment,
   update_taskComment,
   delete_taskComment
 }
+
+export default taskCommentService

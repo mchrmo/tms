@@ -37,8 +37,8 @@ const getTaskUpdates = async (req: NextRequest) => {
 
 
 
-
-
-export default {
-  getTaskUpdates,
+const taskUpdatesController = {
+  getTaskUpdates
 }
+
+export default taskUpdatesController

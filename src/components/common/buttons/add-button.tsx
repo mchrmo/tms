@@ -15,6 +15,9 @@ const AddButton = forwardRef<HTMLButtonElement, AddButtonProps>(
   )
 );
 
+AddButton.displayName = 'AddButton';
+
+
 export default AddButton;
 
 

@@ -5,7 +5,7 @@ const TaskCommentchema = z.object({
   id: z.number().optional(), // id is optional for create form (autoincrement)
   task_id: z.number().min(1, "Task ID is required and should be a positive number"),
   creator_id: z.number(),
-  message: z.string().min(1, "Message is required"),
+  message: z.string().min(1, "Zadajte komentár").max(250, "Maximálny počet znakov je 250"),
 });
 
 

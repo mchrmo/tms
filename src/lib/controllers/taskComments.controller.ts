@@ -115,10 +115,12 @@ const deleteTaskComment = async (req: NextRequest, params: any) => {
 }
 
 
-export default {
+const taskCommentsController = {
   getTaskComment,
   getTaskComments,
   createTaskComment,
   updateTaskComment,
   deleteTaskComment
 }
+
+export default taskCommentsController

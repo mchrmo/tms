@@ -1,4 +1,4 @@
-import taskCommentController from "@/lib/controllers/taskComment.controller";
+import taskCommentController from "@/lib/controllers/taskComments.controller";
 import { errorHandler } from "@/lib/utils/api.utils";
 
 

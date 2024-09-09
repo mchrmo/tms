@@ -167,10 +167,11 @@ const deleteTask = async (req: NextRequest, params: any) => {
 
 
 
-export default {
+const tasksController = {
   getTask,
   getTasks,
   createTask,
   updateTask,
   deleteTask
 }
+export default tasksController

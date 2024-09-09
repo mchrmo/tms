@@ -95,10 +95,12 @@ const deleteTaskReminder = async (req: NextRequest, params: any) => {
 }
 
 
-export default {
+const taskRemindersController = {
   getTaskReminder,
   getTaskReminders,
   createTaskReminder,
   updateTaskReminder,
   deleteTaskReminder
 }
+
+export default taskRemindersController

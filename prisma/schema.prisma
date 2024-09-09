@@ -134,7 +134,7 @@ model TaskComment {
   task       Task               @relation(fields: [task_id], references: [id])
   creator_id Int
   creator    OrganizationMember @relation(fields: [creator_id], references: [id])
-  message    String
+  message    String             @db.VarChar(250)
   createdAt  DateTime           @default(now())
   updateAt   DateTime           @default(now())
 }

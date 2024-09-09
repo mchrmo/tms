@@ -49,6 +49,7 @@ export default function TaskCommentForm({onUpdate, defaultValues: _def, edit}: {
     if (createTaskComment.isSuccess) { 
 
       createTaskComment.reset()
+      reset()
     }
   }, [createTaskComment.isSuccess])
   
@@ -71,10 +72,10 @@ export default function TaskCommentForm({onUpdate, defaultValues: _def, edit}: {
             name="message"
             render={({ field }) => (
               <FormItem className="col-span-full">
-                <FormLabel>Správa</FormLabel>
+                <FormLabel>Komentár</FormLabel>
                 <Textarea 
                   id="taskComment-description"
-                  placeholder="Popis zadania úlohy..."
+                  placeholder="Nový komentár..."
                   {...field}
                 />
                 <FormMessage />
@@ -86,10 +87,11 @@ export default function TaskCommentForm({onUpdate, defaultValues: _def, edit}: {
 
 
 
-        {isDirty && <div className="space-x-3 col-span-full flex mt-5">
+        {/* {isDirty && } */}
+        <div className="space-x-3 col-span-full flex mt-5 ms-auto">
           <Button variant="secondary" type="button" onClick={() => {onCancel();}}>Zrušiť</Button>
-          <SubmitButton isLoading={updateTaskComment.isPending || createTaskComment.isPending} type="submit" >Odoslať</SubmitButton>
-        </div>}
+          <SubmitButton className="w-36" isLoading={updateTaskComment.isPending || createTaskComment.isPending} type="submit" >Pridať komentár</SubmitButton>
+        </div>
 
       </form>
     </Form>

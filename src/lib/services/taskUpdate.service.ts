@@ -91,9 +91,10 @@ const delete_taskUpdates = async (task_id: number) => {
 }
 
 
-
-export default {
+const taskUpdateService = {
   get_taskUpdate,
   create_taskUpdate,
   delete_taskUpdates
 }
+
+export default taskUpdateService

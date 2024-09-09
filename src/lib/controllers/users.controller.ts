@@ -46,7 +46,8 @@ const getUsers = async (req: NextRequest) => {
 }
 
 
-
-export default {
+const usersController = {
   getUsers
 }
+
+export default usersController

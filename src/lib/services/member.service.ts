@@ -15,6 +15,8 @@ const get_current_member = async (user_id: number) => {
 }
 
 
-export default {
+const memberService = {
   get_current_member
 }
+
+export default memberService
