@@ -4,7 +4,6 @@ import { getUserByClerkId } from "@/lib/db/user.repository";
 import { TASK_COLUMNS_PATHS } from "@/lib/models/task.model";
 import prisma from "@/lib/prisma";
 import { errorHandler } from "@/lib/services/api.service";
-import { create_task, update_task } from "@/lib/services/task.service";
 import { auth } from "@clerk/nextjs/server";
 import { Prisma, Task, TaskPriority, TaskStatus } from "@prisma/client";
 import { NextApiRequest } from "next";
@@ -15,5 +14,6 @@ import { z } from "zod";
 
 export const GET = errorHandler(tasksController.getTasks)
 
-
 export const POST = errorHandler(tasksController.createTask)
+
+export const PATCH = errorHandler(tasksController.updateTask)

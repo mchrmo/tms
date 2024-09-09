@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { paginate, parseFilter, parseQueryParams } from "../services/api.service";
 import { Prisma } from "@prisma/client";
-import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP } from "../models/task.model";
+import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP, TaskUpdateSchema } from "../models/task.model";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "../db/user.repository";
 import { z } from "zod";
-import { create_task, update_task } from "../services/task.service";
+import taskService from "../services/task.service";
 
 
+const getTask = async (req: NextRequest, params: any) => {
+
+  const taskId = parseInt(params.id)
+
+  // auth().protect()
+  const task = await taskService.get_task(taskId)  
+
+  return NextResponse.json(task, { status: 200 })
+
+}
 
 const getTasks = async (req: NextRequest) => {
 
@@ -67,12 +77,10 @@ const getTasks = async (req: NextRequest) => {
     orderBy: order,
     include: include as any
   })
-  // console.log(filters, order);
   
 
   return NextResponse.json(data, { status: 200 })
 }
-
 
 const createTask = async (request: NextRequest) => {
 
@@ -82,14 +90,14 @@ const createTask = async (request: NextRequest) => {
   }
 
   const user = await getUserByClerkId(userId)
+  
   if(!user?.OrganizationMember.length) {
-    return NextResponse.json({error: "Užívateľ nie je súčasťou žiadnej organizácie."}, {status: 400})
+    return NextResponse.json({error: "Vytvárateľ nie je súčasťou žiadnej organizácie."}, {status: 400})
   }
 
   const memberId = user?.OrganizationMember[0].id
-
   if(!memberId) {
-    return NextResponse.json({error: "Užívateľ nie je súčasťou žiadnej organizácie."}, {status: 400})
+    return NextResponse.json({error: "Vytvárateľ nie je súčasťou žiadnej organizácie."}, {status: 400})
   }
   
   const schema = z.object({
@@ -119,7 +127,7 @@ const createTask = async (request: NextRequest) => {
     creator_id: memberId
   }}
 
-  const task = await create_task(newTaskData)
+  const task = await taskService.create_task(newTaskData)
 
 
   return NextResponse.json(task, { status: 200 })
@@ -128,20 +136,9 @@ const createTask = async (request: NextRequest) => {
 
 const updateTask = async (request: NextRequest) => {
 
-  const schema = z.object({
-    id: z.number(),
-    name: z.string().optional(),
-    description: z.string().optional(),
-    deadline: z.coerce.date().optional(),
-    assignee_id: z.number().optional(),
-    priority: z.enum(['LOW', 'MEDIUM', "HIGH", "CRITICAL"]).optional(),
-    parent_id: z.number().or(z.null()).optional(),
-    status: z.enum(['TODO', 'WAITING', 'INPROGRESS', 'CHECKREQ', 'DONE']).optional(),
-  });
-
   
   const body = await request.json()
-  const parsedSchema = schema.safeParse(body);
+  const parsedSchema = TaskUpdateSchema.safeParse(body);
 
   if (!parsedSchema.success) {
     const { errors } = parsedSchema.error;
@@ -154,16 +151,26 @@ const updateTask = async (request: NextRequest) => {
 
   const updateData = {...parsedSchema.data}
 
-  const task = await update_task(updateData)
+  const task = await taskService.update_task(updateData)
 
 
   return NextResponse.json(task, { status: 200 })
   
 };
 
+const deleteTask = async (req: NextRequest, params: any) => {
+  const id = parseInt(params.id)
+  const task = await taskService.delete_task(id)  
+
+  return NextResponse.json(task, { status: 200 })
+}
+
+
 
 export default {
+  getTask,
   getTasks,
   createTask,
-  updateTask
+  updateTask,
+  deleteTask
 }

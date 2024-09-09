@@ -69,7 +69,7 @@ export default function TablePagination<TData>({
             <SelectValue placeholder="Počet položiek" />
           </SelectTrigger>
           <SelectContent>
-            {[1, 2, 10, 50].map((size) => (
+            {[5, 10, 50].map((size) => (
               <SelectItem key={size.toString()} value={size.toString()}>{size}</SelectItem>
             ))}
           </SelectContent>

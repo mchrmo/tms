@@ -77,9 +77,19 @@
 
   .link {
     color: rgb(85, 85, 255);
+    cursor: pointer;
   }
+  
 
   .link:hover {
     color: rgb(42, 42, 255);
   }
 
+  .link-danger {
+    color: rgb(255, 85, 85);
+    cursor: pointer;
+  }
+
+  .link-danger:hover {
+    color: rgb(241, 15, 15);
+  }

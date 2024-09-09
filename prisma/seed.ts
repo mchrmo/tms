@@ -1,6 +1,5 @@
-import { Organization, Prisma, PrismaClient, UserRole } from '@prisma/client'
+import { Organization, Prisma, PrismaClient, User, UserRole } from '@prisma/client'
 const prisma = new PrismaClient()
-
 
 const userRoles: UserRole[] = [
   {id: 1, name: "admin"},

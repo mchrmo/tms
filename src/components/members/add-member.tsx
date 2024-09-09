@@ -59,7 +59,7 @@ export default function AddMember({children, defaultValues}: {children?: ReactNo
   return (    
     <Dialog open={open} onOpenChange={setOpen}>
       <AddButton onClick={() => setOpen(true)} className="">{addBtnText}</AddButton>
-      <DialogContent className="w-screen h-screen lg:h-auto lg:max-w-[600px]">
+      <DialogContent onInteractOutside={(e) => e.preventDefault()} className="w-screen h-screen lg:h-auto lg:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Pridať člena organizácie</DialogTitle>
           <DialogDescription>

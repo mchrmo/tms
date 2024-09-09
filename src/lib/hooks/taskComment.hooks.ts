@@ -1,0 +1,189 @@
+import { useEffect } from "react"
+import { getApiClient, PaginatedResponse, parseListHookParams } from "@/lib/utils/api.utils";
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
+import { TaskComment } from "@prisma/client";
+// import { TaskCommentFormInputs } from "@/components/taskComments/taskComment-form";
+import { useToast } from "@/components/ui/use-toast";
+import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react-table";
+import { AxiosError } from "axios";
+import { z } from "zod";
+import { TaskCommentDetail, TaskCommentListItem } from "../services/taskComment.service";
+import { TaskCommentCreateSchema, TaskCommentUpdateSchema } from "@/lib/models/taksComment.model";
+
+
+const taskCommentsApiClient = getApiClient('/tasks/comments')
+
+export const taskCommentQueryKeys = {
+  all: ['taskComments'],
+  searched: (query: string) => [...taskCommentQueryKeys.all, query],
+  details: () => [...taskCommentQueryKeys.all, 'detail'],
+  detail: (id: number) => [...taskCommentQueryKeys.details(), id],
+  pagination: (page: number) => [...taskCommentQueryKeys.all, 'pagination', page],
+};
+
+export const useTaskComment = (id?: number, options?: UseQueryOptions<TaskCommentDetail, Error>) => {
+  const { toast } = useToast()
+
+
+  const getTaskCommentFn = async () => {
+    const response = await taskCommentsApiClient.get<TaskCommentDetail>(`/${id}`);
+    return response.data;
+  };
+
+  const query = useQuery<TaskCommentDetail, Error>({
+    queryKey: taskCommentQueryKeys.detail(Number(id)), 
+    queryFn: getTaskCommentFn,
+    enabled: !!id,
+    ...options
+  });
+
+  useEffect(() => {
+    if(!query.error) return
+    toast({
+      title: "Chyba",
+      description: `Nepodarilo sa nájsť požadované dáta`
+    })
+  }, [query.error])
+
+  return query
+}
+
+export const useTaskComments = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) => {
+  const { toast } = useToast()
+
+  const { urlParams, params } = parseListHookParams(pagination, filter, sort)
+
+  const getTaskCommentsFn = async (params: {[key: string]: string}) => {
+    const response = await taskCommentsApiClient.get('', {
+      params
+    })
+    return response.data
+  }
+
+  const query = useQuery<PaginatedResponse<TaskCommentListItem>>({
+    queryKey: taskCommentQueryKeys.searched(urlParams),
+    queryFn: () => getTaskCommentsFn(params),
+  })
+
+  useEffect(() => {
+    if(!query.error) return
+    toast({
+      title: "Chyba",
+      description: `Nepodarilo sa načítať dáta - kód chyby: ${query.error.name}`
+    })
+  }, [query.error])
+
+  return query 
+}
+
+export const useUpdateTaskComment = (id: number) => {
+
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  const updateTaskCommentFn = async (updateTaskCommentData: z.infer<typeof TaskCommentUpdateSchema>) => {
+    const response = await taskCommentsApiClient.patch(``, updateTaskCommentData)
+    return response.data
+  }
+
+  return useMutation({
+    mutationFn: updateTaskCommentFn,
+    onMutate: async (updatedUser) => {
+      await queryClient.cancelQueries({queryKey: taskCommentQueryKeys.detail(id)});
+      const previousUser = queryClient.getQueryData(taskCommentQueryKeys.detail(id));
+      // queryClient.setQueryData(taskCommentQueryKeys.detail(Number(id)), updatedUser);
+      return { previousUser: previousUser, updatedUser: updatedUser };
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Pripomienka upravená!"
+      })
+    },
+    onError: (err, updatedUser, context?: any) => {
+      queryClient.setQueryData(
+        taskCommentQueryKeys.detail(Number(id)),
+        context.previousUser
+      );
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({queryKey: taskCommentQueryKeys.all});
+    },
+  });
+
+
+}
+
+export const useCreateTaskComment = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast()
+
+  const createTaskCommentFn = async (newTaskComment: z.infer<typeof TaskCommentCreateSchema>) => {
+    const response = await taskCommentsApiClient.post('', newTaskComment)
+    return response.data
+  }
+  
+  return useMutation({
+    mutationFn: createTaskCommentFn,
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: taskCommentQueryKeys.all })
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Pripomienka vytvorená!"
+      })
+    },
+    onError: (err: AxiosError<{error: string}>, newTaskComment, context?: any) => {
+      const errMessage = err.response?.data ? err.response.data.error : err.message
+
+      toast({
+        title: "Chyba",
+        description: errMessage
+      })
+
+      queryClient.setQueryData(taskCommentQueryKeys.all, context.previousTaskComment)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: taskCommentQueryKeys.all })
+    }
+  })
+}
+
+export const useDeleteTaskComment = (id: number) => {
+    const queryClient = useQueryClient();
+    const { toast } = useToast();
+
+    const deleteTaskCommentFn = async () => {
+        const response = await taskCommentsApiClient.delete(`/${id}`);
+        return response.data;
+    };
+
+    return useMutation({
+        mutationFn: deleteTaskCommentFn,
+        onMutate: async () => {
+        if (!confirm("Určite to chcete vymazať?")) {
+            throw new Error('Nič nebolo vymazané');
+        }
+        await queryClient.cancelQueries({ queryKey: taskCommentQueryKeys.detail(id) });
+        const previousUser = queryClient.getQueryData(taskCommentQueryKeys.detail(id));
+        queryClient.removeQueries({ queryKey: taskCommentQueryKeys.detail(id) });
+        return { previousUser };
+        },
+        onSuccess: () => {
+        toast({
+            title: 'Pripomienka vymazaná z databázy!',
+        });
+        },
+        onError: (err: AxiosError<{ error: string }>, _, context?: any) => {
+        const errMessage = err.response?.data ? err.response.data.error : err.message;
+        toast({
+            title: 'Chyba',
+            description: errMessage,
+        });
+
+        queryClient.setQueryData(taskCommentQueryKeys.detail(id), context.previousUser);
+        },
+        onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: taskCommentQueryKeys.all });
+        },
+    });
+}

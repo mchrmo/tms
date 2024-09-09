@@ -18,6 +18,7 @@ import UsersTable from "@/components/users/table"
 
 export default async function Users() {
 
+  
   const users = await getUserList();
   
   

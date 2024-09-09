@@ -1,7 +1,10 @@
 import { Prisma, Task, TaskPriority, TaskStatus } from "@prisma/client";
-import { createTask, createTaskUpdate, getTask, updateTask } from "../db/task.repository";
+import { createTask, createTaskUpdate, updateTask } from "../db/task.repository";
 import { getMember } from "../db/organizations";
 import { sendAssigneeChangeNotification } from "./mail.service";
+import prisma from "../prisma";
+import taskUpdateService from "./taskUpdate.service";
+import { get_current_user } from "./user.service";
 
 
 
@@ -17,7 +20,28 @@ type CreateTaskReqs = {
   deadline: Date;
 }
 
-export async function create_task(taskData: CreateTaskReqs) {
+const get_task = async (id: number) => {
+
+  const task = await prisma.task.findUnique({
+    where: {id},
+    include: {
+      assignee: {
+        include: {user: true},
+      },
+      parent: {
+        select: {name: true, id: true}
+      }
+    }
+  })
+
+  return task
+}
+export type TaskDetail = Prisma.PromiseReturnType<typeof get_task>
+
+const create_task = async (taskData: CreateTaskReqs) => {
+
+  const currentUser = await get_current_user()
+  if(!currentUser) return null
 
   const member = await getMember(taskData.creator_id)
 
@@ -43,58 +67,77 @@ export async function create_task(taskData: CreateTaskReqs) {
     sendAssigneeChangeNotification(member?.user_id, taskData.name)
   }
 
-  // const createUpdate = await createTaskUpdate({
-  //   description: "Úloha vytvorená",
-  //   task: {
-  //     connect: {id: task.id}
-  //   }, 
-  //   user: {
-  //     connect: {id: task.creator?.user_id}
-  //   }
-  // })
+  const update = await taskUpdateService.create_taskUpdate(task, currentUser, 'created')
 
 
   return task
 }
 
-type TaskUpdateRecord = {
-  title: string,
-  value: string
-}
-
-export async function update_task(taskData: Partial<Task>, userId?: number) {
+const update_task = async (taskData: Partial<Task>) => {
 
   if(!taskData.id) return null
 
+  const currentUser = await get_current_user()
+  if(!currentUser) return null
+
+
   const id = taskData.id
-  const originalTask = await getTask(id)
+  const originalTask = await get_task(id)
   const task = await updateTask(id, taskData);
 
-  const updates: string[] = []
-  if(taskData.assignee_id && taskData.assignee_id !== originalTask?.assignee_id) updates.push('assignee')
-  if(taskData.status && taskData.status !== originalTask?.status) updates.push('status')
+  const updates: {[key: string]: any}= {}
+  if(taskData.assignee_id && taskData.assignee_id !== originalTask?.assignee_id) updates.assignee_id = taskData.assignee_id
+  if(taskData.status && taskData.status !== originalTask?.status) updates.status = taskData.status
+  if(taskData.priority && taskData.priority !== originalTask?.priority) updates.priority = taskData.priority
 
-  if(updates.includes('assignee')) {
+  if(Object.keys(updates).includes('assignee')) {
     const member = await getMember(taskData.assignee_id!)
     if(member) {
       sendAssigneeChangeNotification(member?.user_id, taskData.name! || originalTask?.name!)
     }
   }
-  // console.log(updates);
-  
-  // if(userId) {
-  //   const createUpdate = await createTaskUpdate({
-  //     description: "Úloha vytvorená",
-  //     task: {
-  //       connect: {id: task.id}
-  //     }, s
-  //     user: {
-  //       connect: {id: userId}
-  //     }
-  //   })
-  // }
 
-
+  for (const [key, value] of Object.entries(updates)) {
+    const update = await taskUpdateService.create_taskUpdate(task, currentUser, key, value)
+  }
 
   return task
+}
+
+const delete_task = async (task_id: number) => {
+
+  const reminders = await prisma.taskReminder.deleteMany({
+      where: {
+          task_id
+      }
+  })
+
+  const updates = await prisma.taskUpdate.deleteMany({
+      where: {
+        task_id
+      }
+  })
+
+  const metadata = await prisma.taskMeta.deleteMany({
+    where: {
+      task_id
+    }
+  })
+
+  const task = await prisma.task.delete({
+      where: {
+          id: task_id
+      }
+  })
+
+  return task
+}
+
+
+
+export default {
+  get_task,
+  create_task,
+  update_task,
+  delete_task
 }

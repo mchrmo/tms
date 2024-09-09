@@ -6,15 +6,15 @@ import TaskForm from "@/components/tasks/task-form"
 import { getMainOrganization } from "@/lib/db/organizations"
 import { getTaskList } from "@/lib/db/task.repository"
 import { isRole } from "@/lib/utils"
-import { auth } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import Link from "next/link"
 
 
 export default async function Tasks() {
 
 
-  const { sessionClaims } = auth()
-  const isAdmin = isRole(sessionClaims, 'admin')
+  const user = await currentUser()
+  const isAdmin = isRole(user, 'admin')
 
 
 

@@ -2,7 +2,7 @@ import { createUser, getUserByClerkId, getUserRole } from "../db/user.repository
 import { createClerkUser, updateClerkUser } from "../clerk";
 
 import { sendWelcomeEmail } from "./mail.service";
-import { User, clerkClient } from "@clerk/nextjs/server";
+import { User, clerkClient, currentUser } from "@clerk/nextjs/server";
 
 export async function create_user({name, email, roleId}: {name: string, email: string, roleId: number}) {
 
@@ -29,7 +29,6 @@ export async function create_user({name, email, roleId}: {name: string, email: s
 
 }
 
-
 export async function reset_registration(clerk_id: string) {
 
   const user = await getUserByClerkId(clerk_id)
@@ -47,3 +46,12 @@ export async function reset_registration(clerk_id: string) {
 
 }
 
+export async function get_current_user() {
+  
+  const clerkUser = await currentUser()
+  if(!clerkUser) return null
+
+  const user = await getUserByClerkId(clerkUser.id)
+
+  return user
+}

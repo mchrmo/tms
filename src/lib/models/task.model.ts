@@ -31,7 +31,7 @@ export const TASK_STATUSES_MAP = {
 export const TaskSchema = z.object({
   id: z.number().int().optional(), 
   name: z.string().min(1, "Názov je povinný"),
-  status: z.enum(["TODO", "IN_PROGRESS", "WAITING", "CHECKREQ", "DONE"]).default("TODO"),
+  status: z.enum(["TODO", "INPROGRESS", "WAITING", "CHECKREQ", "DONE"]).default("TODO"),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
   description: z.string().optional(),
   parent_id: z.number().nullable(),
@@ -47,7 +47,7 @@ export const TaskSchema = z.object({
 
 
 export const CreateTaskSchema = TaskSchema.omit({ id: true });
-export const UpdateTaskSchema = TaskSchema.partial().merge(z.object({ id: z.number() }));
+export const TaskUpdateSchema = TaskSchema.partial().merge(z.object({ id: z.number() }));
 
 export type Task = z.infer<typeof TaskSchema>  & {id: number};
 

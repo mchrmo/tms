@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react-table";
 import { AxiosError } from "axios";
 import { PaginatedResponse } from "../services/api.service";
+import { taskUpdateQueryKeys } from "./taskUpdate.hooks";
 
 interface MyInt {
   id: number;
@@ -144,7 +145,7 @@ export const useUpdateTask = (id: number) => {
   const { toast } = useToast()
 
   const updateTaskFn = async (updateTaskData: TaskFormInputs) => {
-    const response = await tasksApiClient.patch(`/${id}`, updateTaskData)
+    const response = await tasksApiClient.patch(`/`, updateTaskData)
     return response.data
   }
 
@@ -169,6 +170,8 @@ export const useUpdateTask = (id: number) => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({queryKey: taskQueryKeys.all});
+      queryClient.invalidateQueries({queryKey: taskUpdateQueryKeys.all});
+
     },
   });
 

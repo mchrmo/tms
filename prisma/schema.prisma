@@ -63,6 +63,8 @@ model OrganizationMember {
   TaskComment     TaskComment[]
   AssignedTasks   Task[]               @relation("AssignedMember")
   CreatedTasks    Task[]               @relation("TaskCreator")
+  TaskSubscriptions TaskSubscription[]
+  TaskReminders   TaskReminder[]
 }
 
 // Tasks
@@ -91,9 +93,26 @@ model Task {
   TaskUpdate        TaskUpdate[]
   TaskComment       TaskComment[]
   SubTasks          Task[]              @relation("ParentTask")
-
+  Subscriptions     TaskSubscription[]
+  Reminders         TaskReminder[]
+  Meta              TaskMeta[]
   @@fulltext([name])
+}
 
+model TaskMeta {
+  id          Int      @id @default(autoincrement())
+  task_id     Int
+  task        Task     @relation(fields: [task_id], references: [id])
+  key         String
+  value       String
+}
+
+model TaskSubscription {
+  id          Int      @id @default(autoincrement())
+  task_id     Int
+  task        Task     @relation(fields: [task_id], references: [id])
+  member_id   Int
+  member      OrganizationMember @relation(fields: [member_id], references: [id])
 }
 
 model TaskUpdate {
@@ -104,8 +123,9 @@ model TaskUpdate {
   user        User     @relation(fields: [user_id], references: [id])
   key         String
   title       String
-  description String
+  description String?
   createdAt   DateTime @default(now())
+  value       String?
 }
 
 model TaskComment {
@@ -117,6 +137,16 @@ model TaskComment {
   message    String
   createdAt  DateTime           @default(now())
   updateAt   DateTime           @default(now())
+}
+
+model TaskReminder {
+  id          Int      @id @default(autoincrement())
+  task_id     Int
+  task        Task     @relation(fields: [task_id], references: [id])
+  member_id   Int?
+  member      OrganizationMember? @relation(fields: [member_id], references: [id])
+  description String
+  datetime    DateTime
 }
 
 model TaskType {

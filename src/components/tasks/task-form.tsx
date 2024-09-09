@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SubmitButton from "../common/buttons/submit";
-import { CreateTaskSchema,  UpdateTaskSchema } from "@/lib/models/task.model";
+import { CreateTaskSchema,  TaskUpdateSchema } from "@/lib/models/task.model";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 
 export type TaskFormInputs = {
@@ -58,7 +58,7 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
 
 
   const form = useForm<TaskFormInputs>({
-    resolver: zodResolver(defaultValues.id ? UpdateTaskSchema : CreateTaskSchema), defaultValues,
+    resolver: zodResolver(defaultValues.id ? TaskUpdateSchema : CreateTaskSchema), defaultValues,
     reValidateMode: "onChange"
   })
   const { handleSubmit, reset, setValue, formState: { errors, isDirty, isValid } } = form
@@ -72,12 +72,14 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
   }, [])
 
   useEffect(() => {
-    if (createTask.isSuccess || updateTask.isSuccess) { 
-      router.push('/tasks')
-      updateTask.reset()
+    if (createTask.isSuccess) { 
+      console.log(createTask.data.id);
+      const newId = createTask.data.id
+      if(newId) router.push('/tasks/'+newId)
+
       createTask.reset()
     }
-  }, [createTask.isSuccess, updateTask.isSuccess])
+  }, [createTask.isSuccess])
   
 
   const onSubmit: SubmitHandler<TaskFormInputs> = async (data) => {
@@ -94,7 +96,6 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
     // router.push('/tasks') 
 
   }
-  console.log(errors);
   
 
   return (

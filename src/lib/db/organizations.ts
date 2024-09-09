@@ -81,6 +81,7 @@ export async function getMember(id: number) {
   return member
 }
 
+
 export type OrganizationMemberSubordinate = Prisma.PromiseReturnType<typeof getMemberSubordinates>
 
 export async function getMemberSubordinates(id: number) {

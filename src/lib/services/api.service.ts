@@ -171,11 +171,11 @@ export function parseFilter(filter: Filter, fields: FieldDef): Where {
 
 
 export function errorHandler(
-  handler: (req: NextRequest) => Promise<NextResponse>
+  handler: (req: NextRequest, {params}: {params: any}) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest): Promise<NextResponse> => {
+  return async (req: NextRequest, {params}: {params: any}): Promise<NextResponse> => {
     try {
-      return await handler(req);
+      return await handler(req, params);
     } catch (error) {
       console.error('Error occurred:', error);
 

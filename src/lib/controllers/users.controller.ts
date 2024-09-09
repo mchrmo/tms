@@ -40,7 +40,6 @@ const getUsers = async (req: NextRequest) => {
       }
     } as any
   })
-  // console.log(filters, order);
   
 
   return NextResponse.json(data, { status: 200 })
