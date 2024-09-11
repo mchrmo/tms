@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model UserRole {
+  id    Int    @id @default(autoincrement())
+  name  String
+  users User[]
+}
+
+model User {
+  id                 Int                  @id @default(autoincrement())
+  clerk_id           String               @unique
+  name               String
+  email              String               @unique
+  role_id            Int                  @default(2)
+  role               UserRole             @relation(fields: [role_id], references: [id])
+  OrganizationMember OrganizationMember[]
+  TaskUpdate         TaskUpdate[]
+}
+
+// Organizations
+
+model Organization {
+  id        Int                  @id @default(autoincrement())
+  parent_id Int?
+  name      String               @unique
+  type      OrganizationType
+  parent    Organization?        @relation("OrganizationParent", fields: [parent_id], references: [id])
+  children  Organization[]       @relation("OrganizationParent")
+  members   OrganizationMember[]
+  Task      Task[]
+}
+
+enum OrganizationType {
+  main
+  custom
+}
+
+model OrganizationMember {
+  id              Int                  @id @default(autoincrement())
+  user_id         Int
+  manager_id      Int?
+  organization_id Int
+  position_name   String
+  user            User                 @relation(fields: [user_id], references: [id])
+  manager         OrganizationMember?  @relation("MemberManager", fields: [manager_id], references: [id])
+  subordinates    OrganizationMember[] @relation("MemberManager")
+  organization    Organization         @relation(fields: [organization_id], references: [id])
+  TaskComment     TaskComment[]
+  AssignedTasks   Task[]               @relation("AssignedMember")
+  CreatedTasks    Task[]               @relation("TaskCreator")
+}
+
+// Tasks
+
+model Task {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  status            TaskStatus          @default(TODO)
+  priority          TaskPriority
+  description       String
+  // type_id           Int
+  // type              TaskType            @relation(fields: [type_id], references: [id])
+  parent_id         Int?
+  parent            Task?               @relation("ParentTask", fields: [parent_id], references: [id])
+  organization_id   Int?
+  organization      Organization?        @relation(fields: [organization_id], references: [id])
+  creator_id        Int
+  creator           OrganizationMember? @relation("TaskCreator", fields: [creator_id], references: [id])
+  assignee_id       Int?
+  assignee          OrganizationMember? @relation("AssignedMember", fields: [assignee_id], references: [id])
+  source            String              @default("Organizačná úloha")
+  createdAt         DateTime            @default(now())
+  updateAt          DateTime            @default(now())
+  deadline          DateTime
+  completition_date DateTime?
+  TaskUpdate        TaskUpdate[]
+  TaskComment       TaskComment[]
+  SubTasks          Task[]              @relation("ParentTask")
+
+  @@fulltext([name])
+
+}
+
+model TaskUpdate {
+  id          Int      @id @default(autoincrement())
+  task_id     Int
+  task        Task     @relation(fields: [task_id], references: [id])
+  user_id     Int
+  user        User     @relation(fields: [user_id], references: [id])
+  description String
+  createdAt   DateTime @default(now())
+}
+
+model TaskComment {
+  id         Int                @id @default(autoincrement())
+  task_id    Int
+  task       Task               @relation(fields: [task_id], references: [id])
+  creator_id Int
+  creator    OrganizationMember @relation(fields: [creator_id], references: [id])
+  message    String
+  createdAt  DateTime           @default(now())
+  updateAt   DateTime           @default(now())
+}
+
+model TaskType {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+  // Task        Task[]
+}
+
+enum TaskStatus {
+  TODO
+  WAITING
+  INPROGRESS
+  CHECKREQ
+  DONE
+}
+
+enum TaskPriority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
