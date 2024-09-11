@@ -11,7 +11,7 @@ const processReports = async (req: NextRequest) => {
 
   if(!['afternoon', 'morning'].includes(body.type)) throw new ApiError(400, "Wrong type")
 
-  reportService.process_reports(body.type)
+  await reportService.process_reports(body.type)
 
   return NextResponse.json({ status: 200 })
 }
