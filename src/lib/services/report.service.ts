@@ -37,7 +37,7 @@ const process_reports = async (type: 'morning' | 'afternoon') => {
   for (const user of users) {
     if (!user.OrganizationMember.length) continue
 
-    if(type == 'morning') morning_user_report(user)
+    if(type == 'morning') await morning_user_report(user)
   }
 
 
@@ -166,7 +166,7 @@ const morning_user_report = async (user: ReportedUser) => {
   
   console.log(htmlToSend);
   
-  sendReport(user.email, title, htmlToSend)
+  await sendReport(user.email, title, htmlToSend)
 
 }
 
