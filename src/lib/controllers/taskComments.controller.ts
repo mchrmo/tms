@@ -4,10 +4,10 @@ import { Prisma, TaskComment } from "@prisma/client";
 import taskCommentService, { taskCommentListItem } from "../services/taskComment.service";
 import { ApiError } from "next/dist/server/api-utils";
 import { TaskCommentCreateSchema, TaskCommentCreateServiceSchema, TaskCommentUpdateSchema } from "../models/taksComment.model";
-import { get_current_user } from "../services/user.service";
 import { getMember } from "../db/organizations";
 import memberService from "../services/member.service";
 import { z } from "zod";
+import userService from "../services/user.service";
 
 
 const getTaskComment = async (req: NextRequest, params: any) => {
@@ -62,7 +62,7 @@ const createTaskComment = async (request: NextRequest) => {
 
 
   
-  const currentUser = await get_current_user()
+  const currentUser = await userService.get_current_user()
   if(!currentUser)  return NextResponse.json({
     error: { message: "Forbidden" },
   }, {status: 403});

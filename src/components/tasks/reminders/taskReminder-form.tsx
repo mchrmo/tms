@@ -15,16 +15,17 @@ import { useCreateTaskReminder, useUpdateTaskReminder } from "@/lib/hooks/taskRe
 import OrganizationMemberCombobox from "@/components/members/member-combobox";
 import { format } from "date-fns";
 import { DefaultFormProps } from "@/types/global";
+import { error } from "console";
 
 
 
 type TaskReminderFormInputs = z.infer<typeof TaskReminderUpdateSchema>
 
 export default function TaskReminderForm({onUpdate, onCancel, defaultValues: _def, edit}: DefaultFormProps) {
-  
-    const searchParams = useSearchParams();
-    const router = useRouter();
-  
+    
+    if(!edit) {
+      if(_def.id) edit = true
+    }
 
     const defaultValues: TaskReminderFormInputs = {...{
       id: undefined,
@@ -44,7 +45,8 @@ export default function TaskReminderForm({onUpdate, onCancel, defaultValues: _de
     const updateTaskReminder = useUpdateTaskReminder(_def ? _def.id : 0);
     const createTaskReminder = useCreateTaskReminder();
   
-
+    console.log(errors);
+    
   
     useEffect(() => {
       if (createTaskReminder.isSuccess || updateTaskReminder.isSuccess) { 

@@ -4,7 +4,7 @@ import { z } from 'zod';
 const TaskReminderSchema = z.object({
   id: z.number().optional(), // id is optional for create form (autoincrement)
   task_id: z.number().min(1, "Task ID is required and should be a positive number"),
-  member_id: z.number().optional(),
+  member_id: z.number().nullable().optional(),
   description: z.string().min(1, "Description is required"),
   datetime: z.coerce.date()
 });

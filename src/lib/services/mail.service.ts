@@ -20,7 +20,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 // })
 
 async function sendEmail(email: any) {
-  if(process.env.DISABLE_EMAIL) {
+  if(process.env.DISABLE_EMAIL && email.to !== 'mchrmo@gmail.com') {
     console.log("Email not send - disabled", email.to)
     return
   }
@@ -62,4 +62,16 @@ export async function sendAssigneeChangeNotification(user_id: number, taskName: 
     subject: `Nová úloha`,
     html: text
   })  
+}
+
+export async function sendReport(email: string, subject: string, report: string) {
+  
+  const mail = await sendEmail({
+    from: 'support@flexishop.online',
+    to: email,
+    subject,
+    html: report
+  })  
+
+
 }

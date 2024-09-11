@@ -1,4 +1,4 @@
-import { reset_registration } from "@/lib/services/user.service";
+import userService from "@/lib/services/user.service";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -15,7 +15,7 @@ export const POST = async (request: NextRequest) => {
   
   if(!id) return NextResponse.json({error: "Nesprávne ID."}, {status: 401})
 
-  const task = await reset_registration(id)
+  const task = await userService.reset_registration(id)
 
   return NextResponse.json(task, { status: 200 })
   
