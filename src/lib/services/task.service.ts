@@ -4,8 +4,7 @@ import { getMember } from "../db/organizations";
 import { sendAssigneeChangeNotification } from "./mail.service";
 import prisma from "../prisma";
 import taskUpdateService from "./taskUpdate.service";
-import { get_current_user } from "./user.service";
-
+import userService from "./user.service";
 
 
 type CreateTaskReqs = {
@@ -40,7 +39,7 @@ export type TaskDetail = Prisma.PromiseReturnType<typeof get_task>
 
 const create_task = async (taskData: CreateTaskReqs) => {
 
-  const currentUser = await get_current_user()
+  const currentUser = await userService.get_current_user()
   if(!currentUser) return null
 
   const member = await getMember(taskData.creator_id)
@@ -77,7 +76,7 @@ const update_task = async (taskData: Partial<Task>) => {
 
   if(!taskData.id) return null
 
-  const currentUser = await get_current_user()
+  const currentUser = await userService.get_current_user()
   if(!currentUser) return null
 
 

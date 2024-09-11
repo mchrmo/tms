@@ -3,8 +3,7 @@ import { getMember } from "../db/organizations";
 import { sendAssigneeChangeNotification } from "./mail.service";
 import prisma from "../prisma";
 import { z } from "zod";
-import { get_current_user } from "./user.service";
-import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP } from "../models/task.model";
+import userService from "./user.service";import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP } from "../models/task.model";
 
 export const taskUpdateListItem = Prisma.validator<Prisma.TaskUpdateDefaultArgs>()({
   include: {
@@ -59,7 +58,7 @@ const create_taskUpdate = async (task: Task, user: User, key: string, value?: an
   }
 
   
-  // if(typeof value !== 'string') value = value.toString()
+  if(typeof value == 'number') value = value.toString()
 
   const updateData: Prisma.TaskUpdateCreateInput = {
     task: {

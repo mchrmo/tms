@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { create_user } from '../services/user.service';
+import userService from '../services/user.service';
 
 
 export type State<T> = {
@@ -30,7 +30,7 @@ export async function createUserAction(prevState: State<RegistrationFields>, for
   const email = formData.get('email') as string
 
   try {
-    const user = await create_user({name, email, roleId})
+    const user = await userService.create_user({name, email, roleId})
     revalidatePath('/users')
     return {
       errors: {},
