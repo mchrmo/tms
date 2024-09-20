@@ -8,6 +8,12 @@ import { sendReport } from "./mail.service";
 import { format } from "date-fns";
 import { formatDate, formatDateTime } from "../utils/dates";
 
+handlebars.registerHelper('dateTime', function (dateString: string) {
+  return formatDateTime(new Date(dateString))
+})
+
+
+
 export const user = Prisma.validator<Prisma.UserDefaultArgs>()({
   include: {
     OrganizationMember: {
@@ -144,12 +150,9 @@ const morning_user_report = async (user: ReportedUser) => {
     updates = updates.concat(memberUpdates)
   }
 
-  handlebars.registerHelper('dateTime', function (dateString: string) {
-    return formatDateTime(new Date(dateString))
-  })
 
   
-  const templatePath = path.join(process.cwd(), 'src', 'lib', 'templates', 'morning-report.hbs');
+  const templatePath = path.join(process.cwd(), 'src', 'lib', 'templates', 'morning-report.html');
   const templateSource = fs.readFileSync(templatePath, 'utf8');
   const template = handlebars.compile(templateSource);
 
@@ -164,15 +167,36 @@ const morning_user_report = async (user: ReportedUser) => {
   });
 
   
-  console.log(htmlToSend);
+  // console.log(htmlToSend);
   
-  await sendReport(user.email, title, htmlToSend)
+  return htmlToSend
+  // await sendReport(user.email, title, htmlToSend)
 
+}
+
+const afternoon_user_report = async (user: ReportedUser) => {
+  const reportDate = new Date()
+
+  const templatePath = path.join(process.cwd(), 'src', 'lib', 'templates', 'afternoon-report.html');
+  const templateSource = fs.readFileSync(templatePath, 'utf8');
+  const template = handlebars.compile(templateSource);
+
+  const title = `Poobedný report ${formatDate(reportDate)}`
+
+  const htmlToSend = template({
+    url: process.env.NEXT_PUBLIC_URL,
+    title: title,
+  });
+
+
+  return htmlToSend
 }
 
 
 const reportService = {
-  process_reports
+  process_reports,
+  morning_user_report,
+  afternoon_user_report
 }
 
 export default reportService

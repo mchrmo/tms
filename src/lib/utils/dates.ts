@@ -7,5 +7,5 @@ export function formatDate(date: Date) {
 }
 
 export function formatDateTime(date: Date) {
-  return format(date, 'dd.MM.yyyy mm:hh')
+  return format(date, 'dd.MM.yyyy kk:mm')
 }

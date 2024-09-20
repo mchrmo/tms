@@ -13,6 +13,7 @@ import { TaskUpdate } from "@prisma/client"
 import { format } from "date-fns"
 import { useTaskUpdates } from "@/lib/hooks/taskUpdate.hooks"
 import { TaskUpdateListItem } from "@/lib/services/taskUpdate.service"
+import { formatDateTime } from "@/lib/utils/dates"
 
 
 
@@ -22,7 +23,7 @@ const columns: ColumnDef<TaskUpdateListItem>[] = [
     accessorKey: "createdAt",
     header: "Dátum a čas",
     cell: (props) => {
-      return props.getValue() ? format(props.getValue() as string, 'dd.MM.yyyy hh:mm') : ''
+      return props.getValue() ? formatDateTime(props.getValue() as Date) : ''
     },
 
   },

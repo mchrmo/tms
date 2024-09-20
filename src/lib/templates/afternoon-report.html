@@ -14,6 +14,10 @@
         .content {
             padding: 20px;
         }
+        hr.solid {
+          border-top: 3px solid #bbb;
+        }
+
     </style>
 </head>
 <body>
@@ -22,60 +26,63 @@
     </div>
     <div class="content">
       {{#with deadlineTasks}}
-      <div>
-        <h2>Expirujúce úlohy</h2>
-        
-        <h3>Osobné</h3>
-        <ul>
-            {{#each personal}}
-                <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
-            {{/each}}
-        </ul>
+      <div style="margin: 3rem 0;">
+        <h2>Zmeny za tento deň:</h2>
 
-        <h3>Moje</h3>
+        <h3>Moje úlohy</h3>
         <ul>
             {{#each assignee_id}}
                 <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
+                {{else}}
+                <li>Žiadne zmeny</li>  
             {{/each}}
         </ul>
 
-        <h3>Delegované</h3>
+        <h3>Delegované úlohy</h3>
         <ul>
             {{#each creator_id}}
                 <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
+                {{else}}
+                <li>Žiadne zmeny</li>  
             {{/each}}
         </ul>
       </div>
       {{/with}}
+
+      <hr class="solid">
 
       {{#with reminders}}
-      <div style="margin-top: 2rem;">
-        <h2>Pripomienky</h2>
+      <div style="margin: 3rem 0;">
+        <h2>Deadline nasledujúci deň:</h2>
 
-        <h3>Moje</h3>
+        <h3>Osobné úlohy</h3>
         <ul>
             {{#each assignee_id}}
                 <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.description}}</a></li>
+                {{else}}
+                <li>Žiadne úlohy</li>  
             {{/each}}
         </ul>
 
-        <h3>Delegované</h3>
+        <h3>Moje úlohy</h3>
+        <ul>
+            {{#each assignee_id}}
+                <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.description}}</a></li>
+                {{else}}
+                <li>Žiadne úlohy</li>  
+            {{/each}}
+        </ul>
+
+        <h3>Delegované úlohy</h3>
         <ul>
             {{#each creator_id}}
                 <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.description}}</a></li>
+                {{else}}
+                <li>Žiadne úlohy</li>  
             {{/each}}
         </ul>
       </div>
       {{/with}}
-
-      <div style="margin-top: 2rem;">
-        <h2>Posledná aktivita</h2>
-        <ul>
-            {{#each updates}}
-                <li><a href="{{../url}}/tasks/{{this.task_id}}">{{this.task.name}}</a> {{dateTime this.createdAt}} - {{this.description}}</li>
-            {{/each}}
-        </ul>
-      </div>
     </div>
 </body>
 </html>

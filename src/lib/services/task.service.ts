@@ -92,7 +92,7 @@ const update_task = async (taskData: Partial<Task>) => {
   if(Object.keys(updates).includes('assignee')) {
     const member = await getMember(taskData.assignee_id!)
     if(member) {
-      sendAssigneeChangeNotification(member?.user_id, taskData.name! || originalTask?.name!)
+      await sendAssigneeChangeNotification(member?.user_id, taskData.name! || originalTask?.name!)
     }
   }
 

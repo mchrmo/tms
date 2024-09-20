@@ -73,13 +73,17 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
 
   useEffect(() => {
     if (createTask.isSuccess) { 
-      console.log(createTask.data.id);
       const newId = createTask.data.id
       if(newId) router.push('/tasks/'+newId)
 
       createTask.reset()
     }
-  }, [createTask.isSuccess])
+
+    if(updateTask.isSuccess) {
+      reset(updateTask.data)
+
+    }
+  }, [createTask.isSuccess, updateTask.isSuccess])
   
 
   const onSubmit: SubmitHandler<TaskFormInputs> = async (data) => {
