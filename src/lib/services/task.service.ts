@@ -63,7 +63,7 @@ const create_task = async (taskData: CreateTaskReqs) => {
   const task = await createTask(newTaskData);
 
   if(member) {
-    sendAssigneeChangeNotification(member?.user_id, taskData.name)
+    await sendAssigneeChangeNotification(member?.user_id, taskData.name)
   }
 
   const update = await taskUpdateService.create_taskUpdate(task, currentUser, 'created')
@@ -89,7 +89,8 @@ const update_task = async (taskData: Partial<Task>) => {
   if(taskData.status && taskData.status !== originalTask?.status) updates.status = taskData.status
   if(taskData.priority && taskData.priority !== originalTask?.priority) updates.priority = taskData.priority
 
-  if(Object.keys(updates).includes('assignee')) {
+  
+  if(Object.keys(updates).includes('assignee_id')) {
     const member = await getMember(taskData.assignee_id!)
     if(member) {
       await sendAssigneeChangeNotification(member?.user_id, taskData.name! || originalTask?.name!)
