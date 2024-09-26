@@ -9,7 +9,7 @@ import Link from "next/link"
 import clsx from "clsx"
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react"
 import { ArrowUpDown, ChevronDown, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ChevronUp } from "lucide-react"
-import { formatDateTime } from "@/lib/utils/dates"
+import { formatDate, formatDateTime } from "@/lib/utils/dates"
 import { meetingItemStatusMap } from "@/lib/models/meeting/meetingItem.model"
 import TableComponent from "@/components/common/table/table"
 import { MeetingDetail } from "@/lib/services/meetings/meeting.service"
@@ -39,6 +39,15 @@ const columns: ColumnDef<any>[] = [
 
 
 export default function MeetingItemsTable({meeting}: {meeting?: MeetingDetail}) {
+
+
+  if(!columns.find(c => c.id == 'utils')) {
+    columns.push({
+      id: 'utils',
+      cell: (props) => <Link href={`/tasks/create?source=${meeting?.name} ${formatDate(meeting?.date!)}&name=${props.row.original.description}`}><span className="link">Vytvoriť úlohu</span></Link>,
+      enableColumnFilter: false,
+    })
+  }
 
 
   const table = useReactTable({

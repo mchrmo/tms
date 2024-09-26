@@ -3,7 +3,8 @@
 // TWILIO BPS68FDK5PQVZ2VLLW6UKQ3C
 import Email from "vercel-email";
 import { getUser, getUserByClerkId } from "../db/user.repository";
-import { formatDate } from "../utils/dates";
+import { formatDate, formatDateTime } from "../utils/dates";
+import { Meeting } from "@prisma/client";
 
 const sgMail = require('@sendgrid/mail')
 
@@ -21,7 +22,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 // })
 
 async function sendEmail(email: any) {
-  if(process.env.DISABLE_EMAIL && email.to !== 'mchrmo@gmail.com') {
+  if(process.env.DISABLE_EMAIL) {
     console.log("Email not send - disabled", email.to)
     return
   }
@@ -52,7 +53,7 @@ export async function sendWelcomeEmail(email: string, login: string, password: s
 }
 
 export async function sendAssigneeChangeNotification(user_id: number, taskName: string) {
-
+  
   const user = await getUser(user_id)
   if(!user) return
   const text = `Bola Vám pridelená úloha: ${taskName}`
@@ -80,19 +81,19 @@ export async function sendReport(email: string, subject: string, report: string)
 
 // Meetings
 
-export async function newMeetingAttendantEmail(user_id: number, meeting_name: string, meeting_date: Date) {
+export async function newMeetingAttendantEmail(user_id: number, meeting: Meeting) {
 
   const user = await getUser(user_id)
   if(!user) return
 
-  const text = `Boli ste pozvaný na poradu <b>${meeting_name}</b> ktorá sa uskutoční ${formatDate(meeting_date)}`
+  const text = `Boli ste pozvaný na poradu <a href="${process.env.NEXT_PUBLIC_URL}/meetings/${meeting.id}"><b>${meeting.name}</b></a> ktorá sa uskutoční ${formatDateTime(meeting.date)}`
   console.log("Sending email to ", user?.email);
 
   
   const email = await sendEmail({
     from: 'support@flexishop.online',
     to: user?.email,
-    subject: `Pozvánka na poradu - ${meeting_name}`,
+    subject: `Pozvánka na poradu - ${meeting.name}`,
     html: text
   })  
 }

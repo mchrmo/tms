@@ -13,7 +13,7 @@ import { useCreateMeetingItem, useUpdateMeetingItem } from "@/lib/hooks/meeting/
 import clsx from "clsx";
 
 
-export default function MeetingItemForm({onUpdate, defaultValues: _def, edit}: {edit?: boolean, onUpdate?: () => void, defaultValues?: any}) {
+export default function MeetingItemForm({onUpdate, onCancel, defaultValues: _def, edit}: {edit?: boolean, onUpdate?: () => void, defaultValues?: any, onCancel?: () => void}) {
   const router = useRouter();
 
   // Parse def values
@@ -43,13 +43,14 @@ export default function MeetingItemForm({onUpdate, defaultValues: _def, edit}: {
     if (createMeetingItem.isSuccess) { 
       createMeetingItem.reset()
       router.push(`/meetings/item/${createMeetingItem.data.id}`)
+      cancel()
     }
 
     if(updateMeetingItem.isSuccess) {
       reset(updateMeetingItem.data)
+      cancel()
     }
 
-    reset()
   }, [createMeetingItem.isSuccess, updateMeetingItem.isSuccess])
   
 
@@ -63,8 +64,9 @@ export default function MeetingItemForm({onUpdate, defaultValues: _def, edit}: {
     
   }
 
-  const onCancel = () => {
+  const cancel = () => {
     reset()
+    if(onCancel) onCancel()
   }
   
 
@@ -78,7 +80,7 @@ export default function MeetingItemForm({onUpdate, defaultValues: _def, edit}: {
               <FormItem className={clsx({"col-span-2": edit, "col-span-full": !edit})}>
                 <FormLabel>Popis</FormLabel>
                 <FormControl>
-                  <Input placeholder="Názov úlohy" {...field} disabled={_def.status && _def.status !== 'DRAFT'} />
+                  <Input placeholder="Návrh" {...field} disabled={_def.status && _def.status !== 'DRAFT'} />
                 </FormControl>
               <FormMessage />
             </FormItem>
@@ -104,7 +106,7 @@ export default function MeetingItemForm({onUpdate, defaultValues: _def, edit}: {
 
 
         {(isDirty || !edit) && <div className="space-x-3 col-span-full flex mt-5">
-          <Button variant="secondary" type="button" onClick={() => {onCancel();}}>Zrušiť</Button>
+          <Button variant="secondary" type="button" onClick={() => {cancel();}}>Zrušiť</Button>
           <SubmitButton isLoading={updateMeetingItem.isPending || createMeetingItem.isPending} type="submit" >{edit ? "Upraviť" : "Pridať návrh"}</SubmitButton>
         </div>}
 

@@ -10,6 +10,7 @@ import clsx from "clsx"
 import { useState } from "react"
 import AddButton from "../common/buttons/add-button"
 import MeetingItemForm from "./items/item-form"
+import CreateMeetingItem from "./items/create"
 
 export default function MeetingDetail({ params }: {params: {id: string}}) {
   const [tab, setTab] = useState('items')
@@ -41,12 +42,12 @@ export default function MeetingDetail({ params }: {params: {id: string}}) {
                 </TabsContent>
                 <TabsContent value="items">
                   <div className="flex">
-                    <AddButton className="ms-auto">Pridať návrh</AddButton>
+                    <div className="ms-auto">
+                    <CreateMeetingItem meeting_id={meeting.data.id} ></CreateMeetingItem>
+                    </div>
                   </div>
                   
                   <MeetingItemsTable meeting={meeting.data}></MeetingItemsTable>
-
-                  <MeetingItemForm defaultValues={{meeting_id: meeting.data.id}}></MeetingItemForm>
                 </TabsContent>
               {/* </div> */}
             </Tabs>
