@@ -12,8 +12,15 @@ declare global {
 }
 
 
-import '@tanstack/react-table' 
+export type DefaultFormProps = {
+  edit?: boolean, 
+  onUpdate?: () => void, 
+  onCancel?: () => void,
+  defaultValues?: any
+}
 
+
+import '@tanstack/react-table' 
 export type SelectOptionDef = {
   title: string,
   value: string

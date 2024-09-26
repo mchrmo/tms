@@ -14,8 +14,8 @@ import {
 import Link from "next/link";
 import AddMember from "./add-member";
 import { useRouter } from "next/navigation";
-import { Button } from "../ui/button";
-import { useToast } from "../ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function MemberDetail({member, subs, isAdmin}: {member: OrganizationMemberDetail, subs: OrganizationMemberSubordinate, isAdmin?: boolean}) {
   

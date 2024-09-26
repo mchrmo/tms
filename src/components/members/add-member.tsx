@@ -11,11 +11,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import AddButton from "@/components/common/buttons/add-button";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import AddMemberForm, { MemberFormData } from "./add-member-form";
 import { OrganizationMember } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { useToast } from "../ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 
 
@@ -59,7 +59,7 @@ export default function AddMember({children, defaultValues}: {children?: ReactNo
   return (    
     <Dialog open={open} onOpenChange={setOpen}>
       <AddButton onClick={() => setOpen(true)} className="">{addBtnText}</AddButton>
-      <DialogContent className="w-screen h-screen lg:h-auto lg:max-w-[600px]">
+      <DialogContent onInteractOutside={(e) => e.preventDefault()} className="w-screen h-screen lg:h-auto lg:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Pridať člena organizácie</DialogTitle>
           <DialogDescription>

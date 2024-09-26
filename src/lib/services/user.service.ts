@@ -2,9 +2,9 @@ import { createUser, getUserByClerkId, getUserRole } from "../db/user.repository
 import { createClerkUser, updateClerkUser } from "../clerk";
 
 import { sendWelcomeEmail } from "./mail.service";
-import { User, clerkClient } from "@clerk/nextjs/server";
+import { User, clerkClient, currentUser } from "@clerk/nextjs/server";
 
-export async function create_user({name, email, roleId}: {name: string, email: string, roleId: number}) {
+const create_user = async ({name, email, roleId}: {name: string, email: string, roleId: number}) => {
 
   const password =  Math.random().toString(36).slice(-8);
 
@@ -29,8 +29,7 @@ export async function create_user({name, email, roleId}: {name: string, email: s
 
 }
 
-
-export async function reset_registration(clerk_id: string) {
+const reset_registration = async (clerk_id: string) => {
 
   const user = await getUserByClerkId(clerk_id)
   if(!user) throw new Error("User was not found")
@@ -47,3 +46,23 @@ export async function reset_registration(clerk_id: string) {
 
 }
 
+const get_current_user = async () => {
+  
+  const clerkUser = await currentUser()
+  if(!clerkUser) return null
+
+  const user = await getUserByClerkId(clerkUser.id)
+
+  return user
+}
+
+
+
+
+const userService = {
+  create_user,
+  reset_registration,
+  get_current_user
+}
+
+export default userService

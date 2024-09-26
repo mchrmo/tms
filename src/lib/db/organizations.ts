@@ -1,4 +1,3 @@
-import { User } from "@/models/User";
 import prisma from "../prisma"
 import { OrganizationMember, Prisma } from "@prisma/client";
 
@@ -81,6 +80,7 @@ export async function getMember(id: number) {
 
   return member
 }
+
 
 export type OrganizationMemberSubordinate = Prisma.PromiseReturnType<typeof getMemberSubordinates>
 

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Add some basic styling */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+        hr.solid {
+          border-top: 3px solid #bbb;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{title}}</h1>
+    </div>
+    <div class="content">
+      {{#with nextDayDeadlines}}
+      <div style="margin: 3rem 0;">
+        <h2>Deadline nasledujúci deň:</h2>
+
+        <h3>Moje úlohy</h3>
+        <ul>
+            {{#each assignee_id}}
+                <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
+                {{else}}
+                <li>Žiadne zmeny</li>  
+            {{/each}}
+        </ul>
+
+        <h3>Delegované úlohy</h3>
+        <ul>
+            {{#each creator_id}}
+                <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
+                {{else}}
+                <li>Žiadne zmeny</li>  
+            {{/each}}
+        </ul>
+      </div>
+      {{/with}}
+
+      <hr class="solid">
+
+      {{#with updates}}
+      <div style="margin: 3rem 0;">
+        <h2>Zmeny za tento deň:</h2>
+
+        <!-- <h3>Osobné úlohy</h3>
+        <ul>
+            {{#each assignee_id}}
+                <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.description}}</a></li>
+                {{else}}
+                <li>Žiadne úlohy</li>  
+            {{/each}}
+        </ul> -->
+
+        <h3>Moje úlohy</h3>
+        <ul>
+            {{#each assignee_id}}
+                <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.task.name}}</a> {{dateTime this.createdAt}} - {{this.description}}</li>
+                {{else}}
+                <li>Žiadne úlohy</li>  
+            {{/each}}
+        </ul>
+
+        <h3>Delegované úlohy</h3>
+        <ul>
+            {{#each creator_id}}
+                <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.task.name}}</a> {{dateTime this.createdAt}} - {{this.description}}</li>
+                {{else}}
+                <li>Žiadne úlohy</li>  
+            {{/each}}
+        </ul>
+      </div>
+      {{/with}}
+    </div>
+    <div>
+      <p style="color: #bbb">Vygenerované pre užívateľa {{user.name}} ({{user.id}})</p>
+    </div>
+</body>
+</html>

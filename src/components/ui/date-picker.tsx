@@ -17,8 +17,6 @@ import {
 
 
 export function DatePicker({date, setDate}: {date: Date, setDate: (date?: Date) => void}) {
-
-
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -42,7 +40,7 @@ export function DatePicker({date, setDate}: {date: Date, setDate: (date?: Date) 
           mode="single"
           selected={date}
           onSelect={setDate}
-          initialFocus
+          defaultMonth={date}
         />
       </PopoverContent>
     </Popover>

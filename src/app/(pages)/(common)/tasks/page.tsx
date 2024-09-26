@@ -1,21 +1,20 @@
 import AddButton from "@/components/common/buttons/add-button"
 import ViewHeadline from "@/components/common/view-haedline"
 import Organization from "@/components/organizations/organization"
-import FilteredTaskTable from "@/components/tasks/filtere-table"
 import TasksTable from "@/components/tasks/table"
 import TaskForm from "@/components/tasks/task-form"
 import { getMainOrganization } from "@/lib/db/organizations"
 import { getTaskList } from "@/lib/db/task.repository"
 import { isRole } from "@/lib/utils"
-import { auth } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import Link from "next/link"
 
 
 export default async function Tasks() {
 
 
-  const { sessionClaims } = auth()
-  const isAdmin = isRole(sessionClaims, 'admin')
+  const user = await currentUser()
+  const isAdmin = isRole(user, 'admin')
 
 
 
@@ -31,7 +30,7 @@ export default async function Tasks() {
         }
       </div>
 
-      <FilteredTaskTable />
+      <TasksTable />
     </>
   )
 }

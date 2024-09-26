@@ -1,13 +1,13 @@
 import MemberDetail from "@/components/members/detail";
 import { getMember, getMemberSubordinates } from "@/lib/db/organizations";
 import { isRole } from "@/lib/utils";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 
 export default async function MemberPage({ params }: {params: {memberId: string}}) {
 
-  const { sessionClaims } = auth()
-  const isAdmin = isRole(sessionClaims, 'admin')
+  const user = await currentUser()
+  const isAdmin = isRole(user, 'admin')
 
   const id = parseInt(params.memberId);
   const member = await getMember(id)

@@ -34,18 +34,17 @@ export default async function RootLayout({
     >
     <html lang='en' className="">
       <Providers>
-        <body className={`bg-gray-50 ${inter.className}`}>
+        <body className={`bg-gray-50 ${inter.className} flex flex-col min-h-screen`}>
         <Navbar/>
-          <div className="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900 h-screen">
-            <Sidebar />
-            <div className="relative w-full h-full overflow-y-auto bg-gray-50 lg:ml-64 dark:bg-gray-900">
-            <main>
-                <div className="p-4 m-4 lg:p-8 bg-white block border-b border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700">
-                  {children}
-                </div>
+          <div className="flex flex-1  bg-gray-50 dark:bg-gray-900">
+            <div className="hidden lg:block">
+              <Sidebar />
+            </div>
+            <main className="w-full py-4 md:p-4">
+              <div className="p-4 lg:p-8 bg-white block border-b rounded-md border-gray-200 lg:mt-1.5">
+                {children}
+              </div>
             </main>
-          </div>
-        
           </div>
           <Toaster />
         </body>

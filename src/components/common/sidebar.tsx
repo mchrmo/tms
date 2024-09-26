@@ -1,95 +1,171 @@
-"use server"
+"use client"
 
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { ClipboardCheck, Gauge, Network, Users } from "lucide-react";
+import { auth, currentUser, User } from "@clerk/nextjs/server";
+import { ChevronDownIcon, ClipboardCheck, Gauge, Network, Presentation, Users } from "lucide-react";
 import Link from "next/link";
-import { ReactNode, SVGProps, useEffect } from "react";
+import { Dispatch, Fragment, ReactNode, SetStateAction, SVGProps, useEffect } from "react";
 import SignOut from "./buttons/sign-out";
-import { isRole } from "@/lib/utils";
+import { cn, isRole } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import clsx from "clsx";
+import { usePathname } from "next/navigation";
+import { useAuth, useUser } from "@clerk/nextjs";
 
-interface RoleRoute {
-  label: string; 
-  path: string; 
-  icon: ReactNode;
+
+type Menu = {
+  label: string
+  name: string
+  icon: React.ReactNode
+  submenu?: Submenu[]
+  href: string
 }
 
-export default async function Sidebar() {
+type Submenu = {
+  name: string
+  icon: React.ReactNode
+  href: string
+}
 
-  const { sessionClaims } = await auth();
+export default function Sidebar({setOpen}: {setOpen?: Dispatch<SetStateAction<boolean>>}) {
+
+  const {user} = useUser()
+  const pathname = usePathname();
+
   
 
-  const adminRoutes: RoleRoute[] = [
-    {
-      label: 'Prehľad',
-      path: '/',
-      icon: <Gauge />
-    },
-    {
-      label: 'Úlohy',
-      path: '/tasks',
-      icon: <ClipboardCheck />
-    },
-    {
-        label: 'Užívatelia',
-        path: '/users',
-        icon: <Users />
-    },
-    {
-      label: 'Organizácie',
-      path: '/organizations',
-      icon: <Network />
-    },
-    
-  ]
+  const adminRoutes: Menu[] = [
+      {
+          label: "",
+          name: "Prehľad",
+          icon: <Gauge size={24} className="mr-4" />,
+          href: "/",
+      },
+      {
+          label: "",
+          name: "Úlohy",
+          icon: <ClipboardCheck size={24} className="mr-4" />,
+          href: "/tasks",
+      },
+      {
+          label: "",
+          name: "Užívatelia",
+          icon: <Users size={24} className="mr-4" />,
+          href: "/users",
+      },
+      {
+        label: "",
+        name: "Organizácie",
+        icon: <Network size={24} className="mr-4" />,
+        href: "/organizations",
+      },
+  ];
 
-  const userRoutes: RoleRoute[] = [
+  const userRoutes: Menu[] = [
     {
-      label: 'Prehľad',
-      path: '/',
-      icon: <Gauge />
+        label: "",
+        name: "Prehľad",
+        icon: <Gauge size={24} className="mr-4" />,
+        href: "/",
     },
     {
-      label: 'Úlohy',
-      path: '/tasks',
-      icon: <ClipboardCheck />
+        label: "",
+        name: "Úlohy",
+        icon: <ClipboardCheck size={24} className="mr-4" />,
+        href: "/tasks",
     },
     {
-      label: 'Organizácie',
-      path: '/organizations',
-      icon: <Network />
-    }
-  ]
+      label: "",
+      name: "Organizácie",
+      icon: <Network size={24} className="mr-4" />,
+      href: "/organizations",
+    },
+    {
+      label: "",
+      name: "Porady",
+      icon: <Presentation size={24} className="mr-4" />,
+      href: "/meetings",
+    },
+];
 
-  let routes: RoleRoute[] = []
-  if(isRole(sessionClaims, 'admin')) routes = adminRoutes
-  else routes = userRoutes   
+  let menus: Menu[] = []
+  if(isRole((user as unknown) as User, 'admin')) menus = adminRoutes
+  else menus = userRoutes   
 
+  const uniqueLabels = Array.from(new Set(menus.map((menu) => menu.label)));
 
+  const isActive = (href: string) => {
+    if(href !== '/') return pathname.startsWith(href) ? true : false
+    else if(href == pathname) return true
+    return false
+  }
 
   return (
-      <aside id="sidebar" className="fixed top-0 left-0 z-20 flex-col flex-shrink-0 hidden w-64 h-full pt-16 font-normal duration-75 lg:flex transition-width">
-        <div className="relative flex flex-col flex-1 min-h-0 pt-0 bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-          <div className="flex flex-col flex-1 pt-5 pb-4 overflow-y-auto">
-            <div className="flex-1 px-3 space-y-1 bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-              <ul className="pb-2 space-y-2">
-                  {
-                      routes.map(route => 
-                        <li key={route.label}>
-                          <Link href={route.path} className="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700">
-                            {route.icon as ReactNode}
-                            <span className="ml-3" sidebar-toggle-item="">{route.label}</span>
-                          </Link>
-                        </li>
-    
-                      )
-                  }
-              </ul>
-              <div className="absolute bottom-0 left-0 justify-center hidden w-full p-4 space-x-4 bg-white lg:flex dark:bg-gray-800">
-                <SignOut></SignOut>
-              </div>
-            </div>
-          </div>
+    <ScrollArea className="h-full lg:w-52 bg-white rounded-md">
+        <div className="md:px-4 sm:p-0 mt-5">
+            {uniqueLabels.map((label, index) => (
+                <Fragment key={label}>
+                    {label && (
+                        <p className={`mx-4 mb-3 text-lg text-left tracking-wider font-bold text-slate-800 ${index > 0 ? 'mt-10' : ''}`}>
+                            {label}
+                        </p>
+                    )}
+                    {menus
+                        .filter((menu) => menu.label === label)
+                        .map((menu) => (
+                            <Fragment key={menu.name}>
+                                {menu.submenu && menu.submenu.length > 0 ? (
+                                    <Accordion
+                                        key={menu.name}
+                                        type="single"
+                                        className="mt-[-10px] mb-[-10px] p-0 font-normal"
+                                        collapsible
+                                    >
+                                        <AccordionItem value="item-1" className="m-0 p-0 font-normal">
+                                            <AccordionTrigger>
+                                                <a key={menu.name} className="w-full flex justify-start text-base font-normal h-10 bg-background my-2 items-center p-4 hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-background rounded-md">
+                                                    <div className={cn("flex justify-between w-full [&[data-state=open]>svg]:rotate-180")}>
+                                                        <div className="flex">
+                                                            <div className="w-10">{menu.icon}</div>
+                                                            {menu.name}
+                                                        </div>
+                                                        <ChevronDownIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+                                                    </div>
+                                                </a>
+                                            </AccordionTrigger>
+                                            <AccordionContent>
+                                                {menu.submenu.map((submenu) => (
+                                                    <Link key={submenu.name} href={submenu.href} className="text-gray-400 mt-0 mb-0 flex text-md h-10 bg-white dark:bg-background dark:hover:bg-primary dark:hover:text-background my-2 items-center p-4 hover:bg-primary hover:text-white rounded-md">
+                                                        <div className="w-6">{submenu.icon}</div>
+                                                        {submenu.name}
+                                                    </Link>
+                                                ))}
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    </Accordion>
+                                ) : (
+                                    <div key={menu.name}>
+                                        <Link href={menu.href} onClick={() => setOpen && setOpen(false)} 
+                                          className={clsx(
+                                              "flex text-md h-10 my-2 items-center p-4 rounded-md",
+                                              {
+                                                "bg-white hover:bg-primary hover:text-white": !isActive(menu.href)
+                                              },
+                                              {
+                                                "bg-primary text-white": isActive(menu.href)
+                                              }
+                                            )}>
+                                            
+                                            <div className="w-10">{menu.icon}</div>
+                                            {menu.name}
+                                        </Link>
+                                    </div>
+                                )}
+                            </Fragment>
+                        ))}
+                </Fragment>
+            ))}
         </div>
-      </aside>
-  )
+    </ScrollArea>
+  );
 }

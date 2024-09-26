@@ -5,13 +5,11 @@ import { Prisma } from "@prisma/client";
 export type User = Prisma.UserGetPayload<any>
 
 
-const mockDelay = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
-
-
-export async function getUserList() {
+export async function getUserList(pagination: {page: number, limit: number} = {page: 1, limit: 5}) {
 
   const users = await prisma.user.findMany({
+    skip: ((pagination.page-1)*pagination.limit),
+    take: pagination.limit,
     include: {
       role: true,
       OrganizationMember: {
@@ -34,6 +32,20 @@ export async function getUserList() {
   return users
 }
 
+
+export async function getUser(user_id: number) {
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: user_id
+    },
+    include: {
+      OrganizationMember: true
+    }
+  });
+
+  return user
+}
 export async function getUserByClerkId(clerkId: string) {
 
   const user = await prisma.user.findUnique({

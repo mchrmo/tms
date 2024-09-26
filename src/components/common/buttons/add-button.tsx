@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { ForwardedRef, forwardRef } from "react";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
@@ -8,11 +9,15 @@ interface AddButtonProps extends ButtonProps {
   className?: string;
 }
 
+const AddButton = forwardRef<HTMLButtonElement, AddButtonProps>(
+  (props, forwardedRef: ForwardedRef<HTMLButtonElement>) => (
+    <Button className={props?.className} {...props} ref={forwardedRef}>{props.children} <Plus className="ml-2 h-4 w-4" /> </Button>
+  )
+);
 
-const AddButton: React.FC<AddButtonProps> = ({children, className, ...props}: {children: React.ReactNode, className?: string, props?: ButtonProps}) => {
+AddButton.displayName = 'AddButton';
 
-  return <Button className={className} {...props}>{children} <Plus className="ml-2 h-4 w-4" /> </Button>
-
-}
 
 export default AddButton;
+
+

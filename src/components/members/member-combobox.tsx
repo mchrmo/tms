@@ -1,11 +1,11 @@
 import { Prisma, User } from "@prisma/client";
 import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
 import { useCallback, useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { PopoverContent } from "../ui/popover";
-import { Command, CommandInput, CommandItem, CommandList } from "../ui/command";
+import { PopoverContent } from "@/components/ui/popover";
+import { Command, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query'
 import { Payload } from "@prisma/client/runtime/library";

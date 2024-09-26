@@ -1,7 +1,7 @@
-import { auth, clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { getUserRole, isRole } from "./lib/utils";
+import { auth, clerkMiddleware, createRouteMatcher, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { getUserByClerkId } from "./lib/db/user.repository";
+import { UserRole } from "@prisma/client";
 
 
 const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/api(.*)']);
@@ -15,8 +15,16 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   const { sessionClaims } = auth()
+
+  const isRole = (roleName: string) => {
+    if(!sessionClaims || !sessionClaims.metadata || !sessionClaims.metadata.role) return false
+    const role = sessionClaims.metadata.role as UserRole
+    if(role.name === roleName) return true
+    return false
+  }
+
   
-  if(isAdminRoute(req) && !isRole(sessionClaims, 'admin')) {
+  if(isAdminRoute(req) && !isRole('admin')) {
     return NextResponse.redirect(new URL('/', req.url))
   } 
 
