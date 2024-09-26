@@ -1,4 +1,4 @@
-import tasksController from "@/lib/controllers/tasks.controller";
+import tasksController from "@/lib/controllers/tasks/tasks.controller";
 import { errorHandler } from "@/lib/services/api.service";
 
 export const GET = errorHandler(tasksController.getTask)

@@ -1,11 +1,11 @@
 'use client'
 import { useSearchParams } from "next/navigation";
 import TaskForm from "./task-form";
-import { useTask } from "@/lib/hooks/task.hooks";
+import { useTask } from "@/lib/hooks/task/task.hooks";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "../ui/use-toast";
-import { Label } from "../ui/label";
+import { useToast } from "@/components/ui/use-toast";
+import { Label } from "@/components/ui/label";
 import Link from "next/link";
 
 

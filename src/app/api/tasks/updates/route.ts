@@ -1,4 +1,4 @@
-import taskUpdatesController from "@/lib/controllers/taskUpdates.controller";
+import taskUpdatesController from "@/lib/controllers/tasks/taskUpdates.controller";
 import { errorHandler } from "@/lib/utils/api.utils";
 
 

@@ -5,7 +5,7 @@ import { Button } from "react-day-picker"
 import { PlusIcon, Trash2 } from "lucide-react"
 import TaskReminderForm from "./taskReminder-form"
 import { TaskReminder } from "@prisma/client"
-import { useDeleteTaskReminder } from "@/lib/hooks/taskReminder.hooks"
+import { useDeleteTaskReminder } from "@/lib/hooks/task/taskReminder.hooks"
 
 
 function TaskReminderModal({children, defaultValues}: {children: ReactElement, defaultValues: Partial<TaskReminder>}) {

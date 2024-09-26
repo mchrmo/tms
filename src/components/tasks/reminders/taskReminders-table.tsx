@@ -11,8 +11,8 @@ import TableComponent, { FilteredHeaderCell } from "@/components/common/table/ta
 import TablePagination from "@/components/common/table/pagination"
 import { TaskReminder } from "@prisma/client"
 import { format } from "date-fns"
-import { useTaskReminders } from "@/lib/hooks/taskReminder.hooks"
-import { TaskReminderListItem } from "@/lib/services/taskReminder.service"
+import { useTaskReminders } from "@/lib/hooks/task/taskReminder.hooks"
+import { TaskReminderListItem } from "@/lib/services/tasks/taskReminder.service"
 import { DeleteTaskReminder, EditTaskReminder } from "./taskReminder-modal"
 
 

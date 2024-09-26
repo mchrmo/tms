@@ -4,14 +4,12 @@ import { Button } from "@/components/ui/button";
 
 
 
-export default function SendReportButton() {
+export default function SendReportButton({morning}: {morning: boolean}) {
 
 
   const fetchData = async () => {
-    const req = await fetch(process.env.NEXT_PUBLIC_URL + '/api/reports', {method: "POST", body: JSON.stringify({type: "morning"})});
+    const req = await fetch(process.env.NEXT_PUBLIC_URL + `/api/reports?type=${morning ? "morning" : "afternoon"}`, {method: "GET"});
     const newData = await req.json();
-
-
 };
 
   const handleClick = (event: any) => {
@@ -19,5 +17,5 @@ export default function SendReportButton() {
       fetchData();
   };
 
-  return <Button onClick={handleClick}>Morning report</Button>
+  return <Button variant={'secondary'} onClick={handleClick}>{morning ? 'Ranný' : 'Poobedný'} report</Button>
 }

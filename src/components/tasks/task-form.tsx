@@ -1,23 +1,23 @@
 "use client"
 
 import { SubmitHandler, useForm } from "react-hook-form"
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { DatePicker } from "../ui/date-picker";
-import { Textarea } from "../ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Textarea } from "@/components/ui/textarea";
 import OrganizationMemberCombobox from "../members/member-combobox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TaskPriority, TaskStatus } from "@prisma/client";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useCreateTask, useTask, useUpdateTask } from "@/lib/hooks/task.hooks";
+import { useCreateTask, useTask, useUpdateTask } from "@/lib/hooks/task/task.hooks";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import SubmitButton from "../common/buttons/submit";
+import SubmitButton from "@/components/common/buttons/submit";
 import { CreateTaskSchema,  TaskUpdateSchema } from "@/lib/models/task.model";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export type TaskFormInputs = {
   id?: number ;

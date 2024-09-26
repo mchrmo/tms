@@ -182,7 +182,15 @@ export function errorHandler(
       if (error instanceof ApiError) {
         return NextResponse.json({ message: error.message, statusCode: error.statusCode }, { status: error.statusCode });
       } else {
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+
+        const response: any = {message: 'Internal Server Error'}
+
+        if(error instanceof TypeError || error instanceof Error) {
+          response.error = error.message
+          response.stack = error.stack
+        }
+        
+        return NextResponse.json(response, { status: 500 });
       }
     }
   };

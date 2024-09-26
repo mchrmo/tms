@@ -1,22 +1,17 @@
 "use client"
 
 import { auth, currentUser, User } from "@clerk/nextjs/server";
-import { ChevronDownIcon, ClipboardCheck, Gauge, Network, Users } from "lucide-react";
+import { ChevronDownIcon, ClipboardCheck, Gauge, Network, Presentation, Users } from "lucide-react";
 import Link from "next/link";
 import { Dispatch, Fragment, ReactNode, SetStateAction, SVGProps, useEffect } from "react";
 import SignOut from "./buttons/sign-out";
 import { cn, isRole } from "@/lib/utils";
-import { ScrollArea } from "../ui/scroll-area";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
 
-interface RoleRoute {
-  label: string; 
-  path: string; 
-  icon: ReactNode;
-}
 
 type Menu = {
   label: string
@@ -84,6 +79,12 @@ export default function Sidebar({setOpen}: {setOpen?: Dispatch<SetStateAction<bo
       name: "Organizácie",
       icon: <Network size={24} className="mr-4" />,
       href: "/organizations",
+    },
+    {
+      label: "",
+      name: "Porady",
+      icon: <Presentation size={24} className="mr-4" />,
+      href: "/meetings",
     },
 ];
 

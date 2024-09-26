@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useCreateTaskComment, useTaskComment, useUpdateTaskComment } from "@/lib/hooks/taskComment.hooks";
+import { useCreateTaskComment, useTaskComment, useUpdateTaskComment } from "@/lib/hooks/task/taskComment.hooks";
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SubmitButton from "@/components/common/buttons/submit";

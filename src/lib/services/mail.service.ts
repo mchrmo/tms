@@ -3,6 +3,7 @@
 // TWILIO BPS68FDK5PQVZ2VLLW6UKQ3C
 import Email from "vercel-email";
 import { getUser, getUserByClerkId } from "../db/user.repository";
+import { formatDate } from "../utils/dates";
 
 const sgMail = require('@sendgrid/mail')
 
@@ -20,10 +21,10 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 // })
 
 async function sendEmail(email: any) {
-  // if(process.env.DISABLE_EMAIL && email.to !== 'mchrmo@gmail.com') {
-  //   console.log("Email not send - disabled", email.to)
-  //   return
-  // }
+  if(process.env.DISABLE_EMAIL && email.to !== 'mchrmo@gmail.com') {
+    console.log("Email not send - disabled", email.to)
+    return
+  }
   return await sgMail.send(email)
 }
 
@@ -75,4 +76,23 @@ export async function sendReport(email: string, subject: string, report: string)
   })  
 
 
+}
+
+// Meetings
+
+export async function newMeetingAttendantEmail(user_id: number, meeting_name: string, meeting_date: Date) {
+
+  const user = await getUser(user_id)
+  if(!user) return
+
+  const text = `Boli ste pozvaný na poradu <b>${meeting_name}</b> ktorá sa uskutoční ${formatDate(meeting_date)}`
+  console.log("Sending email to ", user?.email);
+
+  
+  const email = await sendEmail({
+    from: 'support@flexishop.online',
+    to: user?.email,
+    subject: `Pozvánka na poradu - ${meeting_name}`,
+    html: text
+  })  
 }

@@ -1,4 +1,4 @@
-import ViewHeadline from "../common/view-haedline";
+import ViewHeadline from "@/components/common/view-haedline";
 
 
 export default async function AdminDashboard() {

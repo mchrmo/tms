@@ -11,8 +11,8 @@ import TableComponent, { FilteredHeaderCell } from "@/components/common/table/ta
 import TablePagination from "@/components/common/table/pagination"
 import { TaskUpdate } from "@prisma/client"
 import { format } from "date-fns"
-import { useTaskUpdates } from "@/lib/hooks/taskUpdate.hooks"
-import { TaskUpdateListItem } from "@/lib/services/taskUpdate.service"
+import { useTaskUpdates } from "@/lib/hooks/task/taskUpdate.hooks"
+import { TaskUpdateListItem } from "@/lib/services/tasks/taskUpdate.service"
 import { formatDateTime } from "@/lib/utils/dates"
 
 
