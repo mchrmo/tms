@@ -11,8 +11,8 @@ import TableComponent, { FilteredHeaderCell } from "@/components/common/table/ta
 import TablePagination from "@/components/common/table/pagination"
 import { TaskComment } from "@prisma/client"
 import { format } from "date-fns"
-import { TaskCommentListItem } from "@/lib/services/taskComment.service"
-import { useDeleteTaskComment, useTaskComments } from "@/lib/hooks/taskComment.hooks"
+import { TaskCommentListItem } from "@/lib/services/tasks/taskComment.service"
+import { useDeleteTaskComment, useTaskComments } from "@/lib/hooks/task/taskComment.hooks"
 
 
 

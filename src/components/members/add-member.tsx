@@ -11,11 +11,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import AddButton from "@/components/common/buttons/add-button";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import AddMemberForm, { MemberFormData } from "./add-member-form";
 import { OrganizationMember } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { useToast } from "../ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 
 

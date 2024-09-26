@@ -8,6 +8,12 @@ import { sendReport } from "./mail.service";
 import { format } from "date-fns";
 import { formatDate, formatDateTime } from "../utils/dates";
 
+handlebars.registerHelper('dateTime', function (dateString: string) {
+  return formatDateTime(new Date(dateString))
+})
+
+
+
 export const user = Prisma.validator<Prisma.UserDefaultArgs>()({
   include: {
     OrganizationMember: {
@@ -33,11 +39,18 @@ const process_reports = async (type: 'morning' | 'afternoon') => {
     }
   })
 
+  
+    
 
   for (const user of users) {
     if (!user.OrganizationMember.length) continue
 
-    if(type == 'morning') await morning_user_report(user)
+    let reportToSend
+    if(type == 'morning') reportToSend = await morning_user_report(user)
+    if(type == 'afternoon') reportToSend = await afternoon_user_report(user)
+      
+    if(reportToSend) await sendReport(user.email, reportToSend.title, reportToSend.html)
+      
   }
 
 
@@ -78,7 +91,6 @@ const morning_user_report = async (user: ReportedUser) => {
         status: {
           not: "DONE"
         },
-        completition_date: null,
         deadline: {
           gte: moment().toDate(),
           lt: moment().add(1, 'day').toDate()
@@ -144,35 +156,113 @@ const morning_user_report = async (user: ReportedUser) => {
     updates = updates.concat(memberUpdates)
   }
 
-  handlebars.registerHelper('dateTime', function (dateString: string) {
-    return formatDateTime(new Date(dateString))
-  })
 
   
-  const templatePath = path.join(process.cwd(), 'src', 'lib', 'templates', 'morning-report.hbs');
+  const templatePath = path.join(process.cwd(), 'src', 'lib', 'templates', 'morning-report.html');
   const templateSource = fs.readFileSync(templatePath, 'utf8');
   const template = handlebars.compile(templateSource);
 
   const title = `Ranný report ${formatDate(reportDate)}`
 
-  const htmlToSend = template({
+  const html = template({
     url: process.env.NEXT_PUBLIC_URL,
     title: title,
     deadlineTasks,
     reminders,
-    updates
+    updates,
+    user,
   });
 
   
-  console.log(htmlToSend);
+  // console.log(htmlToSend);
   
-  await sendReport(user.email, title, htmlToSend)
+  return {html, title}
+  // await sendReport(user.email, title, htmlToSend)
 
+}
+
+const afternoon_user_report = async (user: ReportedUser) => {
+  const reportDate = new Date()
+
+  const templatePath = path.join(process.cwd(), 'src', 'lib', 'templates', 'afternoon-report.html');
+  const templateSource = fs.readFileSync(templatePath, 'utf8');
+  const template = handlebars.compile(templateSource);
+
+  const title = `Poobedný report ${formatDate(reportDate)}`
+
+
+  let updates: {creator_id: TaskUpdate[], assignee_id: TaskUpdate[]} = {
+    creator_id: [],
+    assignee_id: [],
+  }
+  let nextDayDeadlines: {creator_id: Task[], assignee_id: Task[]} = {
+    creator_id: [],
+    assignee_id: [],
+  }
+
+  for (const { id: memberId } of user.OrganizationMember) {
+
+    const memberDeadlineTasks = await prisma.task.findMany({
+      where: {
+        OR: [
+          {creator_id: memberId},
+          {assignee_id: memberId}
+        ],
+        status: {
+          not: "DONE"
+        },
+        deadline: {
+          gte: moment().toDate(),
+          lt: moment().add(1, 'day').toDate()
+        }
+      }
+    })
+
+
+    nextDayDeadlines.creator_id = nextDayDeadlines.creator_id.concat(memberDeadlineTasks.filter(t => t.creator_id == memberId && t.creator_id !== t.assignee_id))
+    nextDayDeadlines.assignee_id = nextDayDeadlines.assignee_id.concat(memberDeadlineTasks.filter(t => t.assignee_id == memberId && t.creator_id !== t.assignee_id))
+
+    const memberUpdates = await prisma.taskUpdate.findMany({
+      where: {
+        task: {
+           OR: [
+            {creator_id: memberId},
+            {assignee_id: memberId}
+          ]
+        },
+        createdAt: {
+          gt: moment().subtract(1, 'day').toDate()
+        }
+      },
+      include: {
+        task: true
+      }
+    })
+
+    updates.creator_id = updates.creator_id.concat(memberUpdates.filter(t => t.task.creator_id == memberId && t.task.creator_id !== t.task.assignee_id))
+    updates.assignee_id = updates.assignee_id.concat(memberUpdates.filter(t => t.task.assignee_id == memberId && t.task.creator_id !== t.task.assignee_id))
+
+  }
+
+
+
+  const html = template({
+    url: process.env.NEXT_PUBLIC_URL,
+    title: title,
+    user,
+    updates,
+    nextDayDeadlines
+  });
+
+
+  return {html, title}
 }
 
 
 const reportService = {
-  process_reports
+  process_reports,
+  morning_user_report,
+  afternoon_user_report
 }
 
 export default reportService

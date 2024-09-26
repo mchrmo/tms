@@ -3,6 +3,7 @@
 // TWILIO BPS68FDK5PQVZ2VLLW6UKQ3C
 import Email from "vercel-email";
 import { getUser, getUserByClerkId } from "../db/user.repository";
+import { formatDate } from "../utils/dates";
 
 const sgMail = require('@sendgrid/mail')
 
@@ -51,15 +52,16 @@ export async function sendWelcomeEmail(email: string, login: string, password: s
 }
 
 export async function sendAssigneeChangeNotification(user_id: number, taskName: string) {
-  
+
   const user = await getUser(user_id)
   if(!user) return
   const text = `Bola Vám pridelená úloha: ${taskName}`
-  
+  console.log("Sending email to ", user?.email);
+
   const email = await sendEmail({
     from: 'support@flexishop.online',
     to: user?.email,
-    subject: `Nová úloha`,
+    subject: `Bola Vám pridelená úloha - ${taskName}`,
     html: text
   })  
 }
@@ -74,4 +76,23 @@ export async function sendReport(email: string, subject: string, report: string)
   })  
 
 
+}
+
+// Meetings
+
+export async function newMeetingAttendantEmail(user_id: number, meeting_name: string, meeting_date: Date) {
+
+  const user = await getUser(user_id)
+  if(!user) return
+
+  const text = `Boli ste pozvaný na poradu <b>${meeting_name}</b> ktorá sa uskutoční ${formatDate(meeting_date)}`
+  console.log("Sending email to ", user?.email);
+
+  
+  const email = await sendEmail({
+    from: 'support@flexishop.online',
+    to: user?.email,
+    subject: `Pozvánka na poradu - ${meeting_name}`,
+    html: text
+  })  
 }

@@ -17,6 +17,7 @@ const processReports = async (req: NextRequest) => {
 }
 
 
+
 const reportsController = {
   processReports
 }

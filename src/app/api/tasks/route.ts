@@ -1,4 +1,4 @@
-import tasksController from "@/lib/controllers/tasks.controller";
+import tasksController from "@/lib/controllers/tasks/tasks.controller";
 import { getTaskList } from "@/lib/db/task.repository";
 import { getUserByClerkId } from "@/lib/db/user.repository";
 import { TASK_COLUMNS_PATHS } from "@/lib/models/task.model";

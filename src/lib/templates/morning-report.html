@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Add some basic styling */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+        hr.solid {
+          border-top: 3px solid #bbb;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{title}}</h1>
+    </div>
+    <div class="content">
+      {{#with deadlineTasks}}
+      <div style="margin: 3rem 0;">
+        <h2>Expirujúce úlohy</h2>
+        
+        <h3>Osobné</h3>
+        <ul>
+          {{#each personal}}
+              <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
+              {{else}}
+              <li>Žiadne úlohy</li>
+          {{/each}}
+        </ul>
+
+        <h3>Moje</h3>
+        <ul>
+            {{#each assignee_id}}
+                <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
+                {{else}}
+                <li>Žiadne úlohy</li>  
+            {{/each}}
+        </ul>
+
+        <h3>Delegované</h3>
+        <ul>
+            {{#each creator_id}}
+                <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
+                {{else}}
+                <li>Žiadne úlohy</li>  
+            {{/each}}
+        </ul>
+      </div>
+      {{/with}}
+
+      <hr class="solid">
+
+      {{#with reminders}}
+      <div style="margin: 3rem 0;">
+        <h2>Pripomienky</h2>
+
+        <h3>Moje</h3>
+        <ul>
+            {{#each assignee_id}}
+                <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.description}}</a></li>
+                {{else}}
+                <li>Žiadne pripomienky</li>  
+            {{/each}}
+        </ul>
+
+        <h3>Delegované</h3>
+        <ul>
+            {{#each creator_id}}
+                <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.description}}</a></li>
+                {{else}}
+                <li>Žiadne pripomienky</li>  
+            {{/each}}
+        </ul>
+      </div>
+      {{/with}}
+
+      <hr class="solid">
+
+      <div style="margin: 3rem 0;">
+        <h2>Posledná aktivita</h2>
+        <ul>
+            {{#each updates}}
+                <li><a href="{{../url}}/tasks/{{this.task_id}}">{{this.task.name}}</a> {{dateTime this.createdAt}} - {{this.description}}</li>
+                {{else}}
+                <li>Žiadna aktivita</li>  
+            {{/each}}
+        </ul>
+      </div>
+    </div>
+    <div>
+      <p style="color: #bbb">Vygenerované pre užívateľa {{user.name}} ({{user.id}})</p>
+    </div>
+</body>
+</html>

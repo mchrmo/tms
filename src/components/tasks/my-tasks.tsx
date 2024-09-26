@@ -6,8 +6,8 @@ import TasksTable from "./table"
 import { auth } from "@clerk/nextjs/server"
 import { getUserByClerkId } from "@/lib/db/user.repository"
 import { getTaskList } from "@/lib/db/task.repository"
-import AddButton from "../common/buttons/add-button"
-import { useMyTasks } from "@/lib/hooks/task.hooks"
+import AddButton from "@/components/common/buttons/add-button"
+import { useMyTasks } from "@/lib/hooks/task/task.hooks"
 
 export const fetchCache = 'force-no-store'
 

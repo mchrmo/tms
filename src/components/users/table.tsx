@@ -4,7 +4,7 @@ import { ColumnDef, ColumnFilter, ColumnFiltersState, ColumnSort, getCoreRowMode
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useResetRegistration, useUsers } from "@/lib/hooks/user.hooks"
-import TableComponent, { FilteredHeaderCell } from "../common/table/table"
+import TableComponent, { FilteredHeaderCell } from "@/components/common/table/table"
 import { userRolesMap } from "@/lib/models/user.model"
 import { User } from "@/lib/db/user.repository"
 import {   
@@ -14,10 +14,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
- } from "../ui/dropdown-menu"
-import { Button } from "../ui/button"
+ } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 import { EllipsisVerticalIcon } from "lucide-react"
-import TablePagination from "../common/table/pagination"
+import TablePagination from "@/components/common/table/pagination"
 
 
 

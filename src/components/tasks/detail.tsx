@@ -1,21 +1,21 @@
 'use client'
 import { getApiClient } from "@/lib/api-client";
-import { taskQueryKeys, useSubTasks, useTask } from "@/lib/hooks/task.hooks";
+import { taskQueryKeys, useSubTasks, useTask } from "@/lib/hooks/task/task.hooks";
 import { Task } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import ViewHeadline from "../common/view-haedline";
+import ViewHeadline from "@/components/common/view-haedline";
 import TaskForm from "./task-form";
-import LoadingSpinner from "../ui/loading-spinner";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useParams } from "next/navigation";
 import TasksTable from "./table";
 import Link from "next/link";
-import { Label } from "../ui/label";
+import { Label } from "@/components/ui/label";
 import TaskRemindersOverview from "./reminders/taskReminders-overview";
-import AddButton from "../common/buttons/add-button";
+import AddButton from "@/components/common/buttons/add-button";
 import TaskUpdatesOverview from "./updates/taskUpdates-overview";
 import { useState } from "react";
 import clsx from "clsx";
-import { TabsTrigger, Tabs, TabsContent, TabsList } from "../ui/tabs";
+import { TabsTrigger, Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import TaskCommentsOverview from "./comments/taskComments-overview";
 
 

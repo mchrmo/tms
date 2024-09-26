@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
@@ -22,14 +22,17 @@ model UserRole {
 }
 
 model User {
-  id                 Int                  @id @default(autoincrement())
-  clerk_id           String               @unique
-  name               String
-  email              String               @unique
-  role_id            Int                  @default(2)
-  role               UserRole             @relation(fields: [role_id], references: [id])
-  OrganizationMember OrganizationMember[]
-  TaskUpdate         TaskUpdate[]
+  id                  Int                  @id @default(autoincrement())
+  clerk_id            String               @unique
+  name                String
+  email               String               @unique
+  role_id             Int                  @default(2)
+  role                UserRole             @relation(fields: [role_id], references: [id])
+  OrganizationMember  OrganizationMember[]
+  TaskUpdate          TaskUpdate[]
+  meetings            MeetingAttendant[]
+  meetingItems        MeetingItem[]
+  meetingItemComments MeetingItemComment[]
 }
 
 // Organizations
@@ -51,20 +54,20 @@ enum OrganizationType {
 }
 
 model OrganizationMember {
-  id              Int                  @id @default(autoincrement())
-  user_id         Int
-  manager_id      Int?
-  organization_id Int
-  position_name   String
-  user            User                 @relation(fields: [user_id], references: [id])
-  manager         OrganizationMember?  @relation("MemberManager", fields: [manager_id], references: [id])
-  subordinates    OrganizationMember[] @relation("MemberManager")
-  organization    Organization         @relation(fields: [organization_id], references: [id])
-  TaskComment     TaskComment[]
-  AssignedTasks   Task[]               @relation("AssignedMember")
-  CreatedTasks    Task[]               @relation("TaskCreator")
+  id                Int                  @id @default(autoincrement())
+  user_id           Int
+  manager_id        Int?
+  organization_id   Int
+  position_name     String
+  user              User                 @relation(fields: [user_id], references: [id])
+  manager           OrganizationMember?  @relation("MemberManager", fields: [manager_id], references: [id])
+  subordinates      OrganizationMember[] @relation("MemberManager")
+  organization      Organization         @relation(fields: [organization_id], references: [id])
+  TaskComment       TaskComment[]
+  AssignedTasks     Task[]               @relation("AssignedMember")
+  CreatedTasks      Task[]               @relation("TaskCreator")
   TaskSubscriptions TaskSubscription[]
-  TaskReminders   TaskReminder[]
+  TaskReminders     TaskReminder[]
 }
 
 // Tasks
@@ -80,7 +83,7 @@ model Task {
   parent_id         Int?
   parent            Task?               @relation("ParentTask", fields: [parent_id], references: [id])
   organization_id   Int?
-  organization      Organization?        @relation(fields: [organization_id], references: [id])
+  organization      Organization?       @relation(fields: [organization_id], references: [id])
   creator_id        Int
   creator           OrganizationMember? @relation("TaskCreator", fields: [creator_id], references: [id])
   assignee_id       Int?
@@ -96,23 +99,24 @@ model Task {
   Subscriptions     TaskSubscription[]
   Reminders         TaskReminder[]
   Meta              TaskMeta[]
+
   @@fulltext([name])
 }
 
 model TaskMeta {
-  id          Int      @id @default(autoincrement())
-  task_id     Int
-  task        Task     @relation(fields: [task_id], references: [id])
-  key         String
-  value       String
+  id      Int    @id @default(autoincrement())
+  task_id Int
+  task    Task   @relation(fields: [task_id], references: [id])
+  key     String
+  value   String
 }
 
 model TaskSubscription {
-  id          Int      @id @default(autoincrement())
-  task_id     Int
-  task        Task     @relation(fields: [task_id], references: [id])
-  member_id   Int
-  member      OrganizationMember @relation(fields: [member_id], references: [id])
+  id        Int                @id @default(autoincrement())
+  task_id   Int
+  task      Task               @relation(fields: [task_id], references: [id])
+  member_id Int
+  member    OrganizationMember @relation(fields: [member_id], references: [id])
 }
 
 model TaskUpdate {
@@ -140,9 +144,9 @@ model TaskComment {
 }
 
 model TaskReminder {
-  id          Int      @id @default(autoincrement())
+  id          Int                 @id @default(autoincrement())
   task_id     Int
-  task        Task     @relation(fields: [task_id], references: [id])
+  task        Task                @relation(fields: [task_id], references: [id])
   member_id   Int?
   member      OrganizationMember? @relation(fields: [member_id], references: [id])
   description String
@@ -169,4 +173,65 @@ enum TaskPriority {
   HIGH
   MEDIUM
   LOW
+}
+
+// Meetings
+
+model Meeting {
+  id         Int                @id @default(autoincrement())
+  attendants MeetingAttendant[]
+  name       String
+  date       DateTime
+  meta       MeetingMeta[]
+  items      MeetingItem[]
+}
+
+model MeetingAttendant {
+  id         Int                  @id @default(autoincrement())
+  meeting_id Int
+  meeting    Meeting              @relation(fields: [meeting_id], references: [id])
+  user_id    Int
+  user       User                @relation(fields: [user_id], references: [id])
+  role       MeetingAttendantRole @default(ATTENDANT)
+}
+
+enum MeetingAttendantRole {
+  CREATOR
+  ATTENDANT
+}
+
+model MeetingMeta {
+  id         Int     @id @default(autoincrement())
+  meeting_id Int
+  meeting    Meeting @relation(fields: [meeting_id], references: [id])
+  key        String
+  value      String
+}
+
+model MeetingItem {
+  id          Int                  @id @default(autoincrement())
+  status      MeetingItemStatus    @default(DRAFT)
+  description String
+  meeting_id  Int
+  meeting     Meeting              @relation(fields: [meeting_id], references: [id])
+  creator_id  Int
+  creator     User?                @relation(fields: [creator_id], references: [id])
+  comments    MeetingItemComment[]
+}
+
+enum MeetingItemStatus {
+  DRAFT
+  PENDING
+  DENIED
+  ACCEPTED
+}
+
+model MeetingItemComment {
+  id         Int         @id @default(autoincrement())
+  item_id    Int
+  item       MeetingItem @relation(fields: [item_id], references: [id])
+  creator_id Int
+  creator    User        @relation(fields: [creator_id], references: [id])
+  message    String @db.Text
+  createdAt  DateTime    @default(now())
 }

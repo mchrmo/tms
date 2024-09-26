@@ -17,7 +17,6 @@ export default function TaskCommentsOverview({task}: {task: Task}) {
       <div className="mt-5">
         <TaskCommentForm defaultValues={{task_id: task.id}}></TaskCommentForm>
       </div>
-
     </>
 
   )

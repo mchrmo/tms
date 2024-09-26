@@ -35,10 +35,10 @@ export default function Navbar() {
                     </div>
                     <a className="flex-none text-2xl ml-4 font-semibold" href="/">TMS RUŽOMBEROK</a>
                 </div>
-                <div className="flex items-center">
+                <div className="items-center flex">
                   <div>
                     {
-                      user && <span className="text-lg">{user.firstName} {user.lastName}, {role?.name}</span>
+                      user && <span className="text-lg hidden md:block" >{user.firstName} {user.lastName}, {role?.name}</span>
                     }
                   </div>
                   <SignOut iconOnly></SignOut>
