@@ -19,7 +19,7 @@ const create_attendant = async (attendantData: CreateAttendantReqs) => {
   const newAttendant = await prisma.meetingAttendant.create({data: {...attendantData}})
   if(newAttendant) {
     const meeting = await prisma.meeting.findUnique({where: {id: newAttendant.meeting_id}})
-    await newMeetingAttendantEmail(newAttendant.user_id, meeting?.name!, meeting?.date!)
+    if(meeting) await newMeetingAttendantEmail(newAttendant.user_id, meeting)
   }
 
   return newAttendant

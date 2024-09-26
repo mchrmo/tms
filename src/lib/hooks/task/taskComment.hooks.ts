@@ -96,7 +96,7 @@ export const useUpdateTaskComment = (id: number) => {
     },
     onSuccess: (data) => {
       toast({
-        title: "Pripomienka upravená!"
+        title: "Komentár upravený!"
       })
     },
     onError: (err, updatedUser, context?: any) => {
@@ -129,7 +129,7 @@ export const useCreateTaskComment = () => {
     },
     onSuccess: (data) => {
       toast({
-        title: "Pripomienka vytvorená!"
+        title: "Komentár vytvorený!"
       })
     },
     onError: (err: AxiosError<{error: string}>, newTaskComment, context?: any) => {
@@ -170,7 +170,7 @@ export const useDeleteTaskComment = (id: number) => {
         },
         onSuccess: () => {
         toast({
-            title: 'Pripomienka vymazaná z databázy!',
+            title: 'Komentár vymazaný!',
         });
         },
         onError: (err: AxiosError<{ error: string }>, _, context?: any) => {

@@ -12,6 +12,7 @@ import { ChevronLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 import MeetingItemCommentsOverview from "./comments/comment-overview"
 import MeetingItemCommentForm from "./comments/comment-form"
+import { useEffect } from "react"
 
 export default function MeetingItemDetail({ params }: {params: {id: string}}) {
 
@@ -25,27 +26,32 @@ export default function MeetingItemDetail({ params }: {params: {id: string}}) {
 
   const acceptItem = () => {
     resolveItemQ.mutate({id: itemId, status: 'ACCEPTED'})
-    backToMeeting()
   }
 
   const denyItem = () => {
     resolveItemQ.mutate({id: itemId, status: 'DENIED'})
-    backToMeeting()
   }
 
   const deleteItem = () => {
-    backToMeeting()
     deleteItemQ.mutate()
   }
 
   const publishItem = () => {
     publishItemQ.mutate()
-    backToMeeting()
   }
 
   const backToMeeting = () => {
     router.push(`/meetings/${meetingItem.data?.meeting_id}`)
   }
+
+  useEffect(() => {
+
+    if(resolveItemQ.isSuccess || publishItemQ.isSuccess || deleteItemQ.isSuccess) {
+      backToMeeting()
+    }
+
+  }, [resolveItemQ.isSuccess, publishItemQ.isSuccess, deleteItemQ.isSuccess])
+
 
   if(meetingItem.isLoading) return <span>Detail sa načitáva <LoadingSpinner></LoadingSpinner></span> 
   

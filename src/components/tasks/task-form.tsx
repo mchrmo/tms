@@ -69,6 +69,13 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
   useEffect(() => {
     const parentId = searchParams.get('parent_id')
     if(parentId) setValue("parent_id" ,parseInt(parentId))
+
+    const name = searchParams.get('name')
+    if(name) setValue("name" ,name)
+
+    const source = searchParams.get('source')
+    if(source) setValue("source" ,source)
+    
   }, [])
 
   useEffect(() => {
