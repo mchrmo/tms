@@ -29,7 +29,7 @@
       <div style="margin: 3rem 0;">
         <h2>Deadline nasledujúci deň:</h2>
 
-        <h3>Moje úlohy</h3>
+        <h3>Mne delegované úlohy</h3>
         <ul>
             {{#each assignee_id}}
                 <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
@@ -64,7 +64,7 @@
             {{/each}}
         </ul> -->
 
-        <h3>Moje úlohy</h3>
+        <h3>Mne delegované úlohy</h3>
         <ul>
             {{#each assignee_id}}
                 <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.task.name}}</a> {{dateTime this.createdAt}} - {{this.description}}</li>

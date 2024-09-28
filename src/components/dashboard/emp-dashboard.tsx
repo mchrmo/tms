@@ -101,7 +101,7 @@ export default function EmpDashboard() {
 
           {/* Deadlines Widget */}
           <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl cursor-pointer" onClick={() => router.push('/tasks')}>
-            <h3 className="text-lg font-semibold mb-2">Terminy</h3>
+            <h3 className="text-lg font-semibold mb-2">Termíny</h3>
             <p className="text-gray-700">Dnes: {deadlinesCount?.today ?? 0}</p>
             <p className="text-gray-700">Zajtra: {deadlinesCount?.nextDay ?? 0}</p>
           </div>

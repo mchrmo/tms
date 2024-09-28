@@ -65,14 +65,14 @@ export const useDeleteMeetingAttendant = () => {
   return useMutation({
       mutationFn: deleteAttendantFn,
       onMutate: async () => {
-      if (!confirm("Určite to chcete odobrať účastníka z porady?")) {
+      if (!confirm("Určite chcete odobrať účastníka z porady?")) {
           throw new Error('Účastník nebol vymazaný');
       }
 
     },
       onSuccess: () => {
       toast({
-          title: 'Účastník vymazaný z porady!',
+          title: 'Účastník bol odstránený z porady!',
       });
       },
       onError: (err: AxiosError<{ error: string }>, _, context?: any) => {

@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useResetRegistration, useUsers } from "@/lib/hooks/user.hooks"
 import TableComponent, { FilteredHeaderCell } from "@/components/common/table/table"
-import { userRolesMap } from "@/lib/models/user.model"
+import { USER_ROLES_MAP } from "@/lib/models/user.model"
 import { User } from "@/lib/db/user.repository"
 import {   
   DropdownMenu,
@@ -59,7 +59,7 @@ export default function UsersTable() {
     },
     {
       id: 'role',
-      accessorFn: (orginal) => userRolesMap[orginal.role.name],
+      accessorFn: (orginal) => USER_ROLES_MAP[orginal.role.name],
       header: "Rola",
       enableSorting: false
     },
