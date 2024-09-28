@@ -80,7 +80,7 @@ export default function MeetingForm({onUpdate, defaultValues: _def, edit}: {edit
               <FormItem className="col-span-2">
                 <FormLabel>Názov porady</FormLabel>
                 <FormControl>
-                  <Input placeholder="Názov úlohy" {...field} />
+                  <Input placeholder="Názov porady" {...field} />
                 </FormControl>
               <FormMessage />
             </FormItem>

@@ -30,7 +30,7 @@ const columns: ColumnDef<Meeting>[] = [
   },
   {
     accessorKey: "date",
-    header: "Čas a dátum",
+    header: "Dátum a čas",
     cell: (props) => formatDateTime(props.getValue() as Date),
     enableColumnFilter: false,
   },
@@ -42,7 +42,7 @@ const columns: ColumnDef<Meeting>[] = [
   },
   {
     accessorKey: "_count.items",
-    header: "Počet bodov",
+    header: "Počet bodov porady",
     enableColumnFilter: false,
     enableSorting: false
   },
