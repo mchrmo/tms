@@ -15,7 +15,9 @@ import TableComponent from "@/components/common/table/table"
 import { MeetingDetail } from "@/lib/services/meetings/meeting.service"
 
 
-const columns: ColumnDef<any>[] = [
+export type MeetingDetailItems = NonNullable<MeetingDetail>['items'][number];
+
+const columns: ColumnDef<MeetingDetailItems>[] = [
   {
     accessorKey: "description",
     header: "Popis",
@@ -44,7 +46,14 @@ export default function MeetingItemsTable({meeting}: {meeting?: MeetingDetail}) 
   if(!columns.find(c => c.id == 'utils')) {
     columns.push({
       id: 'utils',
-      cell: (props) => <Link href={`/tasks/create?source=${meeting?.name} ${formatDate(meeting?.date!)}&name=${props.row.original.description}`}><span className="link">Vytvoriť úlohu</span></Link>,
+      cell: (props) => {
+        
+        if(props.row.original.status == "ACCEPTED")
+        return (
+          <Link href={`/tasks/create?source=${meeting?.name} ${formatDate(meeting?.date!)}&name=${props.row.original.description}`}><span className="link">Vytvoriť úlohu</span></Link>
+        )
+      
+      },
       enableColumnFilter: false,
     })
   }

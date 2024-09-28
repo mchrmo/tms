@@ -14,7 +14,7 @@ export default function CreateMeetingItem({meeting_id}: {meeting_id: number}) {
         <Dialog open={isForm} onOpenChange={setIsForm}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Nová pripomienka</DialogTitle>
+              <DialogTitle>Pridať návrh bodu porady</DialogTitle>
               <DialogDescription>
                 
               </DialogDescription>

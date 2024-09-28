@@ -223,9 +223,9 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
                 name="source"
                 render={({ field }) => (
                   <FormItem className="col-span-full">
-                    <FormLabel>Zdroj</FormLabel>
+                    <FormLabel>Zdroj úlohy</FormLabel>
                     <FormControl>
-                      <Input placeholder="Zdroj" {...field} />
+                      <Input placeholder="Zdroj úlohy" {...field} />
                     </FormControl>
                   <FormMessage />
                 </FormItem>

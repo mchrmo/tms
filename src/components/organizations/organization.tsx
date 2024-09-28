@@ -30,7 +30,7 @@ export default function Organization({orgData, isAdmin}: {orgData: OrgMembersTre
     <Tabs defaultValue="main" className="w-full" >
       <TabsList className="w-full grid grid-cols-2">
         <TabsTrigger value="main">Hlavná organizácia</TabsTrigger>
-        <TabsTrigger value="custom">Ostatné</TabsTrigger>
+        <TabsTrigger value="custom">Ostatné organizácie</TabsTrigger>
       </TabsList>
       <TabsContent value="main" className="flex justify-center mt-5">
         {

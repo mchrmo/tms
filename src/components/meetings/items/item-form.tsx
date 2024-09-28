@@ -8,7 +8,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SubmitButton from "@/components/common/buttons/submit";
-import { MeetingItemCreateSchema, MeetingItemUpdateSchema, ZMeetingItem } from "@/lib/models/meeting/meetingItem.model";
+import { MeetingItemCreateSchema, meetingItemStatusMap, MeetingItemUpdateSchema, ZMeetingItem } from "@/lib/models/meeting/meetingItem.model";
 import { useCreateMeetingItem, useUpdateMeetingItem } from "@/lib/hooks/meeting/meetingItem.hooks";
 import clsx from "clsx";
 
@@ -92,15 +92,24 @@ export default function MeetingItemForm({onUpdate, onCancel, defaultValues: _def
             <FormField
             control={form.control}
             name="status"
-            render={({ field }) => (
-              <FormItem className="col">
-                <FormLabel>Stav</FormLabel>
-                <FormControl>
-                  <Input {...field} disabled/>
-                </FormControl>
-              <FormMessage />
-            </FormItem>
-            )}
+            render={({ field }) => {
+              const { value, onChange, ...rest } = field;
+              const formatted = meetingItemStatusMap[value]
+
+              return (
+                <FormItem className="col">
+                  <FormLabel>Stav</FormLabel>
+                  <FormControl>
+                    {/* <Input {...field} disabled/> */}
+                    <Input type="text" placeholder="" 
+                        value={formatted}
+                        {...rest}
+                        disabled
+                    />
+                  </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}}
           />}
 
 

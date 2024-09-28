@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Menu } from "lucide-react";
 import Sidebar from "./sidebar";
 import { getUserRole } from "@/lib/utils";
+import { USER_ROLES_MAP } from "@/lib/models/user.model";
 
 
 export default function Navbar() {
@@ -38,7 +39,7 @@ export default function Navbar() {
                 <div className="items-center flex">
                   <div>
                     {
-                      user && <span className="text-lg hidden md:block" >{user.firstName} {user.lastName}, {role?.name}</span>
+                      user && <span className="text-lg hidden md:block" >{user.firstName} {user.lastName}, {role && USER_ROLES_MAP[role?.name]}</span>
                     }
                   </div>
                   <SignOut iconOnly></SignOut>
