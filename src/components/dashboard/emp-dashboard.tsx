@@ -21,15 +21,14 @@ import { formatDate } from "@/lib/utils/dates";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "../ui/loading-spinner";
+import { useEffect, useState } from "react";
 
 // Register necessary Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend, Title, CategoryScale, LinearScale);
 
 export default function EmpDashboard() {
 
-
-
-
+  const [isTasks, setIsTasks] = useState(false)
   const router = useRouter()
 
   const fetchDashboardData = async () => {
@@ -44,6 +43,15 @@ export default function EmpDashboard() {
     queryKey: ['dashboardData'],
     queryFn: fetchDashboardData
   });
+
+  
+
+  useEffect(() => {
+    if(!data) return
+    data.taskStatusCounts = data.taskStatusCounts as {TODO: number, CHECKREQ: number, DONE: number}
+    setIsTasks(Object.values(data.taskStatusCounts as {TODO: number, CHECKREQ: number, DONE: number}).some(v => v > 0))
+
+  }, [data])
 
 
   const taskStatusData = {
@@ -99,7 +107,7 @@ export default function EmpDashboard() {
               <h3 className="text-lg font-semibold mb-2">Pripomienky úloh</h3>
               <p className="text-gray-700">Dnes: {data.remindersCount?.today ?? 0}</p>
               <p className="text-gray-700">Zajtra: {data.remindersCount?.nextDay ?? 0}</p>
-            </div>xq
+            </div>
   
             {/* Deadlines Widget */}
             <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl cursor-pointer" onClick={() => router.push('/tasks')}>
@@ -111,7 +119,10 @@ export default function EmpDashboard() {
             {/* Donut Chart for Task Status */}
             <div className="bg-white shadow-md rounded-lg p-6 col-span-full ">
               <h3 className="text-lg font-semibold mb-2">Prehľad rozpracovania úloh</h3>
-              <Doughnut data={taskStatusData} className="max-h-64"/>
+              {
+                isTasks ? <Doughnut data={taskStatusData} className="max-h-64"/> : <p className="text-gray-500">Pridajte prvú úlohu</p>
+              }
+              
             </div>
           </div>
           )

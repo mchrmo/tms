@@ -144,17 +144,13 @@ const fetchTaskStatusCounts = async (user_id: number) => {
 
 
 export const GET = errorHandler(async (req: NextRequest) => {
-
-  const params = req.nextUrl.searchParams
-
   const user = await userService.get_current_user();
   if(!user) throw new ApiError(403, "No user")
     
-  // const user_id = user?.id
-  const user_id = 16
+  const user_id = user?.id
+  // const user_id = 16
 
   const nextMeeting = await fetchNextMeeting(user_id)
-
   const unfinishedTasksCount = await fetchUnfinishedTasks(user_id)
   const remindersCounts = await fetchRemindersCount(user_id)
   const deadlinesCounts = await fetchDeadlinesCount(user_id)
