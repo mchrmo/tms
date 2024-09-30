@@ -3,7 +3,7 @@ import { Organization, Prisma, PrismaClient, User, UserRole } from '@prisma/clie
 const prisma = new PrismaClient()
 
 // Dev
-// const clerkClient = createClerkClient({ secretKey: 'sk_test_iPbWjrbS97Qa0oEoGmBpNCDw7V20NOsYbTAemEPJcM' })
+const clerkClient = createClerkClient({ secretKey: 'sk_test_iPbWjrbS97Qa0oEoGmBpNCDw7V20NOsYbTAemEPJcM' })
 
 // Prod
 // const clerkClient = createClerkClient({ secretKey: 'sk_live_pdArwwQ2uK0zpDBTCXyUmfOfTLVjqri59u1Arzj7Ro' })
