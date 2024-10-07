@@ -11,53 +11,52 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import { NewUserSchema, UserRegistrationFormInputs } from "@/lib/models/user.model";
+import { useCreateUser } from "@/lib/hooks/user.hooks";
+import SubmitButton from "../common/buttons/submit";
 
 
-const formSchema = z.object({
-  email: z.string().email("Zadajte správny tvar emailu."),
-  name: z.string().regex(new RegExp(/^[A-Z][a-z]*\s[A-Z][a-z]*/), "Zadajte meno a priezvisko")
-})
+const formSchema = NewUserSchema
 
 
-export default function RegistrationForm() {
+export default function UserRegistrationForm({onClose}: {onClose: () => void}) {
 
-  const initialState = { message: null, errors: {}};
-  const [state, dispatch] = useFormState<State<RegistrationFields>, FormData>(createUserAction, initialState);
-
-  const { toast } = useToast()
+  const router = useRouter()
+  const createUser = useCreateUser();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       name: "",
+      phone: ''
     },
     mode: "onChange"
   })
+  const { handleSubmit, reset, setValue, formState: { errors, isDirty, isValid } } = form
 
-  
   useEffect(() => {
-    if(state.message == null) return
+    if(!createUser.isSuccess) return
+    const newId = createUser.data.id
+    if(newId) router.push('/users')
 
-    toast({
-      title: state.success ? "Správa" : "Chyba",
-      description: state.message,
-    })  
+    createUser.reset()
+    onClose()
+  }, [createUser.isSuccess])
 
-    if(state.success) {
-      redirect('/users')
-    }
 
-  }, [state])
+  const onSubmit: SubmitHandler<UserRegistrationFormInputs> = async (data) => {
+    createUser.mutate(data)
+  }
 
   return (
     <>
 
       <Form {...form}>
-        <form action={dispatch} className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="">
 
-          <div className="my-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="my-8 grid grid-cols-1 gap-4">
             <FormField
               control={form.control}
               name="name"
@@ -86,8 +85,25 @@ export default function RegistrationForm() {
               )}
             />
 
-            <Button type="submit" className="col-span-full ">Registrovať</Button>
 
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Telefón</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+421" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" type="button" onClick={() => {onClose();}}>Zrušiť</Button>
+              <SubmitButton isLoading={createUser.isPending || createUser.isPending} type="submit" className="">Registrovať</SubmitButton>
+            </div>
           </div>
           
         </form>

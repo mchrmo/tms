@@ -1,7 +1,7 @@
 "use client"
 
 import { auth, currentUser, User } from "@clerk/nextjs/server";
-import { ChevronDownIcon, ClipboardCheck, Gauge, Network, Presentation, Users } from "lucide-react";
+import { ChevronDownIcon, ClipboardCheck, Gauge, Network, PersonStanding, Presentation, UserIcon, Users,  } from "lucide-react";
 import Link from "next/link";
 import { Dispatch, Fragment, ReactNode, SetStateAction, SVGProps, useEffect } from "react";
 import SignOut from "./buttons/sign-out";
@@ -86,6 +86,12 @@ export default function Sidebar({setOpen}: {setOpen?: Dispatch<SetStateAction<bo
       icon: <Presentation size={24} className="mr-4" />,
       href: "/meetings",
     },
+    {
+      label: "",
+      name: "Profil",
+      href: '/profile',
+      icon: <UserIcon/>
+    }
 ];
 
   let menus: Menu[] = []

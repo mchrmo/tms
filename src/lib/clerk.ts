@@ -36,7 +36,7 @@ export const updateClerkUser = async (id: string, password: string): Promise<Use
   } catch (error) {
     
     console.log(error);
-    throw new Error("Nepodarilo sa vytvoriť užívatela")
+    throw new Error("Nepodarilo sa upraviť užívatela")
 
   }
 };

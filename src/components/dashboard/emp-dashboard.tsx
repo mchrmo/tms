@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "../ui/loading-spinner";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 // Register necessary Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend, Title, CategoryScale, LinearScale);
@@ -84,12 +85,12 @@ export default function EmpDashboard() {
           : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-8 " >
             {/* Next Meeting Widget */}
-            <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl cursor-pointer" onClick={() => router.push('/meetings-')}>
+            <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl " >
               <h3 className="text-lg font-semibold mb-2">Najbližšia porada</h3>
               {data.nextMeeting ? (
-                <p className="text-gray-700">
-                  {formatDate(data.nextMeeting.date)} - {data.nextMeeting.name}
-                </p>
+                <Link href={`/meetings/${data.nextMeeting.id}`}><p className="text-gray-700 cursor-pointer">
+                {formatDate(data.nextMeeting.date)} - {data.nextMeeting.name}
+              </p></Link>
               ) : (
                 <p className="text-gray-500">Žiadna naplánovaná porada</p>
               )}

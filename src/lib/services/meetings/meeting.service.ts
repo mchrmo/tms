@@ -99,6 +99,13 @@ const delete_meeting = async (meeting_id: number) => {
     }
   })
 
+  const attendants = await prisma.meetingAttendant.deleteMany({
+    where: {
+      meeting_id
+    }
+  })
+
+
   const meeting = await prisma.meeting.delete({
       where: {
           id: meeting_id

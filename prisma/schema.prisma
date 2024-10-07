@@ -26,6 +26,7 @@ model User {
   clerk_id            String               @unique
   name                String
   email               String               @unique
+  phone               String              @default("Neuvedené")
   role_id             Int                  @default(2)
   role                UserRole             @relation(fields: [role_id], references: [id])
   OrganizationMember  OrganizationMember[]

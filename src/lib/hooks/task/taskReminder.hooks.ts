@@ -133,7 +133,7 @@ export const useCreateTaskReminder = () => {
       })
     },
     onError: (err: AxiosError<{error: string}>, newTaskReminder, context?: any) => {
-      const errMessage = err.response?.data ? err.response.data.error : err.message
+      const errMessage = err.response?.data ? err.response.data.message : err.message
 
       toast({
         title: "Chyba",
@@ -173,8 +173,8 @@ export const useDeleteTaskReminder = (id: number) => {
             title: 'Pripomienka vymazaná z databázy!',
         });
         },
-        onError: (err: AxiosError<{ error: string }>, _, context?: any) => {
-        const errMessage = err.response?.data ? err.response.data.error : err.message;
+        onError: (err: AxiosError<{ message: string }>, _, context?: any) => {
+        const errMessage = err.response?.data ? err.response.data.message : err.message;
         toast({
             title: 'Chyba',
             description: errMessage,

@@ -50,7 +50,7 @@ export default function MeetingItemsTable({meeting}: {meeting?: MeetingDetail}) 
         
         if(props.row.original.status == "ACCEPTED")
         return (
-          <Link href={`/tasks/create?source=${meeting?.name} ${formatDate(meeting?.date!)}&name=${props.row.original.description}`}><span className="link">Vytvoriť úlohu</span></Link>
+          <a target="_blank" href={`/tasks/create?source=${meeting?.name} ${formatDate(meeting?.date!)}&name=${props.row.original.description}`}><span className="link">Vytvoriť úlohu</span></a>
         )
       
       },

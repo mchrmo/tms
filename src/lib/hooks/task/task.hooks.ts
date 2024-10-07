@@ -174,8 +174,8 @@ export const useCreateTask = () => {
         title: "Úloha vytvorená!"
       })
     },
-    onError: (err: AxiosError<{error: string}>, newTask, context?: any) => {
-      const errMessage = err.response?.data ? err.response.data.error : err.message
+    onError: (err: AxiosError<{message: string}>, newTask, context?: any) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message
 
       toast({
         title: "Chyba",

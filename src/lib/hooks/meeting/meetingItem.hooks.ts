@@ -101,7 +101,7 @@ export const useCreateMeetingItem = () => {
       })
     },
     onError: (err: AxiosError<{error: string}>, newMeetingItem, context?: any) => {
-      const errMessage = err.response?.data ? err.response.data.error : err.message
+      const errMessage = err.response?.data ? err.response.data.message : err.message
 
       toast({
         title: "Chyba",
@@ -143,8 +143,8 @@ export const useDeleteMeetingItem = (id: number) => {
           title: 'Návrh vymazaný z databázy!',
       });
       },
-      onError: (err: AxiosError<{ error: string }>, _, context?: any) => {
-      const errMessage = err.response?.data ? err.response.data.error : err.message;
+      onError: (err: AxiosError<{ message: string }>, _, context?: any) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message;
       toast({
           title: 'Chyba',
           description: errMessage,
