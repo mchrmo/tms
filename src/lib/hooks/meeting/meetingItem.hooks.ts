@@ -100,7 +100,7 @@ export const useCreateMeetingItem = () => {
         title: "Návrh pridaný!"
       })
     },
-    onError: (err: AxiosError<{error: string}>, newMeetingItem, context?: any) => {
+    onError: (err: AxiosError<{message: string}>, newMeetingItem, context?: any) => {
       const errMessage = err.response?.data ? err.response.data.message : err.message
 
       toast({
@@ -193,7 +193,7 @@ export const usePublishMeetingItem = (id: number) => {
   });
 }
 
-export const useResolveMeetingItem = (id: number) => {
+export const useResolveMeetingItem = () => {
 
   const queryClient = useQueryClient()
   const { toast } = useToast()
@@ -206,8 +206,8 @@ export const useResolveMeetingItem = (id: number) => {
   return useMutation({
     mutationFn: resolveMeetingItemFn,
     onMutate: async (updatedItem) => {
-      await queryClient.cancelQueries({queryKey: meetingItemQueryKeys.detail(id)});
-      const previousItem = queryClient.getQueryData(meetingItemQueryKeys.detail(id));
+      await queryClient.cancelQueries({queryKey: meetingItemQueryKeys.detail(updatedItem.id)});
+      const previousItem = queryClient.getQueryData(meetingItemQueryKeys.detail(updatedItem.id));
       // queryClient.setQueryData(meetingItemQueryKeys.detail(Number(id)), updatedItem);
       return { previousItem: previousItem, updatedItem: updatedItem };
     },
@@ -220,7 +220,7 @@ export const useResolveMeetingItem = (id: number) => {
     },
     onError: (err, updatedItem, context?: any) => {
       queryClient.setQueryData(
-        meetingItemQueryKeys.detail(Number(id)),
+        meetingItemQueryKeys.detail(Number(updatedItem.id)),
         context.previousItem
       );
     },

@@ -30,9 +30,9 @@ export default function UserRegistrationForm({onClose}: {onClose: () => void}) {
     defaultValues: {
       email: "",
       name: "",
-      phone: ''
+      phone: '+421'
     },
-    mode: "onChange"
+    mode: "onSubmit"
   })
   const { handleSubmit, reset, setValue, formState: { errors, isDirty, isValid } } = form
 

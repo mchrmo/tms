@@ -12,7 +12,7 @@ export const passwordSchema =  z.string().min(8, "Heslo musí mať minimálne 8 
 export const NewUserSchema = z.object({
   email: z.string().email("Zadajte správny tvar emailu."),
   name: z.string().regex(new RegExp(/^[A-Z][a-z]*\s[A-Z][a-z]*/), "Zadajte meno a priezvisko"),
-  phone: z.string().regex(/^\+\d+$/, "Musí začínať symbolo '+'").min(8, "Zadajte správne telefónne číslo")
+  phone: z.string().regex(/^\+\d+$/, "Musí začínať symbolom '+' a môže obsahovať len čísla").min(8, "Zadajte správne telefónne číslo")
 })
 
 
