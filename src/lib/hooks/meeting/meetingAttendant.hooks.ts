@@ -75,8 +75,8 @@ export const useDeleteMeetingAttendant = () => {
           title: 'Účastník bol odstránený z porady!',
       });
       },
-      onError: (err: AxiosError<{ error: string }>, _, context?: any) => {
-      const errMessage = err.response?.data ? err.response.data.error : err.message;
+      onError: (err: AxiosError<{ message: string }>, _, context?: any) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message;
       toast({
           title: 'Chyba',
           description: errMessage,

@@ -132,8 +132,8 @@ export const useCreateTaskComment = () => {
         title: "Komentár vytvorený!"
       })
     },
-    onError: (err: AxiosError<{error: string}>, newTaskComment, context?: any) => {
-      const errMessage = err.response?.data ? err.response.data.error : err.message
+    onError: (err: AxiosError<{message: string}>, newTaskComment, context?: any) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message
 
       toast({
         title: "Chyba",
@@ -173,8 +173,8 @@ export const useDeleteTaskComment = (id: number) => {
             title: 'Komentár vymazaný!',
         });
         },
-        onError: (err: AxiosError<{ error: string }>, _, context?: any) => {
-        const errMessage = err.response?.data ? err.response.data.error : err.message;
+        onError: (err: AxiosError<{ message: string }>, _, context?: any) => {
+        const errMessage = err.response?.data ? err.response.data.message : err.message;
         toast({
             title: 'Chyba',
             description: errMessage,

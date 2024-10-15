@@ -20,7 +20,7 @@ export default function MeetingItemDetail({ params }: {params: {id: string}}) {
   const meetingItem = useMeetingItem(itemId)
   const router = useRouter()
   
-  const resolveItemQ = useResolveMeetingItem(itemId)
+  const resolveItemQ = useResolveMeetingItem()
   const deleteItemQ = useDeleteMeetingItem(itemId)
   const publishItemQ = usePublishMeetingItem(itemId)
 

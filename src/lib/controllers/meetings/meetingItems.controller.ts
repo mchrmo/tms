@@ -110,8 +110,8 @@ const resolveMeetingItem = async (request: NextRequest) => {
 
   if(item.status === 'DRAFT') throw new ApiError(403, `Draft cannot be resolved`)
 
-  const updatingAttendant = await prisma.meetingAttendant.findMany({where: {meeting_id: item.meeting_id, role: "CREATOR", user_id: user.id}})
-  if(!updatingAttendant.length) throw new ApiError(401, "Only creator can resolve item")
+  // const updatingAttendant = await prisma.meetingAttendant.findMany({where: {meeting_id: item.meeting_id, role: "CREATOR", user_id: user.id}})
+  // if(!updatingAttendant.length) throw new ApiError(401, "Only creator can resolve item")
 
   const updatedItem = await meetingItemService.update_meetingItem(updateData)
   return NextResponse.json(updatedItem, { status: 200 })

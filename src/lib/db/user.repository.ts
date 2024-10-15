@@ -46,6 +46,7 @@ export async function getUser(user_id: number) {
 
   return user
 }
+
 export async function getUserByClerkId(clerkId: string) {
 
   const user = await prisma.user.findUnique({
@@ -60,22 +61,6 @@ export async function getUserByClerkId(clerkId: string) {
   return user
 }
 
-export async function createUser(data: Prisma.UserCreateInput) {
-
-  const user = await prisma.user.create({
-    data: {
-      name: data.name,
-      email: data.email,
-      clerk_id: data.clerk_id,
-      role: {
-        connect: {id: 2}
-      }
-    },
-    
-  });
-
-  return user
-}
 
 
 export async function getUserRole(roleId: number) {

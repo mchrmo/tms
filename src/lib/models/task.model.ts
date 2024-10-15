@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ModelColumns } from "../utils/api.utils";
 
 
 export const TASK_COLUMNS_PATHS: {[key: string]: (value: any) => any} = {
@@ -51,3 +52,53 @@ export const TaskUpdateSchema = TaskSchema.partial().merge(z.object({ id: z.numb
 
 export type Task = z.infer<typeof TaskSchema>  & {id: number};
 
+export const taskColumns: ModelColumns = {
+  'name': {
+    type: 'string',
+    method: 'contains',
+    label: 'Názov'
+  },
+  'createdAt': {
+    label: "Vznik",
+    type: 'datetime',
+  },
+  'priority': {
+    type: 'enum',
+    label: "Priorita",
+    enum: TASK_PRIORITIES_MAP
+  },
+  'status': {
+    type: 'enum',
+    path: 'status',
+    label: "Status",
+    enum: TASK_STATUSES_MAP
+  },
+  'deadline': {
+    label: "Termín",
+    type: 'datetime',
+  },
+  'creator_name': {
+    label: "Vytvoril",
+    type: 'string',
+    path: 'creator.user.name',
+    method: 'contains'
+  },
+  'assignee_name': {
+    label: "Zodpovedný",
+    type: 'string',
+    path: 'assignee.user.name',
+    method: 'contains'
+  },
+  'organization_name': {
+    label: "Organizácia",
+    type: 'string',
+    path: 'organization.name',
+    method: 'contains'
+  },
+  'fulltext': {
+    type: 'string',
+    customFn: (val) => ({OR: [
+      {name: {contains: val}}
+    ]})
+  },
+}
