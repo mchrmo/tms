@@ -37,7 +37,8 @@ const getUser = async (req: NextRequest, params: any) => {
   let user: UserDetail | CurrentUserDetail;
   if(userId == 0) {
     const currentUser = await userService.get_current_user()
-    if(!currentUser) return 
+    if(!currentUser) throw new ApiError(400, "No user")
+ 
     user = await userService.get_user(currentUser.id)  
   } else user = await userService.get_user(userId)  
 
