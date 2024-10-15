@@ -42,6 +42,10 @@ export type PaginatedResponse<T> = {
   }
 }
 
+export type PaginatedResponseOld<T> = {
+  items: T[],
+  totalCount: number
+}
 
 export async function paginate<ModelName extends ModelNames>({
   page,

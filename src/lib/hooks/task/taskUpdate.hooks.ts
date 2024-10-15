@@ -3,7 +3,7 @@ import { getApiClient } from "../../api-client";
 import { useToast } from "@/components/ui/use-toast";
 import { parseListHookParams } from "../../utils/api.utils";
 import { useQuery } from "@tanstack/react-query";
-import { PaginatedResponse } from "../../services/api.service";
+import { PaginatedResponse, PaginatedResponseOld } from "../../services/api.service";
 import { TaskUpdateListItem } from "../../services/tasks/taskUpdate.service";
 import { useEffect } from "react";
 
@@ -29,7 +29,7 @@ export const useTaskUpdates = (pagination: PaginationState, filter?: ColumnFilte
     return response.data
   }
 
-  const query = useQuery<PaginatedResponse<TaskUpdateListItem>>({
+  const query = useQuery<PaginatedResponseOld<TaskUpdateListItem>>({
     queryKey: taskUpdateQueryKeys.searched(urlParams),
     queryFn: () => getTaskUpdatesFn(params),
   })
