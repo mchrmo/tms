@@ -1,24 +1,26 @@
 "use client"
 
-import { ColumnDef, ColumnFilter, ColumnFiltersState, ColumnSort, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, PaginationState, SortingState, useReactTable } from "@tanstack/react-table"
+import { ColumnDef, ColumnFilter, ColumnFiltersState, ColumnSort, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, Header, PaginationState, SortingState, Table, useReactTable } from "@tanstack/react-table"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useResetRegistration, useUsers } from "@/lib/hooks/user.hooks"
-import TableComponent, { FilteredHeaderCell } from "@/components/common/table/table"
-import { USER_ROLES_MAP } from "@/lib/models/user.model"
+import TableComponent from "@/components/common/table/table"
+import { USER_ROLES_MAP, userColumns } from "@/lib/models/user.model"
 import { User } from "@/lib/db/user.repository"
-import {   
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
- } from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { EllipsisVerticalIcon } from "lucide-react"
-import TablePagination from "@/components/common/table/pagination"
-
+import { CalendarIcon, ChevronDownIcon, ChevronUp, ChevronUpIcon, CircleXIcon, CrossIcon, EllipsisVerticalIcon, FilterIcon, HashIcon, PlusIcon, SearchIcon, TextIcon, TrashIcon, XIcon } from "lucide-react"
+import { TableHead } from "../ui/table"
+import { cn } from "@/lib/utils"
+import { formatDate } from "@/lib/utils/dates"
+import { TableFilter } from "../common/table/filter"
 
 
 export default function UsersTable() {
@@ -29,18 +31,18 @@ export default function UsersTable() {
     desc: true
   }])
 
-  const [pagination, setPagination] = useState<PaginationState>({pageIndex: 0, pageSize: 10})
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
 
   const empQuery = useUsers(pagination, columnFilters, sorting[0])
 
   const data = useMemo(() => {
-    return empQuery.data ? empQuery.data.items : [];
+    return empQuery.data ? empQuery.data.data : [];
   }, [empQuery.data]);
-  
+
   useEffect(() => {
     empQuery.refetch()
   }, [sorting, pagination])
-  
+
 
 
   const columns: ColumnDef<any>[] = [
@@ -52,7 +54,7 @@ export default function UsersTable() {
         const id = props.row.original.id
         return props.getValue() as string
       },
-    },  
+    },
     {
       accessorKey: "email",
       header: "E-mail"
@@ -61,7 +63,15 @@ export default function UsersTable() {
       id: 'role',
       accessorFn: (orginal) => USER_ROLES_MAP[orginal.role.name],
       header: "Rola",
-      enableSorting: false
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Dátum",
+      cell: (props) => {
+        const val = props.getValue()
+        if (!val) return ''
+        return formatDate(val as Date)
+      },
     },
     {
       id: 'organization',
@@ -75,15 +85,18 @@ export default function UsersTable() {
     },
     {
       // accessorKey: "clerk_id",
-      id:"actions",
+      id: "actions",
       // accessorFn: (orginal) => {
       //   return 
       // },
       cell: (props) => <RowActions user={props.row.original}></RowActions>,
       header: "",
     },
+    {
+      id: "fulltext"
+    },
   ]
-  
+
 
   const table = useReactTable({
     data,
@@ -101,14 +114,15 @@ export default function UsersTable() {
 
     onPaginationChange: setPagination,
     manualPagination: true,
-    rowCount: empQuery.data?.totalCount,
-    pageCount: Math.ceil((empQuery.data?.totalCount || 0) / (pagination.pageSize || 1)),
+    rowCount: empQuery.data?.meta.total,
+    pageCount: Math.ceil((empQuery.data?.meta.total || 0) / (pagination.pageSize || 1)),
 
     state: {
       columnFilters,
       sorting,
       pagination
     },
+
   })
 
   useEffect(() => {
@@ -123,36 +137,58 @@ export default function UsersTable() {
 
   return (
     <div>
+      <div className="mb-4">
+        <TableFilter table={table} columns={userColumns} primaryFilterColumn="fulltext"></TableFilter>
+      </div>
+
       <TableComponent table={table} isError={empQuery.isError} isLoading={empQuery.isLoading}
         pagination={true}
         templateParts={{
-          // headerCell: (header) => <FilteredHeaderCell key={header.id} header={header}></FilteredHeaderCell> 
+          headerCell: (header) => <FilteredHeaderCell key={header.id} header={header}></FilteredHeaderCell>
         }}
-      
       >
       </TableComponent>
-      
-
     </div>
-    
+
   )
 
 }
 
 
 
-function RowActions({user}: {user: User}) {
 
-  const { mutate: resetRegistration  } = useResetRegistration()
-  
-  const handleDelete = () => {
-    if(!confirm("Určite chcete zmazať záznam?")) return
-    // deleteEmployeeRecord()
-  }
+export function FilteredHeaderCell({ header }: { header: Header<any, unknown> }) {
+
+  return (
+    <TableHead className="align-middle">
+      <div className={cn("flex", header.column.getCanSort() && "cursor-pointer")} onClick={header.column.getToggleSortingHandler()}>
+        <h4 className="font-medium text-muted-foreground" >
+          {header.isPlaceholder
+            ? null
+            : flexRender(
+              header.column.columnDef.header,
+              header.getContext()
+            )}
+        </h4>
+        <span className="">
+          {{
+            asc: <ChevronUpIcon />,
+            desc: <ChevronDownIcon />,
+          }[header.column.getIsSorted() as string] ?? null}
+        </span>
+      </div>
+    </TableHead>
+  )
+}
+
+
+function RowActions({ user }: { user: User }) {
+
+  const { mutate: resetRegistration } = useResetRegistration()
 
   const handleResetRegistration = () => {
-    
-    if(!confirm("Určite chcete resetovať registráciu?")) return
+
+    if (!confirm("Určite chcete resetovať registráciu?")) return
 
     resetRegistration(user.clerk_id)
   }
@@ -166,7 +202,7 @@ function RowActions({user}: {user: User}) {
         <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleResetRegistration}>
-            Resetovať registráciu
+          Resetovať registráciu
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

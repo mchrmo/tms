@@ -132,7 +132,7 @@ export const useCreateTaskComment = () => {
         title: "Komentár vytvorený!"
       })
     },
-    onError: (err: AxiosError<{error: string}>, newTaskComment, context?: any) => {
+    onError: (err: AxiosError<{message: string}>, newTaskComment, context?: any) => {
       const errMessage = err.response?.data ? err.response.data.message : err.message
 
       toast({

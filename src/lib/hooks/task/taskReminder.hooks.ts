@@ -132,7 +132,7 @@ export const useCreateTaskReminder = () => {
         title: "Pripomienka vytvorená!"
       })
     },
-    onError: (err: AxiosError<{error: string}>, newTaskReminder, context?: any) => {
+    onError: (err: AxiosError<{message: string}>, newTaskReminder, context?: any) => {
       const errMessage = err.response?.data ? err.response.data.message : err.message
 
       toast({

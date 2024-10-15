@@ -22,13 +22,14 @@ model UserRole {
 }
 
 model User {
-  id                  Int                  @id @default(autoincrement())
-  clerk_id            String               @unique
+  id                  Int                 @id @default(autoincrement())
+  clerk_id            String              @unique
   name                String
-  email               String               @unique
+  email               String              @unique
   phone               String              @default("Neuvedené")
-  role_id             Int                  @default(2)
-  role                UserRole             @relation(fields: [role_id], references: [id])
+  role_id             Int                 @default(2)
+  role                UserRole            @relation(fields: [role_id], references: [id])
+  createdAt         DateTime              @default(now())
   OrganizationMember  OrganizationMember[]
   TaskUpdate          TaskUpdate[]
   meetings            MeetingAttendant[]

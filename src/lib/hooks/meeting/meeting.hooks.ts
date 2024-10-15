@@ -2,7 +2,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ZMeetingCreateForm } from "@/lib/models/meeting/meeting.model";
 import { PaginatedResponse } from "@/lib/services/api.service";
 import { MeetingDetail } from "@/lib/services/meetings/meeting.service";
-import { getApiClient, parseListHookParams } from "@/lib/utils/api.utils";
+import { getApiClient, parseListHookParams, parseListHookParamsNew } from "@/lib/utils/api.utils";
 import { Meeting } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react-table";
@@ -50,7 +50,7 @@ export const useMeeting = (id?: number, options?: UseQueryOptions<MeetingDetail,
 export const useMeetings = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) => {
   const { toast } = useToast()
 
-  const { urlParams, params } = parseListHookParams(pagination, filter, sort)
+  const {params, urlParams} = parseListHookParamsNew(pagination, filter, sort)
 
 
   const getMeetingsFn = async (params: {[key: string]: string}) => {
@@ -132,7 +132,7 @@ export const useCreateMeeting = () => {
         title: "Porada vytvorená!"
       })
     },
-    onError: (err: AxiosError<{error: string}>, newMeeting, context?: any) => {
+    onError: (err: AxiosError<{message: string}>, newMeeting, context?: any) => {
       const errMessage = err.response?.data ? err.response.data.message : err.message
 
       toast({

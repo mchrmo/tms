@@ -9,7 +9,7 @@ import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react
 import { AxiosError } from "axios";
 import { PaginatedResponse } from "../../services/api.service";
 import { taskUpdateQueryKeys } from "./taskUpdate.hooks";
-import { parseListHookParams } from "@/lib/utils/api.utils";
+import { parseListHookParams, parseListHookParamsNew } from "@/lib/utils/api.utils";
 
 
 const tasksApiClient = getApiClient('/tasks')
@@ -54,7 +54,7 @@ export const useTask = (id?: number, options?: UseQueryOptions<Task, Error>) => 
 export const useTasks = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) => {
   const { toast } = useToast()
 
-  const { urlParams, params } = parseListHookParams(pagination, filter, sort)
+  const { urlParams, params } = parseListHookParamsNew(pagination, filter, sort)
 
 
   const getTasksFn = async (params: {[key: string]: string}) => {

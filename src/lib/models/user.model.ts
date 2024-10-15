@@ -1,4 +1,6 @@
+import { Prisma } from "@prisma/client";
 import { z } from "zod"
+import { ModelColumns } from "../utils/api.utils";
 
 export const USER_ROLES_MAP: {[key: string]: string} = {
   "employee": "Zamestnanec",
@@ -17,3 +19,58 @@ export const NewUserSchema = z.object({
 
 
 export type UserRegistrationFormInputs = z.infer<typeof NewUserSchema>;
+
+
+export const userListIncludes: Prisma.UserInclude = {
+  role: true,
+  OrganizationMember: {
+    include: {
+      organization: {
+        select: {name: true}
+      }
+    }
+  }
+}
+
+
+export const userColumns: ModelColumns = {
+  'name': {
+    type: 'string',
+    method: 'contains',
+    label: 'Meno'
+  },
+  'email': {
+    type: 'string',
+    method: 'contains',
+    label: 'E-mail'
+  },
+  'role': {
+    type: 'enum',
+    path: 'role.name',
+    label: "Rola",
+    enum: USER_ROLES_MAP
+  },
+  'clerk_id': {
+    type: 'string',
+    method: 'contains',
+    label: 'Clerk ID'
+  },
+  'organization': {
+    type: 'string',
+    method: 'contains',
+    path: 'OrganizationMember.organization.name',
+    disableSorting: true,
+    customFn: (val) => ({OrganizationMember: {some: {organization: {name: {contains: val}}}}})
+  },
+  'fulltext': {
+    type: 'string',
+    customFn: (val) => ({OR: [
+      {name: {contains: val}},
+      {email: {contains: val}},
+    ]})
+  },
+  'createdAt': {
+    label: "Dátum registrácie",
+    type: 'datetime',
+  },
+}

@@ -1,3 +1,4 @@
+import { ModelColumns } from '@/lib/utils/api.utils';
 import { z } from 'zod';
 
 
@@ -22,3 +23,14 @@ export const MeetingUpdateSchema = MeetingSchema.partial().merge(z.object({ id: 
 // Zod type for UpdateForm
 export type ZMeetingUpdateForm = z.infer<typeof MeetingUpdateSchema>;
 
+export const meetingColumns: ModelColumns = {
+  'name': {
+    type: 'string',
+    method: 'contains',
+    label: 'Názov'
+  },
+  'date': {
+    label: "Dátum",
+    type: 'datetime',
+  },
+}

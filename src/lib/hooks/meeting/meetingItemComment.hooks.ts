@@ -39,7 +39,7 @@ export const useCreateMeetingItemComment = () => {
         title: "Návrh pridaný!"
       })
     },
-    onError: (err: AxiosError<{error: string}>, newMeetingItemComment, context?: any) => {
+    onError: (err: AxiosError<{message: string}>, newMeetingItemComment, context?: any) => {
       const errMessage = err.response?.data ? err.response.data.message : err.message
 
       toast({

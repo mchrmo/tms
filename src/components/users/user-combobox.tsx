@@ -58,9 +58,6 @@ interface SearchProps {
 export function Search({ selectedResult, onSelectResult, mode }: SearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const users: User[] = [
-    {name: "User", clerk_id: "id", id: 10, email: "mail", role_id: 2}
-  ]
 
   const handleSelectResult = (user: User) => {
     

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectTrigger, SelectValue, SelectItem } from "@/components/ui/select";
 import {Table as TableType } from '@tanstack/react-table'
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronLeftIcon, ChevronRight, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function TablePagination<TData>({
@@ -20,6 +20,7 @@ export default function TablePagination<TData>({
 
   const [pageSize, setPageSize] = useState(table.getState().pagination.pageSize.toString())
 
+  const pageSizeOptions = [5, 10, 50]
   const showPreviousNext = true
   const currentPage = table.getState().pagination.pageIndex+1
   const totalPages = table?.getPageCount()
@@ -33,52 +34,79 @@ export default function TablePagination<TData>({
   }, [pageSize])
 
   return (
-    <div className="flex justify-between">
-      <div className="">
-        <Pagination>
-          <PaginationContent>
-            {showPreviousNext && totalPages ? (
-              <PaginationItem>
-                <Button
-                  onClick={() => onPageChange(currentPage - 1)}
-                  variant={'ghost'}
-                  disabled={currentPage - 1 < 1}
-                ><ChevronLeft/></Button>
-              </PaginationItem>
-            ) : null}
-            {generatePaginationLinks(currentPage, totalPages, onPageChange)}
-            {showPreviousNext && totalPages ? (
-              <PaginationItem>
-                <Button
-                  onClick={() => onPageChange(currentPage + 1)}
-                  variant={'ghost'}
-                  disabled={currentPage > totalPages - 1}
-                  ><ChevronRight/></Button>
-              </PaginationItem>
-            ): null}
-          </PaginationContent>
-        </Pagination>
+    <div className="flex w-full flex-col-reverse items-center justify-between gap-4 overflow-auto p-1 sm:flex-row sm:gap-8">
+      <div className="flex-1 whitespace-nowrap text-sm text-muted-foreground">
+        {/* {table.getFilteredSelectedRowModel().rows.length} of{" "} */}
+        Nájdených {table.getRowCount()} riadkov.
       </div>
-      <div className="flex gap-4 items-center">
-        <span className="text-sm whitespace-nowrap font-semibold">Počet</span>
-        <Select
-          defaultValue={pageSize}
-          onValueChange={(value) => setPageSize(value)}
+      <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
+        <div className="flex items-center space-x-2">
+          <p className="whitespace-nowrap text-sm font-medium">Riadkov</p>
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => {
+              table.setPageSize(Number(value))
+            }}
           >
-          <SelectTrigger className="w-16">
-            <SelectValue placeholder="Počet položiek" />
-          </SelectTrigger>
-          <SelectContent>
-            {[5, 10, 50].map((size) => (
-              <SelectItem key={size.toString()} value={size.toString()}>{size}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
+            <SelectTrigger className="h-8 w-[4.5rem]">
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {pageSizeOptions.map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`}>
+                  {pageSize}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center justify-center text-sm font-medium">
+          Stránka {table.getState().pagination.pageIndex + 1} z{" "}
+          {table.getPageCount()}
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            aria-label="Go to first page"
+            variant="outline"
+            className="hidden size-8 p-0 lg:flex"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <ChevronsLeftIcon className="size-4" aria-hidden="true" />
+          </Button>
+          <Button
+            aria-label="Go to previous page"
+            variant="outline"
+            size="icon"
+            className="size-8"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <ChevronLeftIcon className="size-4" aria-hidden="true" />
+          </Button>
+          <Button
+            aria-label="Go to next page"
+            variant="outline"
+            size="icon"
+            className="size-8"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <ChevronRightIcon className="size-4" aria-hidden="true" />
+          </Button>
+          <Button
+            aria-label="Go to last page"
+            variant="outline"
+            size="icon"
+            className="hidden size-8 lg:flex"
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={!table.getCanNextPage()}
+          >
+            <ChevronsRightIcon className="size-4" aria-hidden="true" />
+          </Button>
+        </div>
       </div>
-
     </div>
-
   );
 }
 

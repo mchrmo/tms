@@ -29,7 +29,6 @@ export default async function Users() {
         <ViewHeadline>Užívatelia</ViewHeadline>
         <NewUserModal></NewUserModal>
       </div>
-      <Separator/>
 
       <UsersTable></UsersTable>
     </>

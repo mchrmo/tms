@@ -1,11 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getParams, paginate, parseFilter, parseQueryParams } from "../services/api.service";
-import { Prisma } from "@prisma/client";
 import userService, { CurrentUserDetail, UserDetail } from "../services/user.service";
 import { ApiError } from "next/dist/server/api-utils";
-import { TaskUpdateSchema } from "../models/task.model";
-import { NewUserSchema, passwordSchema } from "../models/user.model";
-import { auth } from "@clerk/nextjs/server";
+import { NewUserSchema, passwordSchema, userColumns, userListIncludes } from "../models/user.model";
+import { Prisma, User } from "@prisma/client";
+import prisma from "../prisma";
+import { createPaginator } from 'prisma-pagination'
+import { parseGetManyParams } from "../utils/api.utils";
+
+
+
+
+
+
+const getUsers = async (req: NextRequest) => {
+  const params = req.nextUrl.searchParams
+  const {where, orderBy, pagination} = parseGetManyParams(params, userColumns)
+
+  const paginate = createPaginator({ page: pagination.page, perPage: pagination.pageSize })
+  const data = await paginate<User, Prisma.UserFindManyArgs>(
+    prisma.user,
+    {
+      where,
+      orderBy,
+      include: userListIncludes,
+    }
+  )
+
+  return NextResponse.json(data, { status: 200 })
+}
 
 
 
@@ -21,48 +43,6 @@ const getUser = async (req: NextRequest, params: any) => {
 
   return NextResponse.json(user, { status: 200 })
 }
-
-const getUsers = async (req: NextRequest) => {
-
-  const params = req.nextUrl.searchParams
-  const {
-    pagination: {page, pageSize},
-    filters,
-    order
-  } = parseQueryParams(params)
-
-  const where: Prisma.UserWhereInput = parseFilter(filters, {name: 'string', email: 'string', id: 'number'})
-  if('clerk_id' in filters) {
-    where.clerk_id = {
-      contains: filters['clerk_id']
-    }
-  }
-
-  const data = await paginate({
-    modelName: 'User',
-    page,
-    pageSize,
-    where,
-    orderBy: order,
-    include: {
-      role: true,
-      OrganizationMember: {
-        select: {
-          organization_id: true,
-          organization: {
-            select: {
-              name: true
-            }
-          }
-        }
-      }
-    } as any
-  })
-  
-
-  return NextResponse.json(data, { status: 200 })
-}
-
 
 const createUser = async (request: NextRequest) => {
 

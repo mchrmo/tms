@@ -8,6 +8,7 @@ import { AxiosError } from "axios";
 import { PaginatedResponse } from "../services/api.service";
 import { UserRegistrationFormInputs } from "../models/user.model";
 import { UserDetail } from "../services/user.service";
+import { parseListHookParamsNew } from "../utils/api.utils";
 
 const userApiClient = getApiClient('/users')
 
@@ -25,23 +26,8 @@ export const userQueryKeys = {
 export const useUsers = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) => {
   const { toast } = useToast()
 
-  const params: {[key: string]: any} = {
-    page: pagination.pageIndex+1,
-    pageSize: pagination.pageSize
-  }
-  let urlQuery = ''
 
-  if(filter) {
-    filter.forEach((f, i) => {
-      params["filter_" + f.id] = f.value
-      urlQuery += `${f.id}=${f.value}`
-      if(i < filter.length-1) urlQuery += '&' 
-    })
-  }
-
-  if(sort) {
-    params['order_' + sort.id] = sort.desc ? 'desc' : 'asc'
-  }
+  const {params, urlParams} = parseListHookParamsNew(pagination, filter, sort)
 
 
   const getUsersFn = async (params: {[key: string]: string}) => {
@@ -52,7 +38,7 @@ export const useUsers = (pagination: PaginationState, filter?: ColumnFiltersStat
   }
 
   const query = useQuery<PaginatedResponse<User>>({
-    queryKey: userQueryKeys.searched(urlQuery),
+    queryKey: userQueryKeys.searched(urlParams),
     queryFn: () => getUsersFn(params),
   })
 
