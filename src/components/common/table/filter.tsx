@@ -104,9 +104,6 @@ type TableFilterProps<TData> = {
 }
 export function TableFilter<TData>(props: TableFilterProps<TData>) {
   const primaryCol = props.table.getColumn(props.primaryFilterColumn)
-  if(props.primaryFilterColumn) {
-    if (!primaryCol) return <span>Wrong primary filter column name {props.primaryFilterColumn}</span>  
-  }
 
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([])
   const debouncedPrimary = useDebouncedCallback((value) => {
@@ -168,6 +165,11 @@ export function TableFilter<TData>(props: TableFilterProps<TData>) {
       tableCol.setFilterValue(f.value)
     }
   }, [activeFilters])
+
+  
+  if(props.primaryFilterColumn) {
+    if (!primaryCol) return <span>Wrong primary filter column name {props.primaryFilterColumn}</span>  
+  }
 
   return (
     <div className="filter">
