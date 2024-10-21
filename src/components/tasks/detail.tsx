@@ -48,7 +48,7 @@ export default function TaskDetail({ params }: {params: {id: string}}) {
           <TaskForm defaultValues={task.data} edit={true}></TaskForm>
           
           <Tabs value={tab} onValueChange={setTab}  className="">
-            <TabsList className="flex gap-4">
+            <TabsList className="flex gap-4 overflow-x-auto">
               <TabsTrigger value="subtasks" className={clsx({'border-b-3': tab == 'subtasks', 'mb-1': tab !== 'subtasks'})}>Podúlohy</TabsTrigger>
               <TabsTrigger value="reminders" className={clsx({'border-b-3': tab == 'reminders', 'mb-1': tab !== 'reminders'})}>Pripomienky</TabsTrigger>
               <TabsTrigger value="comments" className={clsx({'border-b-3': tab == 'comments', 'mb-1': tab !== 'comments'})}>Komentáre</TabsTrigger>
