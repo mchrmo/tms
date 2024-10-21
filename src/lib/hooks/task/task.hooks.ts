@@ -10,6 +10,7 @@ import { AxiosError } from "axios";
 import { PaginatedResponse } from "../../services/api.service";
 import { taskUpdateQueryKeys } from "./taskUpdate.hooks";
 import { parseListHookParams, parseListHookParamsNew } from "@/lib/utils/api.utils";
+import { TaskDetail } from "@/lib/services/tasks/task.service";
 
 
 const tasksApiClient = getApiClient('/tasks')
@@ -24,16 +25,16 @@ export const taskQueryKeys = {
   assigned: () => [...taskQueryKeys.all, 'assigned']
 };
 
-export const useTask = (id?: number, options?: UseQueryOptions<Task, Error>) => {
+export const useTask = (id?: number, options?: UseQueryOptions<TaskDetail, Error>) => {
   const { toast } = useToast()
 
 
   const getTaskFn = async () => {
-    const response = await tasksApiClient.get<Task>(`/${id}`);
+    const response = await tasksApiClient.get<TaskDetail>(`/${id}`);
     return response.data;
   };
 
-  const query = useQuery<Task, Error>({
+  const query = useQuery<TaskDetail, Error>({
     queryKey: taskQueryKeys.detail(Number(id)), 
     queryFn: getTaskFn,
     enabled: !!id,
@@ -204,4 +205,40 @@ export const useMyTasks = () => {
     queryFn: () => getTasksFn(),
   })
 
+}
+
+
+export const useDeleteTaskAttachment = (taskId: number) => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const deleteTaskAttachmerFn = async (id: number) => {
+      const response = await tasksApiClient.delete(`/attachments/${id}`);
+      return response.data;
+  };
+
+  return useMutation({
+      mutationFn: deleteTaskAttachmerFn,
+      onMutate: async () => {
+      if (!confirm("Určite to chcete vymazať?")) {
+          throw new Error('Nič nebolo vymazané');
+      }
+      },
+      onSuccess: () => {
+      toast({
+          title: 'Príloha odstránená!',
+      });
+      },
+      onError: (err: AxiosError<{ message: string }>, _, context?: any) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message;
+      toast({
+          title: 'Chyba',
+          description: errMessage,
+      });
+
+      },
+      onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(taskId) });
+      },
+  });
 }

@@ -29,6 +29,22 @@ const get_task = async (id: number) => {
       },
       parent: {
         select: {name: true, id: true}
+      },
+      attachments: {
+        select: {
+          id: true,
+          file: {
+            select: {
+              name: true,
+              extension: true,
+              createdAt: true,
+              path: true,
+              owner: {
+                select: {name: true}
+              }
+            }
+          }
+        }
       }
     }
   })
