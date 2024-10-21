@@ -22,19 +22,31 @@ model UserRole {
 }
 
 model User {
-  id                  Int                 @id @default(autoincrement())
-  clerk_id            String              @unique
+  id                  Int                  @id @default(autoincrement())
+  clerk_id            String               @unique
   name                String
-  email               String              @unique
-  phone               String              @default("Neuvedené")
-  role_id             Int                 @default(2)
-  role                UserRole            @relation(fields: [role_id], references: [id])
-  createdAt         DateTime              @default(now())
+  email               String               @unique
+  phone               String               @default("Neuvedené")
+  role_id             Int                  @default(2)
+  role                UserRole             @relation(fields: [role_id], references: [id])
+  createdAt           DateTime             @default(now())
   OrganizationMember  OrganizationMember[]
   TaskUpdate          TaskUpdate[]
   meetings            MeetingAttendant[]
   meetingItems        MeetingItem[]
   meetingItemComments MeetingItemComment[]
+  File                File[]
+}
+
+model File {
+  id             Int              @id @default(autoincrement())
+  owner_id       Int
+  owner          User             @relation(fields: [owner_id], references: [id])
+  name           String
+  path           String
+  extension      String
+  createdAt      DateTime         @default(now())
+  TaskAttachment TaskAttachment[]
 }
 
 // Organizations
@@ -101,6 +113,7 @@ model Task {
   Subscriptions     TaskSubscription[]
   Reminders         TaskReminder[]
   Meta              TaskMeta[]
+  attachments        TaskAttachment[]
 
   @@fulltext([name])
 }
@@ -155,6 +168,14 @@ model TaskReminder {
   datetime    DateTime
 }
 
+model TaskAttachment {
+  id      Int  @id @default(autoincrement())
+  task_id Int
+  tasj    Task @relation(fields: [task_id], references: [id])
+  file_id Int
+  file    File @relation(fields: [file_id], references: [id])
+}
+
 model TaskType {
   id          Int    @id @default(autoincrement())
   name        String
@@ -193,7 +214,7 @@ model MeetingAttendant {
   meeting_id Int
   meeting    Meeting              @relation(fields: [meeting_id], references: [id])
   user_id    Int
-  user       User                @relation(fields: [user_id], references: [id])
+  user       User                 @relation(fields: [user_id], references: [id])
   role       MeetingAttendantRole @default(ATTENDANT)
 }
 
@@ -234,6 +255,6 @@ model MeetingItemComment {
   item       MeetingItem @relation(fields: [item_id], references: [id])
   creator_id Int
   creator    User        @relation(fields: [creator_id], references: [id])
-  message    String @db.Text
+  message    String      @db.Text
   createdAt  DateTime    @default(now())
 }

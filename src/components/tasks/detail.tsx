@@ -17,6 +17,7 @@ import { useState } from "react";
 import clsx from "clsx";
 import { TabsTrigger, Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import TaskCommentsOverview from "./comments/taskComments-overview";
+import TaskAttachmentsOverview from "./attachments/taskAttachments-overview";
 
 
 export default function TaskDetail({ params }: {params: {id: string}}) {
@@ -52,6 +53,7 @@ export default function TaskDetail({ params }: {params: {id: string}}) {
               <TabsTrigger value="reminders" className={clsx({'border-b-3': tab == 'reminders', 'mb-1': tab !== 'reminders'})}>Pripomienky</TabsTrigger>
               <TabsTrigger value="comments" className={clsx({'border-b-3': tab == 'comments', 'mb-1': tab !== 'comments'})}>Komentáre</TabsTrigger>
               <TabsTrigger value="updates" className={clsx({'border-b-3': tab == 'updates', 'mb-1': tab !== 'updates'})}>História</TabsTrigger>
+              <TabsTrigger value="files" className={clsx({'border-b-3': tab == 'files', 'mb-1': tab !== 'files'})}>Prílohy</TabsTrigger>
             </TabsList>
             {/* <div className="mt-5"> */}
               <TabsContent value="subtasks">
@@ -66,6 +68,10 @@ export default function TaskDetail({ params }: {params: {id: string}}) {
               <TabsContent value="updates">
                 <TaskUpdatesOverview task={task.data}></TaskUpdatesOverview>
               </TabsContent>
+              <TabsContent value="files">
+                <TaskAttachmentsOverview task={task.data}></TaskAttachmentsOverview>
+              </TabsContent>
+
             {/* </div> */}
           </Tabs>
 

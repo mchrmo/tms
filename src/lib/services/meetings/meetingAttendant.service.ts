@@ -14,7 +14,7 @@ interface CreateAttendantReqs {
 const create_attendant = async (attendantData: CreateAttendantReqs) => {
 
   const exists = await prisma.meetingAttendant.findMany({where: {user_id: attendantData.user_id, meeting_id: attendantData.meeting_id}})
-  if(exists.length) throw new ApiError(403, "Already between attendants")
+  if(exists.length) throw new ApiError(403, "Účastník sa už v porade nachádza")
 
   const newAttendant = await prisma.meetingAttendant.create({data: {...attendantData}})
   if(newAttendant) {
