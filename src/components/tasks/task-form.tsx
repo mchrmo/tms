@@ -16,11 +16,11 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SubmitButton from "@/components/common/buttons/submit";
-import { CreateTaskSchema,  TaskUpdateSchema } from "@/lib/models/task.model";
+import { CreateTaskSchema, TaskUpdateSchema } from "@/lib/models/task.model";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export type TaskFormInputs = {
-  id?: number ;
+  id?: number;
   name: string;
   description: string;
   deadline: Date;
@@ -31,30 +31,32 @@ export type TaskFormInputs = {
   source: string
 }
 
-export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: boolean, onUpdate?: () => void, defaultValues?: any}) {
+export default function TaskForm({ onUpdate, defaultValues: _def, edit }: { edit?: boolean, onUpdate?: () => void, defaultValues?: any }) {
   const [parentId, setParentId] = useState<number>()
 
   const searchParams = useSearchParams();
   const router = useRouter();
 
   // Parse def values
-  if(_def) {
-    if(_def.deadline) {
-      if(typeof _def.deadline == 'string') _def.deadline = new Date(_def.deadline)
+  if (_def) {
+    if (_def.deadline) {
+      if (typeof _def.deadline == 'string') _def.deadline = new Date(_def.deadline)
     }
   }
 
-  const defaultValues: TaskFormInputs = {...{
-    id: undefined,
-    name: '',
-    description: '',
-    deadline: new Date(),
-    assignee_id: null,
-    priority: 'LOW',
-    status: "TODO",
-    parent_id: null,
-    source: 'Organizačná úloha'
-  }, ...(_def ? _def : {})}
+  const defaultValues: TaskFormInputs = {
+    ...{
+      id: undefined,
+      name: '',
+      description: '',
+      deadline: new Date(),
+      assignee_id: null,
+      priority: 'LOW',
+      status: "TODO",
+      parent_id: null,
+      source: 'Organizačná úloha'
+    }, ...(_def ? _def : {})
+  }
 
 
   const form = useForm<TaskFormInputs>({
@@ -68,34 +70,34 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
 
   useEffect(() => {
     const parentId = searchParams.get('parent_id')
-    if(parentId) setValue("parent_id" ,parseInt(parentId))
+    if (parentId) setValue("parent_id", parseInt(parentId))
 
     const name = searchParams.get('name')
-    if(name) setValue("name" ,name)
+    if (name) setValue("name", name)
 
     const source = searchParams.get('source')
-    if(source) setValue("source" ,source)
-    
+    if (source) setValue("source", source)
+
   }, [])
 
   useEffect(() => {
-    if (createTask.isSuccess) { 
+    if (createTask.isSuccess) {
       const newId = createTask.data.id
-      if(newId) router.push('/tasks/'+newId)
+      if (newId) router.push('/tasks/' + newId)
 
       createTask.reset()
     }
 
-    if(updateTask.isSuccess) {
+    if (updateTask.isSuccess) {
       reset(updateTask.data)
 
     }
   }, [createTask.isSuccess, updateTask.isSuccess])
-  
+
 
   const onSubmit: SubmitHandler<TaskFormInputs> = async (data) => {
-    
-    if(edit) {
+
+    if (edit) {
       updateTask.mutate(data)
     } else {
       createTask.mutate(data)
@@ -107,97 +109,99 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
     // router.push('/tasks') 
 
   }
-  
+
 
   return (
     <Form {...form}>
-      <form  id="form" onSubmit={handleSubmit(onSubmit)} className="my-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">    
+      <form id="form" onSubmit={handleSubmit(onSubmit)} className="my-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel>Názov úlohy</FormLabel>
-                <FormControl>
-                  <Input placeholder="Názov úlohy" {...field} />
-                </FormControl>
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem className="md:col-span-2">
+              <FormLabel>Názov úlohy</FormLabel>
+              <FormControl>
+                <Input placeholder="Názov úlohy" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
-            )}
-          />
-
-        <FormField
-            control={form.control}
-            name="deadline"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Termín dokončenia</FormLabel>
-                <FormControl>
-                  <DatePicker  date={field.value} setDate={(date) => field.onChange(date)}></DatePicker>
-                </FormControl>
-              <FormMessage />
-            </FormItem>
-            )}
+          )}
         />
 
         <FormField
-            control={form.control}
-            name="priority"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Priorita</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger className="">
-                    <SelectValue placeholder="Priorita" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="LOW">Nízka</SelectItem>
-                    <SelectItem value="MEDIUM">Stredná</SelectItem>
-                    <SelectItem value="HIGH">Vysoká</SelectItem>
-                    <SelectItem value="CRITICAL">Kritická</SelectItem>
-                  </SelectContent>
-                </Select>
+          control={form.control}
+          name="deadline"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Termín dokončenia</FormLabel>
+              <FormControl>
+                <DatePicker date={field.value} setDate={(date) => field.onChange(date)}></DatePicker>
+              </FormControl>
               <FormMessage />
             </FormItem>
-            )}
+          )}
         />
 
         <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger className="">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="TODO">Zadaná</SelectItem>
-                    <SelectItem value="WAITING">Čaká</SelectItem>
-                    <SelectItem value="INPROGRESS">V procese</SelectItem>
-                    <SelectItem value="CHECKREQ">Kontrola</SelectItem>
-                    <SelectItem value="DONE">Hotová</SelectItem>
-                  </SelectContent>
-                </Select>
-              <FormMessage />
-            </FormItem>
-            )}
-        />
-
-        <FormField
-            control={form.control}
-            name="assignee_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Zodpovedná osoba</FormLabel>
-                <OrganizationMemberCombobox 
-                defaultValue={_def ? _def.assignee : null} onSelectResult={(member) => field.onChange(member.id)} 
+          control={form.control}
+          name="assignee_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Zodpovedná osoba</FormLabel>
+              <OrganizationMemberCombobox
+                defaultValue={_def ? _def.assignee : null} onSelectResult={(member) => field.onChange(member.id)}
                 label="Vybrať osobu"></OrganizationMemberCombobox>
-                <FormMessage />
+              <FormMessage />
             </FormItem>
-            )}
+          )}
         />
+
+        <FormField
+          control={form.control}
+          name="priority"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Priorita</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <SelectTrigger className="">
+                  <SelectValue placeholder="Priorita" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="LOW">Nízka</SelectItem>
+                  <SelectItem value="MEDIUM">Stredná</SelectItem>
+                  <SelectItem value="HIGH">Vysoká</SelectItem>
+                  <SelectItem value="CRITICAL">Kritická</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <SelectTrigger className="">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="TODO">Zadaná</SelectItem>
+                  <SelectItem value="WAITING">Čaká</SelectItem>
+                  <SelectItem value="INPROGRESS">V procese</SelectItem>
+                  <SelectItem value="CHECKREQ">Kontrola</SelectItem>
+                  <SelectItem value="DONE">Hotová</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+
 
         <Accordion type="single" className="col-span-full" collapsible>
           <AccordionItem value="item-1">
@@ -209,13 +213,13 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
                 render={({ field }) => (
                   <FormItem className="col-span-full">
                     <FormLabel>Popis</FormLabel>
-                    <Textarea 
+                    <Textarea
                       id="task-description"
                       placeholder="Popis zadania úlohy..."
                       {...field}
                     />
                     <FormMessage />
-                </FormItem>
+                  </FormItem>
                 )}
               />
               <FormField
@@ -227,8 +231,8 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
                     <FormControl>
                       <Input placeholder="Zdroj úlohy" {...field} />
                     </FormControl>
-                  <FormMessage />
-                </FormItem>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
             </AccordionContent>
@@ -239,7 +243,7 @@ export default function TaskForm({onUpdate, defaultValues: _def, edit}: {edit?: 
 
 
         {isDirty && <div className="space-x-3 col-span-full flex mt-5">
-          <Button variant="secondary" type="button" onClick={() => {onCancel();}}>Zrušiť</Button>
+          <Button variant="secondary" type="button" onClick={() => { onCancel(); }}>Zrušiť</Button>
           <SubmitButton isLoading={updateTask.isPending || createTask.isPending} type="submit" >Uložiť</SubmitButton>
         </div>}
 
