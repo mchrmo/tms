@@ -14,6 +14,12 @@ import { meetingItemStatusMap } from "@/lib/models/meeting/meetingItem.model"
 import TableComponent from "@/components/common/table/table"
 import { MeetingDetail } from "@/lib/services/meetings/meeting.service"
 import { useResolveMeetingItem } from "@/lib/hooks/meeting/meetingItem.hooks"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 
 export type MeetingDetailItems = NonNullable<MeetingDetail>['items'][number];
@@ -66,9 +72,29 @@ export default function MeetingItemsTable({meeting}: {meeting?: MeetingDetail}) 
           )
         } else if(status == "PENDING") {
           return  (
-            <div className="">
-              <CheckIcon onClick={() => resolveItem(itemId, 'ACCEPTED')}></CheckIcon>
-              <XIcon onClick={() => resolveItem(itemId, 'DENIED')}></XIcon>
+            <div className="flex space-x-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                  <CheckIcon className="cursor-pointer text-gray-400 hover:text-black" onClick={() => resolveItem(itemId, 'ACCEPTED')}></CheckIcon>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Schváliť</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                  <XIcon className="cursor-pointer text-gray-400 hover:text-black" onClick={() => resolveItem(itemId, 'DENIED')}></XIcon>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Zamietnuť</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
             </div>
           )
         }
