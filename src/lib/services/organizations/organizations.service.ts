@@ -1,8 +1,5 @@
 import { Prisma, Organization } from "@prisma/client";
 import prisma from "../../prisma";
-import userService from "../user.service";
-import { ApiError } from "next/dist/server/api-utils";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 
 type CreateOrganizationReqs = {
@@ -14,6 +11,11 @@ export const organizationListItem = Prisma.validator<Prisma.OrganizationDefaultA
     parent: {
       select: {
         name: true
+      }
+    },
+    _count: {
+      select: {
+        members: true
       }
     }
   }
@@ -29,6 +31,15 @@ const get_organization = async (id: number) => {
       parent: {
         select: {
           name: true
+        }
+      },
+      members: {
+        select: {
+          user: {
+            select: {name: true},
+          },
+          position_name: true,
+          id: true,
         }
       }
     },

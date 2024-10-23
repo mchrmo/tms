@@ -41,14 +41,13 @@ export default function OrganizationForm({onUpdate, defaultValues: _def, edit}: 
   useEffect(() => {
     if (createOrganization.isSuccess) { 
       const newId = createOrganization.data.id
-      if(newId) router.push('/organizations/'+newId)
-
+      router.push('/organizations')
       createOrganization.reset()
     }
 
     if(updateOrganization.isSuccess) {
+      router.push('/organizations')
       reset(updateOrganization.data)
-
     }
   }, [createOrganization.isSuccess, updateOrganization.isSuccess])
   
@@ -91,7 +90,10 @@ export default function OrganizationForm({onUpdate, defaultValues: _def, edit}: 
             <FormItem className="">
               <FormLabel>Nadriadená organizácia</FormLabel>
               <FormControl>
-                <OrganizationCombobox onSelectResult={() => {}}></OrganizationCombobox>
+                <OrganizationCombobox 
+                  onSelectResult={(org) => field.onChange(org.id)}
+                  defaultValue={_def && _def.parent}
+                  ></OrganizationCombobox>
               </FormControl>
             <FormMessage />
           </FormItem>

@@ -1,7 +1,7 @@
 import { useToast } from "@/components/ui/use-toast";
 import { ZOrganizationCreateForm } from "@/lib/models/organization/organization.model";
 import { PaginatedResponse } from "@/lib/services/api.service";
-import { OrganizationDetail } from "@/lib/services/organizations/organizations.service";
+import { OrganizationDetail, OrganizationListItem } from "@/lib/services/organizations/organizations.service";
 import { getApiClient, parseListHookParamsNew } from "@/lib/utils/api.utils";
 import { Organization } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
@@ -40,7 +40,7 @@ export const useOrganization = (id?: number, options?: UseQueryOptions<Organizat
     if(!query.error) return
     toast({
       title: "Chyba",
-      description: `Nepodarilo sa nájsť poradu`
+      description: `Nepodarilo sa nájsť organizáciu`
     })
   }, [query.error])
 
@@ -60,7 +60,7 @@ export const useOrganizations = (pagination: PaginationState, filter?: ColumnFil
     return response.data
   }
 
-  const query = useQuery<PaginatedResponse<Organization>>({
+  const query = useQuery<PaginatedResponse<OrganizationListItem>>({
     queryKey: organizationQueryKeys.searched(urlParams),
     queryFn: () => getOrganizationsFn(params),
   })
@@ -91,12 +91,12 @@ export const useUpdateOrganization = (id: number) => {
     onMutate: async (updatedUser) => {
       await queryClient.cancelQueries({queryKey: organizationQueryKeys.detail(id)});
       const previousUser = queryClient.getQueryData(organizationQueryKeys.detail(id));
-      queryClient.setQueryData(organizationQueryKeys.detail(Number(id)), updatedUser);
+      // queryClient.setQueryData(organizationQueryKeys.detail(Number(id)), updatedUser);
       return { previousUser: previousUser, updatedUser: updatedUser };
     },
     onSuccess: (data) => {
       toast({
-        title: "Porada upravená!"
+        title: "Organizácia upravená!"
       })
     },
     onError: (err: AxiosError<{message: string}>, newOrganization, context?: any) => {
@@ -106,10 +106,6 @@ export const useUpdateOrganization = (id: number) => {
         description: errMessage
       })
 
-      queryClient.setQueryData(
-        organizationQueryKeys.detail(Number(id)),
-        context.previousUser
-      );
     },
     onSettled: () => {
       queryClient.invalidateQueries({queryKey: organizationQueryKeys.all});
@@ -135,7 +131,7 @@ export const useCreateOrganization = () => {
     },
     onSuccess: (data) => {
       toast({
-        title: "Porada vytvorená!"
+        title: "Organizácia vytvorená!"
       })
     },
     onError: (err: AxiosError<{message: string}>, newOrganization, context?: any) => {
@@ -175,7 +171,7 @@ export const useDeleteOrganization = (id: number) => {
       },
       onSuccess: () => {
       toast({
-          title: 'Porada vymazaná z databázy!',
+          title: 'Organizácia vymazaná z databázy!',
       });
       },
       onError: (err: AxiosError<{ message: string }>, _, context?: any) => {

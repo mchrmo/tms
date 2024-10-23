@@ -8,14 +8,15 @@ import { PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
 import { useDebounce } from 'use-debounce';
 import { useOrganizations } from "@/lib/hooks/organization/organization.hooks";
+import { OrganizationDetail } from "@/lib/services/organizations/organizations.service";
 
 const POPOVER_WIDTH = 'w-full';
 
-export default function OrganizationCombobox({onSelectResult}: {onSelectResult: (organization: Organization) => void;}) {
+export default function OrganizationCombobox({onSelectResult, defaultValue}: {onSelectResult: (organization: Organization) => void, defaultValue?: Organization}) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<Organization | undefined>();
+  const [selected, setSelected] = useState<Organization | undefined>(defaultValue);
 
-
+  
   const handleSetActive = useCallback((organization: Organization) => {
     setSelected(organization);
     onSelectResult(organization)

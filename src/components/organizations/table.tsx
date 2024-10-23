@@ -9,9 +9,10 @@ import { useOrganizations } from "@/lib/hooks/organization/organization.hooks"
 import TablePagination from "@/components/common/table/pagination"
 import { TableFilter } from "../common/table/filter"
 import { organizationColumns } from "@/lib/models/organization/organization.model"
+import { OrganizationListItem } from "@/lib/services/organizations/organizations.service"
 
 
-const columns: ColumnDef<Organization>[] = [
+const columns: ColumnDef<OrganizationListItem>[] = [
   {
     accessorKey: "name",
     header: "Názov",
@@ -30,6 +31,12 @@ const columns: ColumnDef<Organization>[] = [
       return <Link className="link" href={'/organizations/'+parent_id}>{props.getValue() as string}</Link>
     }
   },
+  {
+    id: 'membersCount',
+    accessorKey: '_count.members',
+    header: "Počet členov",
+    enableSorting: false
+  }
 
   
 ]

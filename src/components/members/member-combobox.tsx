@@ -16,7 +16,7 @@ export type OrganizationMemberWithUser = Prisma.OrganizationMemberGetPayload<{in
 
 export default function OrganizationMemberCombobox({onSelectResult, label, defaultValue: _def}: 
   {
-    onSelectResult: (organizationMember: OrganizationMemberWithUser) => void, 
+    onSelectResult: (organizationMember: OrganizationMemberWithUser) => void,
     label?: string
     defaultValue?: OrganizationMemberWithUser
   }) {

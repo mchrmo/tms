@@ -5,7 +5,6 @@ import { OrganizationMemberDetail, OrganizationMemberSubordinate } from "@/lib/d
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -17,35 +16,35 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
-export default function MemberDetail({member, subs, isAdmin}: {member: OrganizationMemberDetail, subs: OrganizationMemberSubordinate, isAdmin?: boolean}) {
-  
-  const {toast} = useToast()
+export default function MemberDetail({ member, subs, isAdmin }: { member: OrganizationMemberDetail, subs: OrganizationMemberSubordinate, isAdmin?: boolean }) {
+
+  const { toast } = useToast()
 
   const router = useRouter();
 
-  if(!member) return 
+  if (!member) return
 
 
 
   const onMemberRemove = async () => {
-    
-    fetch('/api/organizations/members?id='+member.id , {
+
+    fetch('/api/organizations/members?id=' + member.id, {
       method: "DELETE",
     })
-    .then(res => {
-      if(!res.ok) throw new Error(res.statusText)
+      .then(res => {
+        if (!res.ok) throw new Error(res.statusText)
 
-      return res
-    })
-    .then((res) => {
-      router.push('/organizations')
-      router.refresh()
-    }).catch(err => {
-      toast({
-        title: "Chyba",
-        description: "Člena sa nepodarilo odstrániť"
+        return res
       })
-    })
+      .then((res) => {
+        router.push('/organizations')
+        router.refresh()
+      }).catch(err => {
+        toast({
+          title: "Chyba",
+          description: "Člena sa nepodarilo odstrániť"
+        })
+      })
 
   }
 
@@ -55,7 +54,7 @@ export default function MemberDetail({member, subs, isAdmin}: {member: Organizat
       <div className="">
         <ViewHeadline>{member.user.name}, {member.organization.name}</ViewHeadline>
       </div>
-      
+
 
 
       <Table className="w-[400px]">
@@ -66,7 +65,11 @@ export default function MemberDetail({member, subs, isAdmin}: {member: Organizat
           </TableRow>
           <TableRow className="hover:bg-white">
             <TableHead>Organ.:</TableHead>
-            <TableCell className="font-medium">{member.organization.name}</TableCell>
+            <TableCell className="font-medium">
+              <Link href={'/organizations/' + member.organization_id  }>
+                <Button className="p-0 h-0" variant={'link'}>{member.organization.name}</Button>
+              </Link>
+            </TableCell>
           </TableRow>
           <TableRow className="hover:bg-white">
             <TableHead>Pozícia:</TableHead>
@@ -75,7 +78,9 @@ export default function MemberDetail({member, subs, isAdmin}: {member: Organizat
           <TableRow className="hover:bg-white">
             <TableHead>Nadriadený:</TableHead>
             <TableCell className="font-medium">
-              <Link className="link" href={'/organizations/members/'+member.manager_id}>{member.manager?.user.name}</Link>
+              <Link href={'/organizations/members/' + member.manager_id}>
+                <Button className="p-0 h-0" variant={'link'}>{member.manager?.user.name}</Button>
+              </Link>
             </TableCell>
           </TableRow>
         </TableBody>
@@ -84,12 +89,12 @@ export default function MemberDetail({member, subs, isAdmin}: {member: Organizat
       <div className="flex items-center justify-between mt-10 mb-3">
         <h3 className="text-xl">Podriadení:</h3>
         {
-          isAdmin && 
+          isAdmin &&
 
           <div className="flex gap-5">
-            <AddMember defaultValues={{manager: member}}/>
-            <Button onClick={onMemberRemove} variant={"destructive"} style={{pointerEvents: "auto"}}
-              disabled={!!subs.length} title={ subs.length ? "Člen nesmie mať žiadnych podriadených aby ho bolo možné vymazať" : "" }
+            <AddMember defaultValues={{ manager: member }} />
+            <Button onClick={onMemberRemove} variant={"destructive"} style={{ pointerEvents: "auto" }}
+              disabled={!!subs.length} title={subs.length ? "Člen nesmie mať žiadnych podriadených aby ho bolo možné vymazať" : ""}
             >
               Vymazať člena
             </Button>
@@ -98,46 +103,46 @@ export default function MemberDetail({member, subs, isAdmin}: {member: Organizat
       </div>
 
       <Table className="">
-            <TableHeader>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="">Meno</TableHead>
+            <TableHead>Pozícia</TableHead>
+            <TableHead>Organizácia</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
+
+        <TableBody>
+          {
+            !subs.length ?
               <TableRow>
-                <TableHead className="">Meno</TableHead>
-                <TableHead>Pozícia</TableHead>
-                <TableHead>Organizácia</TableHead>
-                <TableHead></TableHead>
+                <TableCell className="font-medium">
+                  Žiadny podriadení.
+                </TableCell>
               </TableRow>
-            </TableHeader>
 
-            <TableBody>
-                {
-                  !subs.length ?
-                  <TableRow>
-                    <TableCell className="font-medium">
-                      Žiadny podriadení.   
-                    </TableCell>
-                  </TableRow> 
-                  
-                  :
-                  
-                  subs.map(sub => 
-                    <TableRow  key={sub.id}>
-                      <TableCell className="font-medium">
-                        <Link className="link" href={'/organizations/members/'+sub.id}>{sub.user.name}</Link>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {sub.position_name}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {sub.organization.name}
-                      </TableCell>
-                    </TableRow>
-                  )
-                }
-      </TableBody>
-    </Table>
+              :
 
-      
+              subs.map(sub =>
+                <TableRow key={sub.id}>
+                  <TableCell className="font-medium">
+                    <Link className="link" href={'/organizations/members/' + sub.id}>{sub.user.name}</Link>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {sub.position_name}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {sub.organization.name}
+                  </TableCell>
+                </TableRow>
+              )
+          }
+        </TableBody>
+      </Table>
 
-    
+
+
+
     </>
   )
 }
