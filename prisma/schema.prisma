@@ -55,7 +55,7 @@ model Organization {
   id        Int                  @id @default(autoincrement())
   parent_id Int?
   name      String               @unique
-  type      OrganizationType
+  type      OrganizationType     @default(main)
   parent    Organization?        @relation("OrganizationParent", fields: [parent_id], references: [id])
   children  Organization[]       @relation("OrganizationParent")
   members   OrganizationMember[]

@@ -2,6 +2,7 @@ import { Prisma, Organization } from "@prisma/client";
 import prisma from "../../prisma";
 import userService from "../user.service";
 import { ApiError } from "next/dist/server/api-utils";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 
 type CreateOrganizationReqs = {
@@ -10,6 +11,11 @@ type CreateOrganizationReqs = {
 
 export const organizationListItem = Prisma.validator<Prisma.OrganizationDefaultArgs>()({
   include: {
+    parent: {
+      select: {
+        name: true
+      }
+    }
   }
 })
 export type OrganizationListItem = Prisma.OrganizationGetPayload<typeof organizationListItem>
@@ -20,8 +26,12 @@ const get_organization = async (id: number) => {
   const organization = await prisma.organization.findUnique({
     where: {id},
     include: {
+      parent: {
+        select: {
+          name: true
+        }
+      }
     },
-    
   })
 
   return organization
@@ -29,14 +39,8 @@ const get_organization = async (id: number) => {
 export type OrganizationDetail = Prisma.PromiseReturnType<typeof get_organization>
 
 const create_organization = async (organizationData: CreateOrganizationReqs) => {
-
-  const user = await userService.get_current_user()
-  if(!user) throw new ApiError(403, "No user")
-
-  const data: Prisma.OrganizationCreateInput = {...organizationData, ...{type: 'main'}}
-
+  const data: Prisma.OrganizationCreateInput = {...organizationData}
   const organization = await prisma.organization.create({data})
-  
   return organization
 }
 

@@ -7,8 +7,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
 import { useDebounce } from 'use-debounce';
-import { useQuery } from '@tanstack/react-query'
-import { ApiError } from "next/dist/server/api-utils";
+import { useOrganizations } from "@/lib/hooks/organization/organization.hooks";
 
 const POPOVER_WIDTH = 'w-full';
 
@@ -72,7 +71,7 @@ export function Search({ selectedResult, onSelectResult }: SearchProps) {
       <CommandInput
         value={searchQuery}
         onValueChange={setSearchQuery}
-        placeholder="Vyhľadať užívateľa"
+        placeholder="Vyhľadať organizáciu"
       />
       <SearchResults
           query={searchQuery}
@@ -98,45 +97,16 @@ function SearchResults({
 
   const enabled = !!debouncedSearchQuery;
 
-  const getOrganizations = async (search: string) => {
-		const res = await fetch(`/api/organizations?search=${search}`);
-		return res.json();
-	};
-
-
-  const createOrganization = async () => {
-
-    if(query.length < 2) {
-      alert("Názov musí obsahovať min. 2 znaky.")
-      return
-    }
-    
-    fetch(`/api/organizations`, {
-      method: 'POST',
-      body: JSON.stringify({
-        name: query.trim()
-      })
-    }).then(res => {
-      if(!res.ok) throw new Error("Nepodarilo sa vytvoriť organizáciu")
-
-      return res.json()
-    })
-    .then(newOrg => onSelectResult(newOrg))
-    .catch(err => alert(err.message));
-
-  }
-
   const {
     data,
     isLoading: isLoadingOrig,
     isError,
     error
-  } = useQuery<Organization[]>({
-    queryKey: ['searchOrganizations', debouncedSearchQuery],
-    queryFn: () => getOrganizations(debouncedSearchQuery),
-    // enabled,
-  });
-
+  } = useOrganizations(
+    {pageIndex: 0, pageSize: 15},
+    [{id: 'name', value: debouncedSearchQuery}]
+  )
+  
   // To get around this https://github.com/TanStack/query/issues/3584
   const isLoading = enabled && isLoadingOrig;
 
@@ -149,11 +119,6 @@ function SearchResults({
 
       {
         <>
-          <CommandItem
-              onSelect={() => createOrganization()}
-            >
-              Vytvoriť {query}
-          </CommandItem>
           <CommandSeparator>
 
           </CommandSeparator>
@@ -169,7 +134,7 @@ function SearchResults({
 
 
 
-      {data?.map((organization) => {
+      {data?.data.map((organization) => {
         return (
           <CommandItem
             key={organization.id}

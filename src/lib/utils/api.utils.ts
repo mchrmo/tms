@@ -413,7 +413,6 @@ export const parseGetManyParams = (urlParams: URLSearchParams, columns: ModelCol
   const where = getFilters(params, columns)
   const orderBy = getSorting(params, columns)
   
-  console.log(JSON.stringify(where));
 
   return {where, orderBy, pagination}
 }  
