@@ -1,16 +1,15 @@
 "use client"
 
-import { auth, currentUser, User } from "@clerk/nextjs/server";
-import { ChevronDownIcon, ClipboardCheck, Gauge, Network, PersonStanding, Presentation, UserIcon, Users, } from "lucide-react";
+import { User } from "@clerk/nextjs/server";
+import { ChevronDownIcon, ClipboardCheck, Gauge, Network, Presentation, UserIcon, Users, } from "lucide-react";
 import Link from "next/link";
-import { Dispatch, Fragment, ReactNode, SetStateAction, SVGProps, useEffect } from "react";
-import SignOut from "./buttons/sign-out";
+import { Dispatch, Fragment, SetStateAction } from "react";
 import { cn, isRole } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 
 
 type Menu = {
@@ -23,7 +22,7 @@ type Menu = {
 
 type Submenu = {
   name: string
-  icon: React.ReactNode
+  // icon: React.ReactNode
   href: string
 }
 
@@ -46,18 +45,68 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
       name: "Úlohy",
       icon: <ClipboardCheck size={24} className="mr-4" />,
       href: "/tasks",
+      submenu: [
+        {
+          href: '/tasks/create',
+          name: 'Vytvoriť úlohu'
+        },
+        {
+          name: "Všetky úlohy",
+          href: "/tasks"
+        },
+        {
+          name: "Delegované úlohy",
+          href: "/tasks/my"
+        }
+      ]
     },
     {
       label: "",
       name: "Užívatelia",
       icon: <Users size={24} className="mr-4" />,
       href: "/users",
+      submenu: [
+        {
+          href: '/users',
+          name: 'Prehľad'
+        },
+        {
+          name: "Aliasy",
+          href: "/users/aliases"
+        }
+      ]
     },
     {
       label: "",
       name: "Organizácie",
       icon: <Network size={24} className="mr-4" />,
       href: "/organizations",
+      submenu: [
+        {
+          href: '/organizations/create',
+          name: 'Vytvoriť organizáciu'
+        },
+        {
+          href: '/organizations',
+          name: 'Všetky organizácie'
+        }
+      ]
+    },
+    {
+      label: "",
+      name: "Porady",
+      icon: <Presentation size={24} className="mr-4" />,
+      href: "/meetings",
+      submenu: [
+        {
+          href: '/meetings/create',
+          name: 'Vytvoriť poradu'
+        },
+        {
+          href: '/meetings',
+          name: 'Všetky porady'
+        }
+      ]
     },
   ];
 
@@ -73,6 +122,12 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
       name: "Úlohy",
       icon: <ClipboardCheck size={24} className="mr-4" />,
       href: "/tasks",
+      submenu: [
+        {
+          name: "Moje úlohy",
+          href: "/tasks/my"
+        }
+      ]
     },
     {
       label: "",
@@ -101,6 +156,9 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
   const uniqueLabels = Array.from(new Set(menus.map((menu) => menu.label)));
 
   const isActive = (href: string) => {
+    if(href === pathname) return true
+    else return false
+
     if (href !== '/') return pathname.startsWith(href) ? true : false
     else if (href == pathname) return true
     return false
@@ -108,8 +166,8 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
 
   return (
     <div className="h-full lg:w-52 bg-white rounded-md ">
-      <ScrollArea >
-        <div className="md:px-4 sm:p-0 mt-5 fixed" >
+      <ScrollArea className="h-full">
+        <div className="md:px-4 sm:p-0 mt-5 space-y-2" >
           {uniqueLabels.map((label, index) => (
             <Fragment key={label}>
               {label && (
@@ -117,57 +175,71 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
                   {label}
                 </p>
               )}
+
               {menus
                 .filter((menu) => menu.label === label)
                 .map((menu) => (
                   <Fragment key={menu.name}>
-                    {menu.submenu && menu.submenu.length > 0 ? (
-                      <Accordion
-                        key={menu.name}
-                        type="single"
-                        className="mt-[-10px] mb-[-10px] p-0 font-normal"
-                        collapsible
-                      >
-                        <AccordionItem value="item-1" className="m-0 p-0 font-normal">
-                          <AccordionTrigger>
-                            <a key={menu.name} className="w-full flex justify-start text-base font-normal h-10 bg-background my-2 items-center p-4 hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-background rounded-md">
-                              <div className={cn("flex justify-between w-full [&[data-state=open]>svg]:rotate-180")}>
-                                <div className="flex">
-                                  <div className="w-10">{menu.icon}</div>
-                                  {menu.name}
-                                </div>
-                                <ChevronDownIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
-                              </div>
-                            </a>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            {menu.submenu.map((submenu) => (
-                              <Link key={submenu.name} href={submenu.href} className="text-gray-400 mt-0 mb-0 flex text-md h-10 bg-white dark:bg-background dark:hover:bg-primary dark:hover:text-background my-2 items-center p-4 hover:bg-primary hover:text-white rounded-md">
-                                <div className="w-6">{submenu.icon}</div>
-                                {submenu.name}
-                              </Link>
-                            ))}
-                          </AccordionContent>
-                        </AccordionItem>
-                      </Accordion>
-                    ) : (
-                      <div key={menu.name}>
-                        <Link href={menu.href} onClick={() => setOpen && setOpen(false)}
-                          className={clsx(
-                            "flex text-md h-10 my-2 items-center p-4 rounded-md",
-                            {
-                              "bg-white hover:bg-primary hover:text-white": !isActive(menu.href)
-                            },
-                            {
-                              "bg-primary text-white": isActive(menu.href)
-                            }
-                          )}>
+                    {
+                      menu.submenu && menu.submenu.length > 0 ?
+                        (
+                          <Accordion
+                            key={menu.name}
+                            type="single"
+                            className="mt-[-10px] mb-[-10px] p-0 font-normal"
+                            collapsible
+                            defaultValue="item-1"
+                          >
+                            <AccordionItem value="item-1" className="m-0 p-0 font-normal">
+                              <AccordionTrigger className="p-0">
+                                <a key={menu.name} className="w-full flex justify-start text-base font-normal h-8 bg-background p-4 px-2 my-2 items-center rounded-md">
+                                  <div className={cn("flex justify-between w-full [&[data-state=open]>svg]:rotate-180")}>
+                                    <div className="flex">
+                                      <div className="w-10">{menu.icon}</div>
+                                      {menu.name}
+                                    </div>
+                                  </div>
+                                </a>
+                              </AccordionTrigger>
+                              <AccordionContent className="ms-3">
+                                {menu.submenu.map((submenu) => (
+                                  <Link key={submenu.name} href={submenu.href} 
+                                  className={clsx(
+                                    "mt-0 mb-0 px-2 flex text-md h-9 items-center rounded-md",
+                                      {
+                                        "bg-white hover:bg-primary hover:text-white": !isActive(submenu.href)
+                                      },
+                                      {
+                                        "bg-primary text-white": isActive(submenu.href)
+                                      }
+                                    )}>
+                                    {submenu.name}
+                                  </Link>
+                                ))}
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        )
+                        :
+                        (
+                          <div key={menu.name}>
+                            <Link href={menu.href} onClick={() => setOpen && setOpen(false)}
+                              className={clsx(
+                                "flex text-md h-10 my-2 items-center p-4 px-2 rounded-md",
+                                {
+                                  "bg-white hover:bg-primary hover:text-white": !isActive(menu.href)
+                                },
+                                {
+                                  "bg-primary text-white": isActive(menu.href)
+                                }
+                              )}>
 
-                          <div className="w-10">{menu.icon}</div>
-                          {menu.name}
-                        </Link>
-                      </div>
-                    )}
+                              <div className="w-10">{menu.icon}</div>
+                              {menu.name}
+                            </Link>
+                          </div>
+                        )
+                    }
                   </Fragment>
                 ))}
             </Fragment>
@@ -175,6 +247,5 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
         </div>
       </ScrollArea>
     </div>
-
   );
 }

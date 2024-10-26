@@ -40,7 +40,7 @@ export default async function RootLayout({
             <div className="hidden lg:block">
               <Sidebar />
             </div>
-            <main className="w-full py-4 md:p-4">
+            <main className="w-full py-4 md:p-4 overflow-auto">
               <div className="p-4 lg:p-8 bg-white block border-b rounded-md border-gray-200 lg:mt-1.5">
                 {children}
               </div>

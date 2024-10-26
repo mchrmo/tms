@@ -34,7 +34,7 @@ export default function Navbar() {
                             </SheetContent>
                         </Sheet>
                     </div>
-                    <a className="flex-none text-2xl ml-4 font-semibold" href="/">TMS RUŽOMBEROK</a>
+                    <a className="flex-none  text-md lg:text-2xl ml-4 font-semibold" href="/">TMS RUŽOMBEROK</a>
                 </div>
                 <div className="items-center flex">
                   <div>
