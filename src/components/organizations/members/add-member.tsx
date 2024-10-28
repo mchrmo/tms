@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import AddButton from "@/components/common/buttons/add-button";
 import { Button } from "@/components/ui/button";
-import AddMemberForm, { MemberFormData } from "./add-member-form";
+import AddMemberForm, { MemberFormData } from "./form";
 import { OrganizationMember } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { useToast } from "@/components/ui/use-toast";
@@ -27,38 +27,14 @@ type DefaultValues = {
 
 export default function AddMember({children, defaultValues}: {children?: ReactNode, defaultValues?: DefaultValues}) {
 
-  const addBtnText = children ? children : "Pridať" 
+  const trigger = children || <AddButton  className="">Pridať</AddButton>
   const [open, setOpen] = useState(false)
-  const [formData, setFormData] = useState<MemberFormData>({})
-  const router = useRouter()
-  const { toast } = useToast()
-
-  useEffect(() => {
-    
-  }, [])
-
-  const addMember = async () => {
-    const res = await fetch('/api/organizations/members', {
-      method: 'POST',
-      body: JSON.stringify(formData),
-    })
-
-    if(res.ok) {
-      setOpen(false)
-      router.refresh()
-    } else {
-      
-    }
-
-    
-  }
-
-
-
   
   return (    
     <Dialog open={open} onOpenChange={setOpen}>
-      <AddButton onClick={() => setOpen(true)} className="">{addBtnText}</AddButton>
+      <DialogTrigger asChild>
+        {trigger}
+      </DialogTrigger>
       <DialogContent onInteractOutside={(e) => e.preventDefault()} className="w-screen h-screen lg:h-auto lg:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Pridať člena organizácie</DialogTitle>
@@ -66,10 +42,10 @@ export default function AddMember({children, defaultValues}: {children?: ReactNo
             Pomocou tohto okna môžete priradiť užíateľa k organizácií.
           </DialogDescription>
         </DialogHeader>
-        <AddMemberForm formData={formData} setFormData={setFormData} />
+        {/* <MemberForm /> */}
         <DialogFooter>
-          <Button variant="secondary" type="submit" onClick={() => setOpen(false)}>Zrušiť</Button>
-          <Button type="submit" onClick={() => addMember()}>Uložiť</Button>
+          {/* <Button variant="secondary" type="submit" onClick={() => setOpen(false)}>Zrušiť</Button>
+          <Button type="submit" onClick={() => addMember()}>Uložiť</Button> */}
         </DialogFooter>
       </DialogContent>
     </Dialog>

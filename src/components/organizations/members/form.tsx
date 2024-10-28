@@ -9,10 +9,10 @@ import { ComboboxDemo } from "@/components/ui/combobox";
 import {Autocomplete, AutocompleteItem} from "@nextui-org/react";
 import {useAsyncList} from "@react-stately/data";
 import { Organization, User } from "@prisma/client";
-import UserCombobox from "../users/user-combobox";
-import OrganizationCombobox from "../organizations/organization-combobox";
 import { BaseSyntheticEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
 import OrganizationMemberCombobox, { OrganizationMemberWithUser } from "./member-combobox";
+import UserCombobox from "@/components/users/user-combobox";
+import OrganizationCombobox from "../organization-combobox";
 
 
 export type MemberFormData = {
@@ -29,7 +29,7 @@ const formSchema = z.object({
 })
 
 
-export default function AddMemberForm({formData, setFormData}: {formData: MemberFormData, setFormData: Dispatch<SetStateAction<MemberFormData>>}) {
+export default function MemberForm({defa}: {formData: MemberFormData, setFormData: Dispatch<SetStateAction<MemberFormData>>}) {
 
 
   const onUserSelect = (user: User) => {
@@ -67,6 +67,9 @@ export default function AddMemberForm({formData, setFormData}: {formData: Member
   return (
 
     <form  className="grid gap-4 py-4">
+      <div>
+
+      </div>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="name" className="text-right">
           Užívateľ

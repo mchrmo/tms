@@ -45,20 +45,7 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
       name: "Úlohy",
       icon: <ClipboardCheck size={24} className="mr-4" />,
       href: "/tasks",
-      submenu: [
-        {
-          href: '/tasks/create',
-          name: 'Vytvoriť úlohu'
-        },
-        {
-          name: "Všetky úlohy",
-          href: "/tasks"
-        },
-        {
-          name: "Delegované úlohy",
-          href: "/tasks/my"
-        }
-      ]
+      
     },
     {
       label: "",
@@ -124,8 +111,32 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
       href: "/tasks",
       submenu: [
         {
-          name: "Moje úlohy",
-          href: "/tasks/my"
+          href: '/tasks/create',
+          name: 'Vytvoriť úlohu'
+        },
+        {
+          name: "Všetky úlohy",
+          href: "/tasks"
+        },
+        // {
+        //   name: "Delegované úlohy",
+        //   href: "/tasks/my"
+        // }
+      ]
+    },
+    {
+      label: "",
+      name: "Porady",
+      icon: <Presentation size={24} className="mr-4" />,
+      href: "/meetings",
+      submenu: [
+        {
+          href: '/meetings/create',
+          name: 'Vytvoriť poradu'
+        },
+        {
+          href: '/meetings',
+          name: 'Všetky porady'
         }
       ]
     },
@@ -134,12 +145,6 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
       name: "Organizácie",
       icon: <Network size={24} className="mr-4" />,
       href: "/organizations",
-    },
-    {
-      label: "",
-      name: "Porady",
-      icon: <Presentation size={24} className="mr-4" />,
-      href: "/meetings",
     },
     {
       label: "",

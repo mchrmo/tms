@@ -10,7 +10,6 @@ import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SubmitButton from "@/components/common/buttons/submit";
 import { OrganizationCreateSchema, OrganizationUpdateSchema, ZOrganization } from "@/lib/models/organization/organization.model";
-import OrganizationMemberCombobox from "../members/member-combobox";
 import OrganizationCombobox from "./organization-combobox";
 
 
