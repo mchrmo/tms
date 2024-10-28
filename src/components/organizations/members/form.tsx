@@ -29,15 +29,11 @@ const formSchema = z.object({
 })
 
 
-export default function MemberForm({defa}: {formData: MemberFormData, setFormData: Dispatch<SetStateAction<MemberFormData>>}) {
+export default function MemberForm({onUpdate, defaultValues: _def}: {onUpdate?: () => void, defaultValues?: any}) {
 
 
   const onUserSelect = (user: User) => {
 
-    setFormData((data) => ({
-      ...data,
-      user_id: user.id
-    }))
   }
 
   const onManagerSelect = (member: OrganizationMemberWithUser) => {
