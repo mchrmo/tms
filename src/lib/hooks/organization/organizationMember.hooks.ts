@@ -1,17 +1,17 @@
 import { useToast } from "@/components/ui/use-toast";
-import { OrganizationMemberDetail } from "@/lib/db/organizations";
 import { ZOrganizationMemberCreateForm } from "@/lib/models/organization/member.model";
 import { PaginatedResponse } from "@/lib/services/api.service";
-import { OrganizationMemberListItem } from "@/lib/services/organizations/organizationMembers.service";
+import { OrganizationMemberDetail, OrganizationMemberListItem } from "@/lib/services/organizations/organizationMembers.service";
 import { getApiClient, parseListHookParamsNew } from "@/lib/utils/api.utils";
 import { OrganizationMember } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react-table";
 import { AxiosError } from "axios";
 import { useEffect } from "react";
+import { organizationQueryKeys } from "./organization.hooks";
 
 
-const organizationMembersApi = getApiClient('/organizationMembers/members')
+const organizationMembersApi = getApiClient('/organizations/members')
 
 export const organizationMemberQueryKeys = { 
   all: ['organizationMembers'],
@@ -132,7 +132,7 @@ export const useCreateOrganizationMember = () => {
     },
     onSuccess: (data) => {
       toast({
-        title: "Organizácia vytvorená!"
+        title: "Člen pridaný do organizácie!"
       })
     },
     onError: (err: AxiosError<{message: string}>, newOrganizationMember, context?: any) => {
@@ -146,6 +146,8 @@ export const useCreateOrganizationMember = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: organizationMemberQueryKeys.all })
+      queryClient.invalidateQueries({ queryKey: organizationQueryKeys.all })
+
     }
   })
 }
@@ -154,8 +156,8 @@ export const useDeleteOrganizationMember = (id: number) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const deleteTaskReminderFn = async () => {
-      const response = await organizationMembersApi.delete(`/${id}`);
+  const deleteTaskReminderFn = async ({new_owner}: {new_owner: number}) => {
+      const response = await organizationMembersApi.delete(`/${id}?new_owner=${new_owner}`);
       return response.data;
   };
 

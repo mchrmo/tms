@@ -17,11 +17,16 @@ import { OrganizationMember } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import MemberForm from "./form";
 
 
 type DefaultValues = {
   manager?: OrganizationMember,
-  position_name?: string
+  position_name?: string,
+  organization_id?: number,
+  organization?: {
+    name: string
+  }
 }
 
 
@@ -42,7 +47,7 @@ export default function AddMember({children, defaultValues}: {children?: ReactNo
             Pomocou tohto okna môžete priradiť užíateľa k organizácií.
           </DialogDescription>
         </DialogHeader>
-        {/* <MemberForm /> */}
+        <MemberForm defaultValues={defaultValues} onCancel={() => setOpen(false)}/>
         <DialogFooter>
           {/* <Button variant="secondary" type="submit" onClick={() => setOpen(false)}>Zrušiť</Button>
           <Button type="submit" onClick={() => addMember()}>Uložiť</Button> */}

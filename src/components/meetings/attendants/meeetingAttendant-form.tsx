@@ -11,7 +11,7 @@ import { formatDateTimeHtml } from "@/lib/utils/dates";
 import { Input } from "@/components/ui/input";
 import { MeetingAttendantCreateSchema, ZMeetingAttendant } from "@/lib/models/meeting/meetingAttendant.model";
 import { Button } from "@/components/ui/button";
-import OrganizationMemberCombobox from "@/components/members/member-combobox";
+import OrganizationMemberCombobox from "@/components/organizations/members/member-combobox";
 
 
 export default function MeetingAttendantForm({onUpdate, meeting_id}: {onUpdate?: () => void, meeting_id: number}) {

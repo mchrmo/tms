@@ -33,6 +33,12 @@ const get_organization = async (id: number) => {
           name: true
         }
       },
+      children: {
+        select: {
+          id: true,
+          name: true
+        }
+      },
       members: {
         select: {
           user: {

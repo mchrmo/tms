@@ -1,53 +1,9 @@
-import prisma from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
+import organizationMembersController from "@/lib/controllers/organizations/organizationMembers.controller"
+import { errorHandler } from "@/lib/services/api.service"
 
 
-export const GET = async (request: NextRequest) => {
+export const GET = errorHandler(organizationMembersController.getOrganizationMembers)
 
-  const search = request.nextUrl.searchParams.get("search")
+export const POST = errorHandler(organizationMembersController.createOrganizationMember)
 
-  
-  // auth().protect()
-  const data = await prisma.organizationMember.findMany({
-    include: {
-      user: true
-    },
-    where: {
-      user: {
-        name: {
-          contains: search ? search : ''
-        }
-      }
-    }
-  })
-
-  
-  return NextResponse.json(data, { status: 200 });
-};
-
-export const POST = async (request: NextRequest) => {
-  const data = await request.json()
-  
-  // auth().protect()
-  const newMember = await prisma.organizationMember.create({
-    data: data
-  })    
-  return NextResponse.json(data, { status: 200 });
-};
-
-
-
-export const DELETE = async (request: NextRequest) => {
-
-  
-  const memberId = request.nextUrl.searchParams.get("id")
-  if(!memberId) return
-
-  // auth().protect()
-  await prisma.organizationMember.delete({
-    where: {
-      id: parseInt(memberId)
-    }
-  })    
-  return NextResponse.json({}, { status: 200 });
-};
+// export const PATCH = errorHandler(organizationsController.updateOrganization)

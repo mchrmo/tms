@@ -1,18 +1,18 @@
 'use client'
 
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { OrganizationMemberCreateSchema, OrganizationMemberUpdateSchema, ZOrganizationMember } from "@/lib/models/organization/member.model";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ComboboxDemo } from "@/components/ui/combobox";
-import {Autocomplete, AutocompleteItem} from "@nextui-org/react";
-import {useAsyncList} from "@react-stately/data";
-import { Organization, User } from "@prisma/client";
-import { BaseSyntheticEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
-import OrganizationMemberCombobox, { OrganizationMemberWithUser } from "./member-combobox";
+import { useCreateOrganizationMember, useUpdateOrganizationMember } from "@/lib/hooks/organization/organizationMember.hooks";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useRouter } from "next/navigation";
 import UserCombobox from "@/components/users/user-combobox";
-import OrganizationCombobox from "../organization-combobox";
+import OrganizationMemberCombobox from "./member-combobox";
+import { Button } from "@/components/ui/button";
+import SubmitButton from "@/components/common/buttons/submit";
 
 
 export type MemberFormData = {
@@ -22,88 +22,102 @@ export type MemberFormData = {
   position_name?: string
 }
 
-const formSchema = z.object({
-  userId: z.number(),
-  organizationId: z.number(),
-  name: z.string().regex(new RegExp(/^[A-Z][a-z]*\s[A-Z][a-z]*/), "Zadajte meno a priezvisko")
-})
+export default function MemberForm({ onCancel, defaultValues: _def }: { onCancel?: () => void, defaultValues?: any }) {
+  const router = useRouter()
 
-
-export default function MemberForm({onUpdate, defaultValues: _def}: {onUpdate?: () => void, defaultValues?: any}) {
-
-
-  const onUserSelect = (user: User) => {
-
+  const defaultValues = {
+    ...{
+      id: undefined,
+    }, ...(_def ? _def : {})
   }
 
-  const onManagerSelect = (member: OrganizationMemberWithUser) => {
-    
-    setFormData((data) => ({
-      ...data,
-      manager_id: member.id
-    }))
+
+  const form = useForm<ZOrganizationMember>({
+    resolver: zodResolver(OrganizationMemberCreateSchema), defaultValues,
+    reValidateMode: "onChange"
+  })
+  const { handleSubmit, reset, setValue, formState: { errors, isDirty, isValid } } = form
+
+  const createOrganizationMember = useCreateOrganizationMember();
+
+  useEffect(() => {
+    if (createOrganizationMember.isSuccess) {
+      const newId = createOrganizationMember.data.id
+      createOrganizationMember.reset()
+      if(onCancel) onCancel()
+    }
+  }, [createOrganizationMember.isSuccess])
+
+  const onSubmit: SubmitHandler<ZOrganizationMember> = async (data) => {
+    createOrganizationMember.mutate(data)
   }
 
-  const onOrgSelect = (organization: Organization) => {
-    setFormData((data) => ({
-      ...data,
-      organization_id: organization.id
-    }))
-  }
-  
-  const onPositionChange = (e: BaseSyntheticEvent) => {
-    
-    setFormData((data) => ({
-      ...data,
-      position_name: e.target.value
-    }))
-  }
 
 
   return (
+    <Form {...form}>
 
-    <form  className="grid gap-4 py-4">
-      <div>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex gap-3 flex-col">
 
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="name" className="text-right">
-          Užívateľ
-        </Label>
-        <div className="col-span-2">
-          <UserCombobox onSelectResult={onUserSelect} mode="unassigned"></UserCombobox>
-        </div>
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="name" className="text-right">
-          Organizácia
-        </Label>
-        <div className="col-span-2">
-          <OrganizationCombobox onSelectResult={onOrgSelect}></OrganizationCombobox>
-        </div>
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="name" className="text-right">
-          Nadriadený
-        </Label>
-        <div className="col-span-2">
-          <OrganizationMemberCombobox onSelectResult={onManagerSelect}></OrganizationMemberCombobox>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="username" className="text-right">
-          Pozícia
-        </Label>
-        <Input
-          id="position"
-          placeholder="Pozíca"
-          className="w-full col-span-2"
-          onChange={onPositionChange}
+        <FormField
+          control={form.control}
+          name="user_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Užívateľ</FormLabel>
+              <UserCombobox mode="unassigned"
+                onSelectResult={(user) => field.onChange(user.id)}
+              ></UserCombobox>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-    </form>
 
+        <FormField
+          control={form.control}
+          name="position_name"
+          render={({ field }) => (
+            <FormItem className="col-span-2">
+              <FormLabel>Pozícia</FormLabel>
+              <FormControl>
+                <Input placeholder="Pozícia" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="manager_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nadriadený</FormLabel>
+              <OrganizationMemberCombobox
+                onSelectResult={(member) => field.onChange(member.id)}
+                label="Vybrať nadriadenú osobu"  managersToOrg={defaultValues && defaultValues.organization && defaultValues.organization.id}></OrganizationMemberCombobox>
+              <FormMessage/>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="organization_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Organizácia</FormLabel>
+              <Input placeholder="" value={defaultValues && defaultValues.organization && defaultValues.organization.name} disabled />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {<div className="space-x-3 col-span-full flex mt-5">
+          <Button variant="secondary" type="button" onClick={() => {onCancel && onCancel();}}>Zrušiť</Button>
+          <SubmitButton isLoading={createOrganizationMember.isPending} type="submit" >Pridať</SubmitButton>
+        </div>}
+      </form>
+    </Form>
   )
 
 }

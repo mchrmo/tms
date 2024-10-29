@@ -52,7 +52,7 @@ export async function getMainOrganization() {
 }
 
 
-export type OrganizationMemberDetail = Prisma.PromiseReturnType<typeof getMember>
+export type OrganizationMemberDetail = Exclude<Prisma.PromiseReturnType<typeof getMember>, null>
 
 export async function getMember(id: number) {
 

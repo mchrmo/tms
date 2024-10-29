@@ -9,7 +9,7 @@ import Link from "next/link"
 
 export default async function Users() {
 
-  const orgData = await getMainOrganization()
+  // const orgData = await getMainOrganization()
   
   const user = await currentUser()
   const isAdmin = isRole(user, 'admin')

@@ -4,11 +4,10 @@ import { z } from "zod";
 
 const OrganizationMemberSchema = z.object({
   id: z.number().optional(), // Optional for creation (auto-increment)
-  name: z.string().min(1, "Názov je povinný"),
   user_id: z.number(),
   manager_id: z.number().nullable(),
   organization_id: z.number(),
-  position_name: z.string().min(1, 'Názov pozície je povinný')
+  position_name: z.string({required_error: "Názov pozície je povinný"})
 });
 
 
@@ -24,3 +23,17 @@ export const OrganizationMemberUpdateSchema = OrganizationMemberSchema.partial()
 
 // Zod type for UpdateForm
 export type ZOrganizationMemberUpdateForm = z.infer<typeof OrganizationMemberUpdateSchema>;
+
+export const organizationMemberColumns: ModelColumns = {
+  'name': {
+    type: 'string',
+    path: 'user.name',
+    method: 'contains'
+  },
+  'fulltext': {
+    type: 'string',
+    customFn: (val) => ({OR: [
+      {name: {contains: val}}
+    ]})
+  },
+}

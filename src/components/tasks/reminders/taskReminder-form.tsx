@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { TaskReminderCreateSchema, TaskReminderUpdateSchema } from "@/lib/models/taskReminder.model";
 import { useCreateTaskReminder, useUpdateTaskReminder } from "@/lib/hooks/task/taskReminder.hooks";
-import OrganizationMemberCombobox from "@/components/members/member-combobox";
+import OrganizationMemberCombobox from "@/components/organizations/members/member-combobox";
 import { format } from "date-fns";
 import { DefaultFormProps } from "@/types/global";
 import { error } from "console";

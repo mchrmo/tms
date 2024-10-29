@@ -25,17 +25,23 @@ export default function OrganizationForm({onUpdate, defaultValues: _def, edit}: 
     id: undefined,
     name: '',
     parent_id: null
-  }, ...(_def ? _def : {})}
+  }, ...(_def ? _def : {})}  
 
-
+  // console.log(defaultValues);
+  
   const form = useForm<ZOrganization>({
     resolver: zodResolver(defaultValues.id ? OrganizationUpdateSchema : OrganizationCreateSchema), defaultValues,
     reValidateMode: "onChange"
   })
   const { handleSubmit, reset, setValue, formState: { errors, isDirty, isValid } } = form
 
+
   const updateOrganization = useUpdateOrganization(_def ? _def.id : 0);
   const createOrganization = useCreateOrganization();
+
+  useEffect(() => {
+    if (_def.parent) setValue("parent_id", _def.parent.id)
+  }, [])
 
   useEffect(() => {
     if (createOrganization.isSuccess) { 
@@ -82,7 +88,9 @@ export default function OrganizationForm({onUpdate, defaultValues: _def, edit}: 
             )}
           />
 
-        <FormField 
+        {
+          ((_def && _def.members && !_def.members.length) || !edit) &&
+          <FormField 
           control={form.control}
           name="parent_id"
           render={({ field }) => (
@@ -96,9 +104,10 @@ export default function OrganizationForm({onUpdate, defaultValues: _def, edit}: 
               </FormControl>
             <FormMessage />
           </FormItem>
-
           )}
         />
+        }
+        
 
 
         {isDirty && <div className="space-x-3 col-span-full flex mt-5">

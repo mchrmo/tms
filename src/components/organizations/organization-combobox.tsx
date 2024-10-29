@@ -16,6 +16,8 @@ export default function OrganizationCombobox({onSelectResult, defaultValue}: {on
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Organization | undefined>(defaultValue);
 
+  // console.log(defaultValue);
+  
   
   const handleSetActive = useCallback((organization: Organization) => {
     setSelected(organization);

@@ -1,4 +1,4 @@
-import { OrganizationMemberCreateSchema, OrganizationMemberUpdateSchema, ZOrganizationMemberCreateForm } from "@/lib/models/organization/member.model"
+import { organizationMemberColumns, OrganizationMemberCreateSchema, OrganizationMemberUpdateSchema, ZOrganizationMemberCreateForm } from "@/lib/models/organization/member.model"
 import prisma from "@/lib/prisma"
 import organizationMemberService, { organizationMemberListItem } from "@/lib/services/organizations/organizationMembers.service"
 import { parseGetManyParams } from "@/lib/utils/api.utils"
@@ -12,10 +12,56 @@ import { createPaginator } from "prisma-pagination"
 const getOrganizationMember = async (req: NextRequest, params: any) => {
 
   const id = parseInt(params.id)
-  const organizationMember = await organizationMemberService.get_organizationMember(id)  
-  if(!organizationMember) throw new ApiError(404, 'Not found')
-  
+  const organizationMember = await organizationMemberService.get_organizationMember(id)
+  if (!organizationMember) throw new ApiError(404, 'Not found')
+
   return NextResponse.json(organizationMember, { status: 200 })
+}
+
+const getOrganizationMembers = async (req: NextRequest) => {
+
+  const params = req.nextUrl.searchParams
+
+  const paramsObj = Object.fromEntries(new URLSearchParams(params));
+  const customWhere: Prisma.OrganizationMemberFindManyArgs['where'] = {}
+  if (paramsObj.managers_to_org) {
+    const orgId = paramsObj.managers_to_org
+
+    let query = Prisma.sql`
+        WITH RECURSIVE ParentOrgs AS (
+          SELECT id, parent_id
+          FROM \`Organization\`
+          WHERE id = ${orgId}
+          UNION
+          SELECT o.id, o.parent_id
+          FROM \`Organization\` o
+          INNER JOIN ParentOrgs po ON po.parent_id = o.id
+        )
+        SELECT om.id
+        FROM \`OrganizationMember\` om
+        JOIN ParentOrgs p ON om.organization_id = p.id
+     `;
+    const membersRaw = await prisma.$queryRaw(query) as {id: number}[]
+    const memberIds = membersRaw.map((m: any) => m.id)
+    // if(memberIds.length)
+    customWhere.id = {in: memberIds} 
+  }
+
+
+  const { where, orderBy, pagination } = parseGetManyParams(params, organizationMemberColumns)
+
+  const paginate = createPaginator({ page: pagination.page, perPage: pagination.pageSize })
+  
+  const data = await paginate<OrganizationMember, Prisma.OrganizationMemberFindManyArgs>(
+    prisma.organizationMember,
+    {
+      where:{...where, ...customWhere},
+      orderBy,
+      include: organizationMemberListItem.include,
+    }
+  )
+
+  return NextResponse.json(data, { status: 200 })
 }
 
 const createOrganizationMember = async (request: NextRequest) => {
@@ -25,10 +71,10 @@ const createOrganizationMember = async (request: NextRequest) => {
 
   if (!parsedSchema.success) {
     const { errors } = parsedSchema.error;
-    
+
     return NextResponse.json({
       error: { message: "Invalid request", errors },
-    }, {status: 400});
+    }, { status: 400 });
   }
 
 
@@ -41,8 +87,8 @@ const createOrganizationMember = async (request: NextRequest) => {
 
   }
   catch (error) {
-    if(error instanceof PrismaClientKnownRequestError) {
-      if(error.code == 'P2002') {
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code == 'P2002') {
         throw new ApiError(400, "Organizácia s rovnakým názvom už existuje")
       }
     }
@@ -52,7 +98,7 @@ const createOrganizationMember = async (request: NextRequest) => {
 
 };
 
-const updateOrganizationMember = async (request: NextRequest) => {  
+const updateOrganizationMember = async (request: NextRequest) => {
   const body = await request.json()
   const parsedSchema = OrganizationMemberUpdateSchema.safeParse(body);
 
@@ -61,11 +107,11 @@ const updateOrganizationMember = async (request: NextRequest) => {
 
     return NextResponse.json({
       error: { message: "Invalid request", errors },
-    }, {status: 400});
+    }, { status: 400 });
   }
 
 
-  const updateData = {...parsedSchema.data}
+  const updateData = { ...parsedSchema.data }
 
   try {
     const organizationMember = await organizationMemberService.update_organizationMember(updateData)
@@ -73,8 +119,8 @@ const updateOrganizationMember = async (request: NextRequest) => {
 
   }
   catch (error) {
-    if(error instanceof PrismaClientKnownRequestError) {
-      if(error.code == 'P2002') {
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code == 'P2002') {
         throw new ApiError(400, "Organizácia s rovnakým názvom už existuje")
       }
     }
@@ -84,9 +130,16 @@ const updateOrganizationMember = async (request: NextRequest) => {
 
 const deleteOrganizationMember = async (req: NextRequest, params: any) => {
   const id = parseInt(params.id)
-  const organizationMember = await organizationMemberService.delete_organizationMember(id)  
+  const paramsObj = Object.fromEntries(new URLSearchParams(req.nextUrl.searchParams));
+  let {new_owner: new_owner_raw} = paramsObj
+  const new_owner = parseInt(new_owner_raw)
+  
+  if(!new_owner) throw new ApiError(400, "Missing new tasks owner id")
+  
+  
+  const organizationMember = await organizationMemberService.delete_organizationMember(id, new_owner)
 
-  return NextResponse.json(organizationMember, { status: 200 })
+  return NextResponse.json({}, { status: 200 })
 
 }
 
@@ -94,6 +147,7 @@ const deleteOrganizationMember = async (req: NextRequest, params: any) => {
 const organizationMembersController = {
   getOrganizationMember,
   createOrganizationMember,
+  getOrganizationMembers,
   updateOrganizationMember,
   deleteOrganizationMember
 }
