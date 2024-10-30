@@ -27,6 +27,7 @@ export default function MemberForm({ onCancel, defaultValues: _def }: { onCancel
   const defaultValues = {
     ...{
       id: undefined,
+      position_name: '',
     }, ...(_def ? _def : {})
   }
 

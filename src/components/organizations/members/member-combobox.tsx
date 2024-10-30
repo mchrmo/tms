@@ -77,13 +77,13 @@ export function Search({ selectedResult, onSelectResult, managersToOrg }: Search
 
   return (
     <Command
-      shouldFilter={true}
+      shouldFilter={false}
       className="h-auto rounded-lg border border-b-0 shadow-md"
     >
       <CommandInput
         value={searchQuery}
         onValueChange={setSearchQuery}
-        placeholder="Vyhľadať užívateľa"
+        placeholder="Vyhľadať člena"
       />
       <SearchResults
           query={searchQuery}
@@ -123,7 +123,6 @@ function SearchResults({
   )
   // To get around this https://github.com/TanStack/query/issues/3584
 
-  console.log(membersQ.data);
   
 
   return (

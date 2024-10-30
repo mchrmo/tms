@@ -11,8 +11,7 @@ interface SubmitButtonProps extends ButtonProps {
 
 
 const SubmitButton: React.FC<SubmitButtonProps> = ({children, className, isLoading, ...props}: SubmitButtonProps) => {
-
-  return <Button className={className} {...props} disabled={isLoading}>
+  return <Button className={className} {...props} disabled={isLoading || props.disabled}>
     { isLoading && <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />}
     {children}
   </Button>

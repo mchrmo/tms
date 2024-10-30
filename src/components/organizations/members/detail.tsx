@@ -16,6 +16,14 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useDeleteOrganizationMember, useOrganizationMember } from "@/lib/hooks/organization/organizationMember.hooks";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { OrganizationMemberDetail, OrganizationMemberListItem } from "@/lib/services/organizations/organizationMembers.service";
+import OrganizationMemberCombobox from "./member-combobox";
+import SubmitButton from "@/components/common/buttons/submit";
+import { useEffect, useState } from "react";
+import { Label } from "@/components/ui/label";
+import UserCombobox from "@/components/users/user-combobox";
+import { UserListItem } from "@/lib/services/user.service";
 
 export default function MemberDetail({ params }: { params: { id: string } }) {
 
@@ -25,11 +33,7 @@ export default function MemberDetail({ params }: { params: { id: string } }) {
   const memberQ = useOrganizationMember(memberId)
   const member = memberQ.data
   const router = useRouter();
-  const deleteMemberQ = useDeleteOrganizationMember(memberId)
-  
-  const deleteMember = (new_owner: number) => {
-    deleteMemberQ.mutate({ new_owner })
-  }
+
 
 
   if (memberQ.isLoading) return <span>Člen sa načitáva <LoadingSpinner></LoadingSpinner></span>
@@ -72,8 +76,10 @@ export default function MemberDetail({ params }: { params: { id: string } }) {
               </TableRow>
               <TableRow className="hover:bg-white">
                 <TableCell className="font-medium" colSpan={2}>
-                  <Button className="p-0 h-0" variant={'linkDestructive'}>Odstrániť člena</Button>
-
+                  <div className="flex justify-evenly">
+                    <DeleteMemberDialog member={member}/>
+                    <SwapMemberDialog member={member}/>
+                  </div>
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -137,5 +143,88 @@ export default function MemberDetail({ params }: { params: { id: string } }) {
       }
 
     </>
+  )
+}
+
+
+function DeleteMemberDialog({ member }: { member: OrganizationMemberDetail }) {
+  const [open, setOpen] = useState(false)
+  const [selectedMember, selectMember] = useState<OrganizationMemberListItem | null>(null)
+
+  const deleteMemberQ = useDeleteOrganizationMember(member.id)
+
+  const deleteMember = () => {
+    if(!selectedMember) return
+    const new_owner = selectedMember.id
+    deleteMemberQ.mutate({ new_owner })
+  }
+
+
+
+  return (
+    <Dialog onOpenChange={setOpen} open={open}>
+      <DialogTrigger asChild>
+        <Button size={'link'} variant={'linkDestructive'}>Odstrániť člena</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            Odstránenie člena organizácie
+          </DialogTitle>
+          <DialogDescription>
+            Pred odstránením člena vyberte iného člena, ktorý sa stane vlastníkom všetkých úloh, ktoré vytvoril vymazaný člen.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label>Nový vlastník úloh:</Label>
+          <OrganizationMemberCombobox onSelectResult={(member) => selectMember(member)}></OrganizationMemberCombobox>
+        </div>
+        <DialogFooter>
+          <Button variant="secondary" type="button" onClick={() => {setOpen(false)}}>Zrušiť</Button>
+          <SubmitButton onClick={() => deleteMember()} isLoading={deleteMemberQ.isPending} type="submit" disabled={!selectedMember}>Potvrdiť odstránenie člena</SubmitButton>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+
+function SwapMemberDialog({ member }: { member: OrganizationMemberDetail }) {
+  const [open, setOpen] = useState(false)
+  const [selectedUser, selectUser] = useState<UserListItem | null>(null)
+
+  // const deleteMemberQ = useDeleteOrganizationMember(member.id)
+
+  const swapMember = () => {
+    if(!selectedUser) return
+
+  }
+
+
+
+  return (
+    <Dialog onOpenChange={setOpen} open={open}>
+      <DialogTrigger asChild>
+        <Button size={'link'} variant={'linkDestructive'}>Vymeniť člena</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            Výmena člena organizácie
+          </DialogTitle>
+          <DialogDescription>
+            Vyberte užívateľa, ktorý nahradí člena na pozící '{member.position_name}' v organizácií '{member.organization.name}'.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label>Nový vlastník úloh:</Label>
+          <UserCombobox onSelectResult={(user) => selectUser(user)}  mode="unassigned"/>
+        </div>
+        <DialogFooter>
+          <Button variant="secondary" type="button" onClick={() => {setOpen(false)}}>Zrušiť</Button>
+          <SubmitButton onClick={() => swapMember()} isLoading={false} type="submit" disabled={!selectUser}>Potvrdiť výmenu člena</SubmitButton>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

@@ -36,6 +36,7 @@ model User {
   meetingItems        MeetingItem[]
   meetingItemComments MeetingItemComment[]
   File                File[]
+  TaskComment         TaskComment[]
 }
 
 model File {
@@ -77,7 +78,6 @@ model OrganizationMember {
   manager           OrganizationMember?  @relation("MemberManager", fields: [manager_id], references: [id])
   subordinates      OrganizationMember[] @relation("MemberManager")
   organization      Organization         @relation(fields: [organization_id], references: [id])
-  TaskComment       TaskComment[]
   AssignedTasks     Task[]               @relation("AssignedMember")
   CreatedTasks      Task[]               @relation("TaskCreator")
   TaskSubscriptions TaskSubscription[]
@@ -113,7 +113,7 @@ model Task {
   Subscriptions     TaskSubscription[]
   Reminders         TaskReminder[]
   Meta              TaskMeta[]
-  attachments        TaskAttachment[]
+  attachments       TaskAttachment[]
 
   @@fulltext([name])
 }
@@ -138,8 +138,8 @@ model TaskUpdate {
   id          Int      @id @default(autoincrement())
   task_id     Int
   task        Task     @relation(fields: [task_id], references: [id])
-  user_id     Int
-  user        User     @relation(fields: [user_id], references: [id])
+  user_id     Int?
+  user        User?     @relation(fields: [user_id], references: [id])
   key         String
   title       String
   description String?
@@ -148,14 +148,15 @@ model TaskUpdate {
 }
 
 model TaskComment {
-  id         Int                @id @default(autoincrement())
-  task_id    Int
-  task       Task               @relation(fields: [task_id], references: [id])
-  creator_id Int
-  creator    OrganizationMember @relation(fields: [creator_id], references: [id])
-  message    String             @db.VarChar(250)
-  createdAt  DateTime           @default(now())
-  updateAt   DateTime           @default(now())
+  id                   Int      @id @default(autoincrement())
+  task_id              Int
+  task                 Task     @relation(fields: [task_id], references: [id])
+  user_id              Int
+  user                 User     @relation(fields: [user_id], references: [id])
+  message              String   @db.VarChar(250)
+  createdAt            DateTime @default(now())
+  updateAt             DateTime @default(now())
+  organizationMemberId Int?
 }
 
 model TaskReminder {

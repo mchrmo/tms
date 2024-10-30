@@ -1,6 +1,7 @@
 import { Prisma, OrganizationMember } from "@prisma/client";
 import prisma from "../../prisma";
 import taskService from "../tasks/task.service";
+import taskUpdateService from "../tasks/taskUpdate.service";
 
 
 type CreateOrganizationMemberReqs = {
@@ -54,7 +55,7 @@ const get_organizationMember = async (id: number) => {
 
   return organizationMember
 }
-export type OrganizationMemberDetail = Prisma.PromiseReturnType<typeof get_organizationMember>
+export type OrganizationMemberDetail = Exclude<Prisma.PromiseReturnType<typeof get_organizationMember>, null>
 
 const create_organizationMember = async (organizationMemberData: CreateOrganizationMemberReqs) => {
   const data: Prisma.OrganizationMemberUncheckedCreateInput = {...organizationMemberData}
@@ -77,6 +78,33 @@ const update_organizationMember = async (organizationMemberData: Partial<Organiz
   return organizationMember
 }
 
+const swap_organizationMember = async (orgMember_id: number, newUser_id: number) => {
+
+  // Zmena zodpovednej 
+  const organizationMember = await prisma.organizationMember.update({
+    where: {id: orgMember_id},
+    data: {
+      user_id: newUser_id
+    }
+  })
+
+  const assignedTasks = await prisma.task.findMany({
+    where: {assignee_id: orgMember_id}
+  })
+  for (const task of assignedTasks) {
+    await taskUpdateService.create_taskUpdate(task, null, 'assignee_id', newUser_id)
+  }
+
+  const createTask = await prisma.task.findMany({
+    where: {assignee_id: orgMember_id}
+  })
+  for (const task of assignedTasks) {
+    await taskUpdateService.create_taskUpdate(task, null, 'assignee_id', newUser_id)
+  }
+
+
+}
+
 const delete_organizationMember = async (orgMember_id: number, newOwner_id: number) => {
 
   // Nie je možné odstrániť člena, ktorý je nadriadený iným členom
@@ -87,7 +115,6 @@ const delete_organizationMember = async (orgMember_id: number, newOwner_id: numb
   const assignedTasks = await prisma.task.findMany({
     where: {assignee_id: orgMember_id}
   })
-
   for (const task of assignedTasks) {
     await taskService.update_task({id: task.id, assignee_id: task.creator_id})
   }

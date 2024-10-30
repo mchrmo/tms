@@ -1,4 +1,3 @@
-import { User } from "@prisma/client";
 import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -8,15 +7,16 @@ import { PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query'
+import { UserListItem } from "@/lib/services/user.service";
 
 const POPOVER_WIDTH = 'w-full';
 
-export default function UserCombobox({onSelectResult, mode}: {onSelectResult: (user: User) => void; mode: 'assigned' | 'unassigned'}) {
+export default function UserCombobox({onSelectResult, mode}: {onSelectResult: (user: UserListItem) => void; mode: 'assigned' | 'unassigned'}) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<User | undefined>();
+  const [selected, setSelected] = useState<UserListItem | undefined>();
 
 
-  const handleSetActive = useCallback((user: User) => {
+  const handleSetActive = useCallback((user: UserListItem) => {
     setSelected(user);
     onSelectResult(user)
     // OPTIONAL: close the combobox upon selection
@@ -50,8 +50,8 @@ export default function UserCombobox({onSelectResult, mode}: {onSelectResult: (u
 
 
 interface SearchProps {
-  selectedResult?: User;
-  onSelectResult: (user: User) => void;
+  selectedResult?: UserListItem;
+  onSelectResult: (user: UserListItem) => void;
   mode: 'assigned' | 'unassigned' 
 }
 
@@ -59,7 +59,7 @@ export function Search({ selectedResult, onSelectResult, mode }: SearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
 
-  const handleSelectResult = (user: User) => {
+  const handleSelectResult = (user: UserListItem) => {
     
     onSelectResult(user);
   };
@@ -111,7 +111,7 @@ function SearchResults({
     isLoading: isLoadingOrig,
     isError,
     error
-  } = useQuery<User[]>({
+  } = useQuery<UserListItem[]>({
     queryKey: ['searchUsers', debouncedSearchQuery],
     queryFn: () => getUsers(debouncedSearchQuery),
     // enabled,

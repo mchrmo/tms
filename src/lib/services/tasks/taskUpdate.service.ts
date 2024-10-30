@@ -23,38 +23,39 @@ const get_taskUpdate = async (id: number) => {
 
 export type TaskUpdateDetail = Prisma.PromiseReturnType<typeof get_taskUpdate>
 
-const create_taskUpdate = async (task: Task, user: User, key: string, value?: any) => {
+const create_taskUpdate = async (task: Task, user: User | null, key: string, value?: any) => {
 
   let description;
   let title = ''
 
+  let changerName = user ? user.name : 'Systém'
 
   switch(key) {
     case 'created': {
       const member = await organizationMemberService.get_organizationMember(task.assignee_id!)
       title = 'Úloha vytvorená'
-      description = `Úlohu vytvoril ${user.name} pre ${member?.user.name}`
+      description = `Úlohu vytvoril ${changerName} pre ${member?.user.name}`
     } break;
     case 'assignee_id': {
       if(!value) break; 
       const member = await organizationMemberService.get_organizationMember(value)
       title = `Zmena poverenej osoby`
-      description = `${user.name} poveril ${member && member.user.name}`
+      description = `${changerName} poveril ${member && member.user.name}`
     } break;
     case 'creator_id': {
       if(!value) break; 
       const member = await organizationMemberService.get_organizationMember(value)
       title = `Zmena vlastníka`
-      description = `${user.name} zmenil vlastníka na ${member && member.user.name}`
+      description = `${changerName} zmenil vlastníka na ${member && member.user.name}`
     } break;
     case 'status': 
       if(!value) break; 
       title = `Stav zmenený`
-      description = `${user.name} zmenil stav na ${TASK_STATUSES_MAP[task.status]}`
+      description = `${changerName} zmenil stav na ${TASK_STATUSES_MAP[task.status]}`
       break;
     case 'priority':  
       title = `Priorita zmenená`
-      description = `${user.name} zmenil prioritu na ${TASK_PRIORITIES_MAP[task.priority]}`
+      description = `${changerName} zmenil prioritu na ${TASK_PRIORITIES_MAP[task.priority]}`
       break;
 
 
@@ -72,7 +73,7 @@ const create_taskUpdate = async (task: Task, user: User, key: string, value?: an
     },
     key,
     value,
-    user: {connect: {id: user.id}},
+    user: user ? {connect: {id: user.id}} : {},
     title,
     description
   }

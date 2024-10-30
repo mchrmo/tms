@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { AxiosError } from "axios";
 import { PaginatedResponse } from "../services/api.service";
 import { UserRegistrationFormInputs } from "../models/user.model";
-import { UserDetail } from "../services/user.service";
+import { UserDetail, UserListItem } from "../services/user.service";
 import { parseListHookParamsNew } from "../utils/api.utils";
 
 const userApiClient = getApiClient('/users')
@@ -31,13 +31,13 @@ export const useUsers = (pagination: PaginationState, filter?: ColumnFiltersStat
 
 
   const getUsersFn = async (params: {[key: string]: string}) => {
-    const response = await userApiClient.get<PaginatedResponse<User>>('', {
+    const response = await userApiClient.get<PaginatedResponse<UserListItem>>('', {
       params
     })
     return response.data
   }
 
-  const query = useQuery<PaginatedResponse<User>>({
+  const query = useQuery<PaginatedResponse<UserListItem>>({
     queryKey: userQueryKeys.searched(urlParams),
     queryFn: () => getUsersFn(params),
   })

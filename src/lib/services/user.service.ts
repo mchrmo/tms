@@ -28,6 +28,13 @@ const get_user = async (id: number) => {
 }
 export type UserDetail = Prisma.PromiseReturnType<typeof get_user>
 
+export const userListItem = Prisma.validator<Prisma.UserDefaultArgs>()({
+  include: {
+  }
+})
+export type UserListItem = Prisma.UserGetPayload<typeof userListItem>
+
+
 const create_user = async ({name, email, roleId}: {name: string, email: string, roleId?: number}) => {
 
   const password =  Math.random().toString(36).slice(-8);

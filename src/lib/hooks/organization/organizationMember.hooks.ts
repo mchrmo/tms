@@ -9,11 +9,12 @@ import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react
 import { AxiosError } from "axios";
 import { useEffect } from "react";
 import { organizationQueryKeys } from "./organization.hooks";
+import { useRouter } from "next/navigation";
 
 
 const organizationMembersApi = getApiClient('/organizations/members')
 
-export const organizationMemberQueryKeys = { 
+export const organizationMemberQueryKeys = {
   all: ['organizationMembers'],
   searched: (query: string) => [...organizationMemberQueryKeys.all, query],
   details: () => [...organizationMemberQueryKeys.all, 'detail'],
@@ -31,17 +32,17 @@ export const useOrganizationMember = (id?: number, options?: UseQueryOptions<Org
   };
 
   const query = useQuery<OrganizationMemberDetail, Error>({
-    queryKey: organizationMemberQueryKeys.detail(Number(id)), 
+    queryKey: organizationMemberQueryKeys.detail(Number(id)),
     queryFn: getOrganizationMemberFn,
     enabled: !!id,
     ...options
   });
 
   useEffect(() => {
-    if(!query.error) return
+    if (!query.error) return
     toast({
       title: "Chyba",
-      description: `Nepodarilo sa nájsť organizáciu`
+      description: `Nepodarilo sa nájsť člena`
     })
   }, [query.error])
 
@@ -51,10 +52,10 @@ export const useOrganizationMember = (id?: number, options?: UseQueryOptions<Org
 export const useOrganizationMembers = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) => {
   const { toast } = useToast()
 
-  const {params, urlParams} = parseListHookParamsNew(pagination, filter, sort)
+  const { params, urlParams } = parseListHookParamsNew(pagination, filter, sort)
 
 
-  const getOrganizationMembersFn = async (params: {[key: string]: string}) => {
+  const getOrganizationMembersFn = async (params: { [key: string]: string }) => {
     const response = await organizationMembersApi.get('', {
       params
     })
@@ -67,14 +68,14 @@ export const useOrganizationMembers = (pagination: PaginationState, filter?: Col
   })
 
   useEffect(() => {
-    if(!query.error) return
+    if (!query.error) return
     toast({
       title: "Chyba",
       description: `Nepodarilo sa načítať - kód chyby: ${query.error.message}`
     })
   }, [query.error])
 
-  return query 
+  return query
 }
 
 export const useUpdateOrganizationMember = (id: number) => {
@@ -90,7 +91,7 @@ export const useUpdateOrganizationMember = (id: number) => {
   return useMutation({
     mutationFn: updateOrganizationMemberFn,
     onMutate: async (updatedUser) => {
-      await queryClient.cancelQueries({queryKey: organizationMemberQueryKeys.detail(id)});
+      await queryClient.cancelQueries({ queryKey: organizationMemberQueryKeys.detail(id) });
       const previousUser = queryClient.getQueryData(organizationMemberQueryKeys.detail(id));
       // queryClient.setQueryData(organizationMemberQueryKeys.detail(Number(id)), updatedUser);
       return { previousUser: previousUser, updatedUser: updatedUser };
@@ -100,7 +101,7 @@ export const useUpdateOrganizationMember = (id: number) => {
         title: "Organizácia upravená!"
       })
     },
-    onError: (err: AxiosError<{message: string}>, newOrganizationMember, context?: any) => {
+    onError: (err: AxiosError<{ message: string }>, newOrganizationMember, context?: any) => {
       const errMessage = err.response?.data ? err.response.data.message : err.message
       toast({
         title: "Chyba",
@@ -109,7 +110,7 @@ export const useUpdateOrganizationMember = (id: number) => {
 
     },
     onSettled: () => {
-      queryClient.invalidateQueries({queryKey: organizationMemberQueryKeys.all});
+      queryClient.invalidateQueries({ queryKey: organizationMemberQueryKeys.all });
     },
   });
 
@@ -124,7 +125,7 @@ export const useCreateOrganizationMember = () => {
     const response = await organizationMembersApi.post('', newOrganizationMember)
     return response.data
   }
-  
+
   return useMutation({
     mutationFn: createOrganizationMemberFn,
     onMutate: async () => {
@@ -135,7 +136,7 @@ export const useCreateOrganizationMember = () => {
         title: "Člen pridaný do organizácie!"
       })
     },
-    onError: (err: AxiosError<{message: string}>, newOrganizationMember, context?: any) => {
+    onError: (err: AxiosError<{ message: string }>, newOrganizationMember, context?: any) => {
       const errMessage = err.response?.data ? err.response.data.message : err.message
       toast({
         title: "Chyba",
@@ -155,39 +156,41 @@ export const useCreateOrganizationMember = () => {
 export const useDeleteOrganizationMember = (id: number) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const router = useRouter()
 
-  const deleteTaskReminderFn = async ({new_owner}: {new_owner: number}) => {
-      const response = await organizationMembersApi.delete(`/${id}?new_owner=${new_owner}`);
-      return response.data;
+  const deleteOrganizationMemberFn = async ({ new_owner }: { new_owner: number }) => {
+    const response = await organizationMembersApi.delete(`/${id}?new_owner=${new_owner}`);
+    return response.data;
   };
 
   return useMutation({
-      mutationFn: deleteTaskReminderFn,
-      onMutate: async () => {
-      if (!confirm("Určite to chcete vymazať?")) {
-          throw new Error('Nič nebolo vymazané');
-      }
+    mutationFn: deleteOrganizationMemberFn,
+    onMutate: async () => {
+      // if (!confirm("Určite to chcete vymazať?")) {
+      //     throw new Error('Nič nebolo vymazané');
+      // }
       await queryClient.cancelQueries({ queryKey: organizationMemberQueryKeys.detail(id) });
       const previousUser = queryClient.getQueryData(organizationMemberQueryKeys.detail(id));
       queryClient.removeQueries({ queryKey: organizationMemberQueryKeys.detail(id) });
       return { previousUser };
-      },
-      onSuccess: () => {
+    },
+    onSuccess: (data, variables) => {
+      router.push('/organizations/members/'+variables.new_owner)
       toast({
-          title: 'Organizácia vymazaná z databázy!',
+        title: 'Člen bol odstránený z organizácie!',
       });
-      },
-      onError: (err: AxiosError<{ message: string }>, _, context?: any) => {
+    },
+    onError: (err: AxiosError<{ message: string }>, _, context?: any) => {
       const errMessage = err.response?.data ? err.response.data.message : err.message;
       toast({
-          title: 'Chyba',
-          description: errMessage,
+        title: 'Chyba',
+        description: errMessage,
       });
 
       queryClient.setQueryData(organizationMemberQueryKeys.detail(id), context.previousUser);
-      },
-      onSettled: () => {
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: organizationMemberQueryKeys.all });
-      },
+    },
   });
 }
