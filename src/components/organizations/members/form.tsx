@@ -23,7 +23,6 @@ export type MemberFormData = {
 }
 
 export default function MemberForm({ onCancel, defaultValues: _def }: { onCancel?: () => void, defaultValues?: any }) {
-  const router = useRouter()
 
   const defaultValues = {
     ...{
@@ -42,7 +41,6 @@ export default function MemberForm({ onCancel, defaultValues: _def }: { onCancel
 
   useEffect(() => {
     if (createOrganizationMember.isSuccess) {
-      const newId = createOrganizationMember.data.id
       createOrganizationMember.reset()
       if(onCancel) onCancel()
     }
@@ -52,13 +50,9 @@ export default function MemberForm({ onCancel, defaultValues: _def }: { onCancel
     createOrganizationMember.mutate(data)
   }
 
-
-
   return (
     <Form {...form}>
-
       <form onSubmit={handleSubmit(onSubmit)} className="flex gap-3 flex-col">
-
         <FormField
           control={form.control}
           name="user_id"
@@ -112,10 +106,12 @@ export default function MemberForm({ onCancel, defaultValues: _def }: { onCancel
             </FormItem>
           )}
         />
-        {<div className="space-x-3 col-span-full flex mt-5">
-          <Button variant="secondary" type="button" onClick={() => {onCancel && onCancel();}}>Zrušiť</Button>
-          <SubmitButton isLoading={createOrganizationMember.isPending} type="submit" >Pridať</SubmitButton>
-        </div>}
+        {
+          <div className="space-x-3 col-span-full flex mt-5">
+            <Button variant="secondary" type="button" onClick={() => {onCancel && onCancel();}}>Zrušiť</Button>
+            <SubmitButton isLoading={createOrganizationMember.isPending} type="submit" >Pridať</SubmitButton>
+          </div>
+        }
       </form>
     </Form>
   )

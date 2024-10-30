@@ -1,9 +1,9 @@
 import { Prisma, Task, TaskPriority, TaskStatus, User } from "@prisma/client";
-import { getMember } from "../../db/organizations";
 import { sendAssigneeChangeNotification } from "../mail.service";
 import prisma from "../../prisma";
 import { z } from "zod";
 import userService from "../user.service";import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP } from "../../models/task.model";
+import organizationMemberService from "../organizations/organizationMembers.service";
 
 export const taskUpdateListItem = Prisma.validator<Prisma.TaskUpdateDefaultArgs>()({
   include: {
@@ -31,15 +31,21 @@ const create_taskUpdate = async (task: Task, user: User, key: string, value?: an
 
   switch(key) {
     case 'created': {
-      const member = await getMember(task.assignee_id!)
+      const member = await organizationMemberService.get_organizationMember(task.assignee_id!)
       title = 'Úloha vytvorená'
       description = `Úlohu vytvoril ${user.name} pre ${member?.user.name}`
     } break;
     case 'assignee_id': {
       if(!value) break; 
-      const member = await getMember(value)
+      const member = await organizationMemberService.get_organizationMember(value)
       title = `Zmena poverenej osoby`
-      description = `${user.name} poveril/a ${member && member.user.name}`
+      description = `${user.name} poveril ${member && member.user.name}`
+    } break;
+    case 'creator_id': {
+      if(!value) break; 
+      const member = await organizationMemberService.get_organizationMember(value)
+      title = `Zmena vlastníka`
+      description = `${user.name} zmenil vlastníka na ${member && member.user.name}`
     } break;
     case 'status': 
       if(!value) break; 
@@ -53,7 +59,7 @@ const create_taskUpdate = async (task: Task, user: User, key: string, value?: an
 
 
     default:
-      title = `Neidentifikovaná zmena - ${key}/${value}`
+      title = `Ostatná zmena - ${key}/${value}`
       break;
   }
 

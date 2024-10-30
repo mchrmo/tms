@@ -4,7 +4,6 @@ import { Prisma, TaskComment } from "@prisma/client";
 import taskCommentService, { taskCommentListItem } from "../../services/tasks/taskComment.service";
 import { ApiError } from "next/dist/server/api-utils";
 import { TaskCommentCreateSchema, TaskCommentCreateServiceSchema, TaskCommentUpdateSchema } from "../../models/taksComment.model";
-import { getMember } from "../../db/organizations";
 import memberService from "../../services/member.service";
 import { z } from "zod";
 import userService from "../../services/user.service";

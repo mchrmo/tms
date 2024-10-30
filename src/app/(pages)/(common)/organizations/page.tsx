@@ -1,7 +1,6 @@
 import AddButton from "@/components/common/buttons/add-button"
 import ViewHeadline from "@/components/common/view-haedline"
 import OrganizationsTable from "@/components/organizations/table"
-import { getMainOrganization } from "@/lib/db/organizations"
 import { isRole } from "@/lib/utils"
 import { auth, currentUser } from "@clerk/nextjs/server"
 import Link from "next/link"

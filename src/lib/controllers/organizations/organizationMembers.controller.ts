@@ -139,7 +139,7 @@ const deleteOrganizationMember = async (req: NextRequest, params: any) => {
   
   const organizationMember = await organizationMemberService.delete_organizationMember(id, new_owner)
 
-  return NextResponse.json({}, { status: 200 })
+  return NextResponse.json(organizationMember, { status: 200 })
 
 }
 

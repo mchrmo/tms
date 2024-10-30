@@ -1,7 +1,6 @@
 'use client'
 
 import ViewHeadline from "@/components/common/view-haedline";
-import { OrganizationMemberDetail, OrganizationMemberSubordinate } from "@/lib/db/organizations";
 import {
   Table,
   TableBody,

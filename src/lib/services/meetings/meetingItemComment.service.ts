@@ -1,7 +1,6 @@
 
 
 import { Prisma, MeetingItemComment } from "@prisma/client";
-import { getMember } from "../../db/organizations";
 import { sendAssigneeChangeNotification } from "../mail.service";
 import prisma from "../../prisma";
 import userService from "../user.service";
