@@ -80,7 +80,6 @@ const update_organizationMember = async (organizationMemberData: Partial<Organiz
 
 const swap_organizationMember = async (orgMember_id: number, newUser_id: number) => {
 
-  // Zmena zodpovednej 
   const organizationMember = await prisma.organizationMember.update({
     where: {id: orgMember_id},
     data: {
@@ -91,18 +90,19 @@ const swap_organizationMember = async (orgMember_id: number, newUser_id: number)
   const assignedTasks = await prisma.task.findMany({
     where: {assignee_id: orgMember_id}
   })
+
   for (const task of assignedTasks) {
     await taskUpdateService.create_taskUpdate(task, null, 'assignee_id', newUser_id)
   }
 
-  const createTask = await prisma.task.findMany({
-    where: {assignee_id: orgMember_id}
+  const createdTasks = await prisma.task.findMany({
+    where: {creator_id: orgMember_id}
   })
-  for (const task of assignedTasks) {
-    await taskUpdateService.create_taskUpdate(task, null, 'assignee_id', newUser_id)
+  for (const task of createdTasks) {
+    await taskUpdateService.create_taskUpdate(task, null, 'creator_id', newUser_id)
   }
 
-
+  return organizationMember
 }
 
 const delete_organizationMember = async (orgMember_id: number, newOwner_id: number) => {
@@ -143,6 +143,7 @@ const organizationMemberService = {
   get_organizationMember,
   create_organizationMember,
   update_organizationMember,
+  swap_organizationMember,
   delete_organizationMember
 }
 

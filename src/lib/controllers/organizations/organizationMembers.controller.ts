@@ -128,6 +128,16 @@ const updateOrganizationMember = async (request: NextRequest) => {
   }
 };
 
+const swapOrganizationMember = async (req: NextRequest, params: any) => {
+  const body = await req.json()
+  const {memberId, newUserId} = body
+  
+  // const organizationMember = await organizationMemberService.swap_organizationMember()
+
+  return NextResponse.json({}, { status: 200 })
+
+}
+
 const deleteOrganizationMember = async (req: NextRequest, params: any) => {
   const id = parseInt(params.id)
   const paramsObj = Object.fromEntries(new URLSearchParams(req.nextUrl.searchParams));
