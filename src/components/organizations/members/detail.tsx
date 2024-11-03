@@ -14,7 +14,7 @@ import AddMember from "./add-member";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { useDeleteOrganizationMember, useOrganizationMember } from "@/lib/hooks/organization/organizationMember.hooks";
+import { useDeleteOrganizationMember, useOrganizationMember, useSwapOrganizationMember } from "@/lib/hooks/organization/organizationMember.hooks";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { OrganizationMemberDetail, OrganizationMemberListItem } from "@/lib/services/organizations/organizationMembers.service";
@@ -78,6 +78,12 @@ export default function MemberDetail({ params }: { params: { id: string } }) {
                 <TableCell className="font-medium" colSpan={2}>
                   <div className="flex justify-evenly">
                     <DeleteMemberDialog member={member}/>
+                  </div>
+                </TableCell>
+              </TableRow>
+              <TableRow className="hover:bg-white">
+                <TableCell className="font-medium" colSpan={2}>
+                  <div className="flex justify-evenly">
                     <SwapMemberDialog member={member}/>
                   </div>
                 </TableCell>
@@ -193,13 +199,16 @@ function SwapMemberDialog({ member }: { member: OrganizationMemberDetail }) {
   const [open, setOpen] = useState(false)
   const [selectedUser, selectUser] = useState<UserListItem | null>(null)
 
-  // const deleteMemberQ = useDeleteOrganizationMember(member.id)
+  const swapMemberQ = useSwapOrganizationMember()
 
   const swapMember = () => {
     if(!selectedUser) return
-
+    swapMemberQ.mutate({memberId: member.id, newUserId: selectedUser.id})
   }
 
+  useEffect(() => {
+    if(swapMemberQ.isSuccess) setOpen(false)
+  }, [swapMemberQ.isSuccess])
 
 
   return (
@@ -222,7 +231,7 @@ function SwapMemberDialog({ member }: { member: OrganizationMemberDetail }) {
         </div>
         <DialogFooter>
           <Button variant="secondary" type="button" onClick={() => {setOpen(false)}}>Zrušiť</Button>
-          <SubmitButton onClick={() => swapMember()} isLoading={false} type="submit" disabled={!selectUser}>Potvrdiť výmenu člena</SubmitButton>
+          <SubmitButton onClick={() => swapMember()} isLoading={swapMemberQ.isPending } type="submit" disabled={!selectUser}>Potvrdiť výmenu člena</SubmitButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

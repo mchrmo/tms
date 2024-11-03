@@ -200,8 +200,6 @@ export default function TaskForm({ onUpdate, defaultValues: _def, edit }: { edit
           )}
         />
 
-
-
         <Accordion type="single" className="col-span-full" collapsible>
           <AccordionItem value="item-1">
             <AccordionTrigger>Podrobnosti</AccordionTrigger>
@@ -234,12 +232,11 @@ export default function TaskForm({ onUpdate, defaultValues: _def, edit }: { edit
                   </FormItem>
                 )}
               />
+
+              
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-
-
-
 
         {isDirty && <div className="space-x-3 col-span-full flex mt-5">
           <Button variant="secondary" type="button" onClick={() => { onCancel(); }}>Zrušiť</Button>

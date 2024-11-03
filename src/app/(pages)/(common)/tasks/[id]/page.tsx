@@ -10,7 +10,6 @@ export default async function Task({ params }: {params: {id: string}}) {
 
   return (
     <>
-      <ViewHeadline>Detail úlohy</ViewHeadline>
 
       <TaskDetail params={params}></TaskDetail>
     </>

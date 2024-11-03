@@ -30,6 +30,12 @@ const get_task = async (id: number) => {
       parent: {
         select: {name: true, id: true}
       },
+      meta: {
+        select: {
+          key: true,
+          value: true
+        }
+      },
       attachments: {
         select: {
           id: true,

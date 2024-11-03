@@ -66,7 +66,7 @@ export function Search({ selectedResult, onSelectResult, mode }: SearchProps) {
 
   return (
     <Command
-      shouldFilter={true}
+      shouldFilter={false}
       className="h-auto rounded-lg border border-b-0 shadow-md"
     >
       <CommandInput
@@ -120,11 +120,8 @@ function SearchResults({
   // To get around this https://github.com/TanStack/query/issues/3584
   const isLoading = enabled && isLoadingOrig;
 
-
-
   return (
     <CommandList>
-      {/* TODO: these should have proper loading aria */}
       {isLoading && <div className="p-4 text-sm">Hľadám...</div>}
       {!isError && !isLoading && !data?.length && (
         <div className="p-4 text-sm">Nenašiel sa žiadny užívateľ</div>

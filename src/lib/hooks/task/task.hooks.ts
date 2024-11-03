@@ -54,9 +54,7 @@ export const useTask = (id?: number, options?: UseQueryOptions<TaskDetail, Error
 
 export const useTasks = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) => {
   const { toast } = useToast()
-
   const { urlParams, params } = parseListHookParamsNew(pagination, filter, sort)
-
 
   const getTasksFn = async (params: {[key: string]: string}) => {
     const response = await tasksApiClient.get('', {
@@ -241,4 +239,73 @@ export const useDeleteTaskAttachment = (taskId: number) => {
       queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(taskId) });
       },
   });
+}
+
+
+export const useAddTaskMeta = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast()
+
+  const addTaskMetaFn = async (metaData: {taskId: number, key: string, value: string}) => {
+    const response = await tasksApiClient.post('/meta', {metaData})
+    return response.data
+  }
+  
+  return useMutation({
+    mutationFn: addTaskMetaFn,
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: taskQueryKeys.all })
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Zmeny uložené!"
+      })
+    },
+    onError: (err: AxiosError<{message: string}>) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message
+
+      toast({
+        title: "Chyba",
+        description: errMessage
+      })
+
+    },
+    onSettled: (metaData) => {
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(metaData.taskId) })
+    }
+  })
+}
+
+export const useDeleteTaskMeta = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast()
+
+  const deleteTaskMeta = async ({taskId, key}: {taskId: number, key: string}) => {
+    const response = await tasksApiClient.delete(`/meta?taskId=${taskId}&key=${key}`,)
+    return response.data
+  }
+  
+  return useMutation({
+    mutationFn: deleteTaskMeta,
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: taskQueryKeys.all })
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Zmeny uložené!"
+      })
+    },
+    onError: (err: AxiosError<{message: string}>) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message
+
+      toast({
+        title: "Chyba",
+        description: errMessage
+      })
+
+    },
+    onSettled: (metaData) => {  
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(metaData.taskId) })
+    }
+  })
 }

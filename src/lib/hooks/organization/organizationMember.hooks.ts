@@ -117,6 +117,39 @@ export const useUpdateOrganizationMember = (id: number) => {
 
 }
 
+export const useSwapOrganizationMember = () => {
+
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  const swapOrganizationMemberFn = async ({memberId, newUserId}: {memberId: number, newUserId: number}) => {
+    const response = await organizationMembersApi.post<OrganizationMember>(`/swap`, {memberId, newUserId})
+    return response.data
+  }
+
+  return useMutation({
+    mutationFn: swapOrganizationMemberFn,
+    onSuccess: (data) => {
+      toast({
+        title: "Člen vymenený!"
+      })
+    },
+    onError: (err: AxiosError<{ message: string }>, newOrganizationMember, context?: any) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message
+      toast({
+        title: "Chyba",
+        description: errMessage
+      })
+
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: organizationMemberQueryKeys.all });
+    },
+  });
+
+
+}
+
 export const useCreateOrganizationMember = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast()

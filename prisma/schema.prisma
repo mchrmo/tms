@@ -112,7 +112,7 @@ model Task {
   SubTasks          Task[]              @relation("ParentTask")
   Subscriptions     TaskSubscription[]
   Reminders         TaskReminder[]
-  Meta              TaskMeta[]
+  meta              TaskMeta[]
   attachments       TaskAttachment[]
 
   @@fulltext([name])

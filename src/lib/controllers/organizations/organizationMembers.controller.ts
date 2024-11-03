@@ -7,6 +7,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { ApiError } from "next/dist/server/api-utils"
 import { NextRequest, NextResponse } from "next/server"
 import { createPaginator } from "prisma-pagination"
+import { z } from "zod"
 
 
 const getOrganizationMember = async (req: NextRequest, params: any) => {
@@ -130,11 +131,25 @@ const updateOrganizationMember = async (request: NextRequest) => {
 
 const swapOrganizationMember = async (req: NextRequest, params: any) => {
   const body = await req.json()
-  const {memberId, newUserId} = body
-  
-  // const organizationMember = await organizationMemberService.swap_organizationMember()
 
-  return NextResponse.json({}, { status: 200 })
+  const schema = z.object({
+    memberId: z.number(),
+    newUserId: z.number()
+  })
+
+  const parsedSchema = schema.safeParse(body)
+  if (!parsedSchema.success) {
+    const { errors } = parsedSchema.error;
+
+    return NextResponse.json({
+      error: { message: "Invalid request", errors },
+    }, { status: 400 });
+  }
+
+  const {memberId, newUserId} = parsedSchema.data
+  const organizationMember = await organizationMemberService.swap_organizationMember(memberId, newUserId)
+
+  return NextResponse.json(organizationMember, { status: 200 })
 
 }
 
@@ -159,6 +174,7 @@ const organizationMembersController = {
   createOrganizationMember,
   getOrganizationMembers,
   updateOrganizationMember,
+  swapOrganizationMember,
   deleteOrganizationMember
 }
 

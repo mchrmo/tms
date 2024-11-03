@@ -2,6 +2,7 @@ import { Prisma, OrganizationMember } from "@prisma/client";
 import prisma from "../../prisma";
 import taskService from "../tasks/task.service";
 import taskUpdateService from "../tasks/taskUpdate.service";
+import userService from "../user.service";
 
 
 type CreateOrganizationMemberReqs = {
@@ -80,6 +81,9 @@ const update_organizationMember = async (organizationMemberData: Partial<Organiz
 
 const swap_organizationMember = async (orgMember_id: number, newUser_id: number) => {
 
+  const currentUser = await userService.get_current_user()
+  if(!currentUser) return null
+
   const organizationMember = await prisma.organizationMember.update({
     where: {id: orgMember_id},
     data: {
@@ -92,14 +96,14 @@ const swap_organizationMember = async (orgMember_id: number, newUser_id: number)
   })
 
   for (const task of assignedTasks) {
-    await taskUpdateService.create_taskUpdate(task, null, 'assignee_id', newUser_id)
+    await taskUpdateService.create_taskUpdate(task, currentUser, 'assignee_id', newUser_id)
   }
 
   const createdTasks = await prisma.task.findMany({
     where: {creator_id: orgMember_id}
   })
   for (const task of createdTasks) {
-    await taskUpdateService.create_taskUpdate(task, null, 'creator_id', newUser_id)
+    await taskUpdateService.create_taskUpdate(task, currentUser, 'creator_id', newUser_id)
   }
 
   return organizationMember

@@ -106,10 +106,6 @@ export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFil
     return query.data ? query.data.data : [];
   }, [query.data]);
   
-  // useEffect(() => {
-  //   query.refetch()
-  // }, [sorting, pagination])
-
 
   const table = useReactTable({
     data,
@@ -154,7 +150,6 @@ export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFil
         <TablePagination table={table}></TablePagination>
       </div>
     </div>
-    
   )
 }
 
