@@ -17,8 +17,13 @@ datasource db {
 
 model UserRole {
   id    Int    @id @default(autoincrement())
-  name  String
+  name  Roles
   users User[]
+} 
+
+enum Roles {
+  admin
+  employee
 }
 
 model User {
@@ -51,7 +56,6 @@ model File {
 }
 
 // Organizations
-
 model Organization {
   id        Int                  @id @default(autoincrement())
   parent_id Int?
@@ -85,7 +89,6 @@ model OrganizationMember {
 }
 
 // Tasks
-
 model Task {
   id                Int                 @id @default(autoincrement())
   name              String

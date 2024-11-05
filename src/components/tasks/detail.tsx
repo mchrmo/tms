@@ -1,12 +1,9 @@
 'use client'
-import { getApiClient } from "@/lib/api-client";
-import { taskQueryKeys, useSubTasks, useTask } from "@/lib/hooks/task/task.hooks";
+import { useTask } from "@/lib/hooks/task/task.hooks";
 import { Task } from "@prisma/client";
-import { useQuery } from "@tanstack/react-query";
 import ViewHeadline from "@/components/common/view-haedline";
 import TaskForm from "./task-form";
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import { useParams } from "next/navigation";
 import TasksTable from "./table";
 import Link from "next/link";
 import { Label } from "@/components/ui/label";
@@ -42,7 +39,6 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
 
   return (
     <>
-
       {task.error instanceof Error && <div>{task.error.message}</div>}
 
       {
@@ -100,9 +96,6 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
           </>
         )
       }
-
-
-
     </>
   )
 }

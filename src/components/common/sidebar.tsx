@@ -52,16 +52,16 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
       name: "Užívatelia",
       icon: <Users size={24} className="mr-4" />,
       href: "/users",
-      submenu: [
-        {
-          href: '/users',
-          name: 'Prehľad'
-        },
-        {
-          name: "Aliasy",
-          href: "/users/aliases"
-        }
-      ]
+      // submenu: [
+      //   {
+      //     href: '/users',
+      //     name: 'Prehľad'
+      //   },
+      //   {
+      //     name: "Aliasy",
+      //     href: "/users/aliases"
+      //   }
+      // ]
     },
     {
       label: "",
