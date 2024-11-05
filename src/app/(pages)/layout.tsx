@@ -11,6 +11,8 @@ import { Toaster } from "@/components/ui/toaster";
 import RoleProvider, { Providers } from "../providers";
 import { auth, getAuth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import UserProvider from "../providers";
+import { cloneElement } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,14 +33,12 @@ export default async function RootLayout({
     // Handle unauthenticated access
     return <p>Please log in to access the dashboard.</p>;
   }
-
   // Fetch user role from your database
-  const userRole = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { clerk_id: userId },
-    select: { role: { select: { name: true } } },
+    include: {role: true}
   });
 
-  const role = userRole?.role.name || 'employee';
 
   return (
     <ClerkProvider 
@@ -51,7 +51,7 @@ export default async function RootLayout({
     >
     <html lang='en' className="">
       <Providers>
-        <RoleProvider role={role}>
+        <UserProvider user={user}>
           <body className={`bg-gray-50 ${inter.className} flex flex-col min-h-screen`}>
           <Navbar/>
             <div className="flex flex-1  bg-gray-50 dark:bg-gray-900">
@@ -60,13 +60,15 @@ export default async function RootLayout({
               </div>
               <main className="w-full py-4 md:p-4 overflow-auto">
                 <div className="p-4 lg:p-8 bg-white block border-b rounded-md border-gray-200 lg:mt-1.5">
-                  {children}
+                  {/* {children} */}
+                  {cloneElement(children as React.ReactElement, { user })}
+
                 </div>
               </main>
             </div>
             <Toaster />
           </body>
-        </RoleProvider>
+        </UserProvider>
       </Providers>
     </html>
   </ClerkProvider>

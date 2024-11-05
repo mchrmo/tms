@@ -11,6 +11,7 @@ import SubmitButton from "@/components/common/buttons/submit";
 import { MeetingItemCreateSchema, meetingItemStatusMap, MeetingItemUpdateSchema, ZMeetingItem } from "@/lib/models/meeting/meetingItem.model";
 import { useCreateMeetingItem, useUpdateMeetingItem } from "@/lib/hooks/meeting/meetingItem.hooks";
 import clsx from "clsx";
+import { Textarea } from "@/components/ui/textarea";
 
 
 export default function MeetingItemForm({onUpdate, onCancel, defaultValues: _def, edit}: {edit?: boolean, onUpdate?: () => void, defaultValues?: any, onCancel?: () => void}) {
@@ -26,6 +27,7 @@ export default function MeetingItemForm({onUpdate, onCancel, defaultValues: _def
   const defaultValues: ZMeetingItem = {...{
     id: undefined,
     description: '',
+    title: '',
     meeting_id: undefined
   }, ...(_def ? _def : {})}
 
@@ -42,7 +44,7 @@ export default function MeetingItemForm({onUpdate, onCancel, defaultValues: _def
   useEffect(() => {
     if (createMeetingItem.isSuccess) { 
       createMeetingItem.reset()
-      router.push(`/meetings/item/${createMeetingItem.data.id}`)
+      router.push(`/meetings/items/${createMeetingItem.data.id}`)
       cancel()
     }
 
@@ -73,21 +75,22 @@ export default function MeetingItemForm({onUpdate, onCancel, defaultValues: _def
   return (
     <Form {...form}>
       <form  id="form" onSubmit={handleSubmit(onSubmit)} className="my-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">    
-        <FormField
+
+      <FormField
             control={form.control}
-            name="description"
+            name="title"
             render={({ field }) => (
               <FormItem className={clsx({"col-span-2": edit, "col-span-full": !edit})}>
-                <FormLabel>Popis</FormLabel>
+                <FormLabel>Predmet</FormLabel>
                 <FormControl>
-                  <Input placeholder="Návrh" {...field} disabled={_def.status && _def.status !== 'DRAFT'} />
+                  <Input placeholder="Predmet" {...field}/>
                 </FormControl>
               <FormMessage />
             </FormItem>
             )}
           />
-
-          {
+        
+        {
             edit &&
             <FormField
             control={form.control}
@@ -111,6 +114,22 @@ export default function MeetingItemForm({onUpdate, onCancel, defaultValues: _def
               </FormItem>
             )}}
           />}
+        <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem className={'col-span-full'}>
+                <FormLabel>Popis</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Návrh" {...field}>
+                  </Textarea>
+                </FormControl>
+              <FormMessage />
+            </FormItem>
+            )}
+          />
+
+          
 
 
 

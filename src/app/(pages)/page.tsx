@@ -7,16 +7,18 @@ import AdminDashboard from "@/components/dashboard/admin-dashboard";
 import EmpDashboard from "@/components/dashboard/emp-dashboard";
 import { getUserRole, isRole } from "@/lib/utils";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { User } from "@prisma/client";
+import { useUser } from "../providers";
 
 
-export default async function Home() {
+export default async function Home({user}: {user: User}) {
 
-  const user = await currentUser()
-  const isAdmin = isRole(user, 'admin')
+  // const user = await currentUser()
+  // const userContext = useUser();
+
+  const isAdmin = true
 
   
-  
-
   return (
     <>
       {

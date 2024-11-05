@@ -238,6 +238,7 @@ model MeetingMeta {
 model MeetingItem {
   id          Int                  @id @default(autoincrement())
   status      MeetingItemStatus    @default(DRAFT)
+  title       String                @default("")
   description String
   meeting_id  Int
   meeting     Meeting              @relation(fields: [meeting_id], references: [id])
