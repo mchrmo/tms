@@ -154,7 +154,7 @@ model TaskComment {
   id                   Int      @id @default(autoincrement())
   task_id              Int
   task                 Task     @relation(fields: [task_id], references: [id])
-  user_id              Int
+  user_id              Int      @default(1)
   user                 User     @relation(fields: [user_id], references: [id])
   message              String   @db.VarChar(250)
   createdAt            DateTime @default(now())
