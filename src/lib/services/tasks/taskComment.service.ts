@@ -2,15 +2,12 @@ import { Prisma, Task, TaskPriority, TaskStatus } from "@prisma/client";
 import prisma from "../../prisma";
 import { z } from "zod";
 import { TaskCommentCreateSchema, TaskCommentCreateServiceSchema, TaskCommentUpdateSchema } from "../../models/taksComment.model";
+import userService from "../user.service";
 
 export const taskCommentListItem = Prisma.validator<Prisma.TaskCommentDefaultArgs>()({
   include: {
-    creator: {
-      select: {
-        user: {
-          select: {name: true}
-        }
-      }
+    user: {
+      select: {name: true}
     }
   }
 })
@@ -31,10 +28,15 @@ export type TaskCommentDetail = Prisma.PromiseReturnType<typeof get_taskComment>
 const create_taskComment = async (data: z.infer<typeof TaskCommentCreateServiceSchema>) => {
   const { ...commentData } = data;
 
+  const currentUser = await userService.get_current_user()
+  if(!currentUser) return null
+
+
 
   const taskComment = await prisma.taskComment.create({
     data: {
       ...commentData,
+      user_id: currentUser.id
     },
   });
 
