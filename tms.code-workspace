@@ -16,6 +16,14 @@
       "path": "./src/lib"
     },
     {
+      "name": "CONTRLS",
+      "path": "./src/lib/controllers"
+    },
+    {
+      "name": "SERVICES",
+      "path": "./src/lib/services"
+    },
+    {
       "name": "API",
       "path": "./src/app/api"
     }

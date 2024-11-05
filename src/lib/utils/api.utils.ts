@@ -142,7 +142,6 @@ export function parseQueryParams(query: URLSearchParams, allowedSort?: string[])
 }
 
 export function parseListHookParams(pagination?: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) {
-
   let query = ''
   const params: {[key: string]: any} = {}
 
@@ -159,6 +158,32 @@ export function parseListHookParams(pagination?: PaginationState, filter?: Colum
   if(filter) {
     filter.forEach((f, i) => {
       params['filter_'+f.id] = f.value
+      query += `${f.id}=${f.value}`
+      if(i < filter.length-1) query += '&' 
+    })
+  }
+
+  return {params, urlParams: query}
+}
+
+export function parseListHookParamsNew(pagination?: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) {
+  let query = ''
+  const params: {[key: string]: any} = {}
+
+  params.page = pagination ? pagination.pageIndex+1 : 1
+  params.pageSize = pagination ? pagination.pageSize : 10
+  
+  query += `?page=${params.page}&pageSize=${params.pageSize}`
+  
+  if(sort) {
+    params['orderBy'] = sort.id
+    params['orderDir'] = sort.desc ? 'desc' : 'asc'
+    query += `&orderBy=${sort.id}&orderDir${sort.id}=${sort.desc ? 'desc' : 'asc'}`
+  }
+
+  if(filter) {
+    filter.forEach((f, i) => {
+      params[f.id] = f.value
       query += `${f.id}=${f.value}`
       if(i < filter.length-1) query += '&' 
     })
@@ -234,3 +259,160 @@ export function errorHandler(
     }
   };
 }
+
+
+// Filtering And Sorting
+
+export type SingleColumnDef = {
+  type: 'string' | 'number' | 'datetime' | 'enum' | 'boolean',
+  label?: string, 
+  path?: string,
+  method?: 'equals' | 'contains',
+  customFn?: (val: string | number | Date[] | boolean) => any,
+  disableSorting?: boolean,
+  enum?: {[key: string]: string}
+}
+
+export type ModelColumns = {
+  [key: string]: SingleColumnDef
+}
+
+
+const parseValue = (value: string, type: SingleColumnDef['type']) => {
+  switch (type) {
+    case 'number':
+      let number = parseFloat(value)
+      if(isNaN(number)) return Error(`Nesprávny formát čísla - '${value}'`)
+      return number;
+    case 'boolean':
+      return value === 'true';
+    case 'datetime':
+      let splitted = value.split('~').map((d) => new Date(d))
+      if(splitted.some(d => isNaN(d.getTime())) || splitted.length > 2) return Error(`Nesprávny formát dátumu - '${value}'`)
+      
+      if(splitted.length == 2){
+        if(splitted[1] < splitted[0]) return Error(`Začiatočný dátum musí byť skôr ako neskorší dátum - '${value}'`)
+        if(splitted[0].getTime() == splitted[1].getTime()) {
+          splitted.splice(0, 1)
+        }
+      }
+      return splitted // Convert to Date object
+    case 'enum':
+      return value
+    default:
+      return value.trim();
+  }
+};
+
+export const getFilters = (params: any, columns: ModelColumns) => {
+  const filter: any = {};
+  
+  for (const colName of Object.keys(columns)) {
+    let rawVal = params[colName]
+    if(!rawVal) continue
+
+    const colDef = columns[colName]
+    const colPath = (colDef.path && colDef.path.split('.')) || [colName]
+    const filterMethod = colDef.method || 'equals'
+
+    let val = parseValue(rawVal, colDef.type)
+    if(val instanceof Error) throw new ApiError(400, val.message)
+
+    let filterCondition: any = {};
+
+    if(colDef.customFn) {
+      const customFilter = colDef.customFn(val)
+      Object.assign(filter, customFilter)
+      continue
+    }
+      
+    let currentLevel = filterCondition;
+
+    colPath.forEach((part, index) => {
+      if (index === colPath.length - 1) {
+        // Apply different filter logic based on type
+        if(colDef.type == 'string' || colDef.type == 'enum') {
+          currentLevel[part] = {
+            [filterMethod]: val,
+          };
+        }
+        if(colDef.type == 'datetime'){
+          const dates = val as Date[]
+          let dFilter;
+
+          if(dates.length == 2) {
+            dFilter = {gte: dates[0], lte: dates[1]}
+          } else {
+            const start = new Date(dates[0])
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(dates[0])
+            end.setHours(23, 59, 59, 999);
+            dFilter = {gte: start, lte: end}
+          }
+
+          currentLevel[part] = dFilter;
+        }
+      } else {
+        currentLevel[part] = {};
+        currentLevel = currentLevel[part];
+      }
+    });
+    filter[colPath[0]] = filterCondition[colPath[0]]
+  }
+
+  return filter
+}
+
+export const getSorting = (params: any, columns: ModelColumns) => {
+  const sorting: any = {}
+
+  let {orderBy, orderDir} = params
+
+  if(!orderBy) return sorting
+  if(!orderDir) orderDir = 'asc'
+
+  if(!['asc', 'desc'].includes(orderDir)) throw new ApiError(400, `orderDir má neplatnú hodnotu ${orderDir}`)
+
+  const colName = Object.keys(columns).find(name => name === orderBy)
+  if(!colName) throw new ApiError(400, `orderBy má neplatnú hodnotu - '${orderBy}'`)
+  
+  const colDef = columns[colName]
+  if(colDef.disableSorting) throw new ApiError(400, `orderBy má neplatnú hodnotu - '${orderBy}'`)
+  const colPath = (colDef.path && colDef.path.split('.')) || [colName]
+
+  // let filterCondition: any = {};
+  let currentLevel = sorting;
+
+  colPath.forEach((part, index) => {
+    if (index === colPath.length - 1) {
+      // Apply different filter logic based on type
+      currentLevel[part] = orderDir
+
+    } else {
+      currentLevel[part] = {};
+      currentLevel = currentLevel[part];
+    }
+  });
+
+  return sorting
+}
+
+export const parseGetManyParams = (urlParams: URLSearchParams, columns: ModelColumns) => {
+  const params = Object.fromEntries(new URLSearchParams(urlParams));
+
+  // Add default id column
+  columns.id = {
+    type: 'number'
+  }
+
+  const pagination: {page?: number, pageSize?: number} = {
+    page: parseInt(params.page || '1'),
+    pageSize: parseInt(params.pageSize || '10')
+  };
+
+  const where = getFilters(params, columns)
+  const orderBy = getSorting(params, columns)
+  
+
+  return {where, orderBy, pagination}
+}  

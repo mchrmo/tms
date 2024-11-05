@@ -3,7 +3,7 @@
 // TWILIO BPS68FDK5PQVZ2VLLW6UKQ3C
 import Email from "vercel-email";
 import { getUser, getUserByClerkId } from "../db/user.repository";
-import { formatDate, formatDateTime } from "../utils/dates";
+import { formatDateTime } from "../utils/dates";
 import { Meeting } from "@prisma/client";
 
 const sgMail = require('@sendgrid/mail')

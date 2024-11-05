@@ -16,24 +16,36 @@ type PrismaOperations<ModelName extends ModelNames> =
 type PrismaFindManyArgs<ModelName extends ModelNames> =
   PrismaOperations<ModelName>['findMany']['args'];
 
+type IncludeOption<ModelName extends ModelNames> =
+  PrismaFindManyArgs<ModelName> extends { include: infer T } ? T : undefined;
+
 // Define a type for pagination options, including model name, query filters, and pagination parameters
 type PaginationOptions<ModelName extends ModelNames> = {
   modelName: ModelName; // Name of the model to paginate
   where?: PrismaFindManyArgs<ModelName>['where']; // Filtering conditions for the query
   orderBy?: PrismaFindManyArgs<ModelName>['orderBy']; // Sorting criteria for the query
-  include?: PrismaFindManyArgs<ModelName> extends { include: infer I } ? I : never;
-  page?: string; // Page number for pagination
+  include?: IncludeOption<ModelName>; // Relations to include
+  page?: string; // Page number for pagination 
   pageSize?: string; // Number of items per page for pagination
 };
 
+
 export type PaginatedResponse<T> = {
-  items: T[],
-  totalCount: number,
-  currentPage: number,
-  prevPage: number | null,
-  nextPage: number | null
+  data: T[],
+  meta: {
+    total: number,
+    currentPage: number,
+    lastPage: number,
+    prev: number | null,
+    next: number | null,
+    perPage: number  
+  }
 }
 
+export type PaginatedResponseOld<T> = {
+  items: T[],
+  totalCount: number
+}
 
 export async function paginate<ModelName extends ModelNames>({
   page,

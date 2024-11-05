@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
+import { Button, ButtonProps } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { ForwardedRef, forwardRef } from "react";
 
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
+// type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 interface AddButtonProps extends ButtonProps {
   children: React.ReactNode;

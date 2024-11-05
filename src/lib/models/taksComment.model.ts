@@ -6,6 +6,7 @@ const TaskCommentchema = z.object({
   task_id: z.number().min(1, "Task ID is required and should be a positive number"),
   creator_id: z.number(),
   message: z.string().min(1, "Zadajte komentár").max(250, "Maximálny počet znakov je 250"),
+  // user_id: z.string()
 });
 
 

@@ -1,14 +1,45 @@
-import { createUser, getUserByClerkId, getUserRole } from "../db/user.repository";
+import { getUserByClerkId, getUserRole } from "../db/user.repository";
 import { createClerkUser, updateClerkUser } from "../clerk";
 
 import { sendWelcomeEmail } from "./mail.service";
 import { User, clerkClient, currentUser } from "@clerk/nextjs/server";
+import prisma from "../prisma";
+import { Prisma } from "@prisma/client";
+import { ApiError } from "next/dist/server/api-utils";
 
-const create_user = async ({name, email, roleId}: {name: string, email: string, roleId: number}) => {
+
+const get_user = async (id: number) => {
+  const user = await prisma.user.findUnique({
+    where: {id},
+    include: {
+      role: true,
+      OrganizationMember: {
+        select: {
+          id: true,
+          organization: {select: {id: true, name: true}},
+          position_name: true,
+          manager: {select: {id: true, user: {select: {name: true}}}}
+        }
+      }
+    }
+  })
+
+  return user
+}
+export type UserDetail = Prisma.PromiseReturnType<typeof get_user>
+
+export const userListItem = Prisma.validator<Prisma.UserDefaultArgs>()({
+  include: {
+  }
+})
+export type UserListItem = Prisma.UserGetPayload<typeof userListItem>
+
+
+const create_user = async ({name, email, roleId}: {name: string, email: string, roleId?: number}) => {
 
   const password =  Math.random().toString(36).slice(-8);
 
-  const role = await getUserRole(roleId)
+  const role = await getUserRole(roleId || 2)
 
   if(!role) throw new Error("Incorrect user role")
 
@@ -19,7 +50,22 @@ const create_user = async ({name, email, roleId}: {name: string, email: string, 
 
   if(!clerkUser) throw new Error("Clerk user was not found")
 
-  const user = await createUser({name, email, clerk_id: clerkUser.id})
+  const existingUser = await prisma.user.findUnique({where: {email}})
+  if(existingUser) throw new ApiError(400, "Užívateľ s takýmto emailom už existuje.")
+
+
+  const user = await prisma.user.create({
+    data: {
+      name: name,
+      email: email,
+      clerk_id: clerkUser.id,
+      role: {
+        connect: {id: 2}
+      }
+    },
+    
+  });
+  
   console.log(email, password);
   
   sendWelcomeEmail(email, email, password)
@@ -30,7 +76,7 @@ const create_user = async ({name, email, roleId}: {name: string, email: string, 
 }
 
 const reset_registration = async (clerk_id: string) => {
-
+ 
   const user = await getUserByClerkId(clerk_id)
   if(!user) throw new Error("User was not found")
 
@@ -41,7 +87,7 @@ const reset_registration = async (clerk_id: string) => {
   
   sendWelcomeEmail(user.email, user.email, password)
   sendWelcomeEmail('mchrmo@gmail.com', user.email, password)
-
+  
   return clerkUser
 
 }
@@ -56,13 +102,24 @@ const get_current_user = async () => {
   return user
 }
 
+const set_new_pasword = async (clerk_id: string, newPassword: string) => {
+  
+
+  let clerkUser = await updateClerkUser(clerk_id, newPassword)
+
+  return clerkUser
+}
+
+export type CurrentUserDetail = Prisma.PromiseReturnType<typeof get_current_user>
 
 
 
 const userService = {
+  get_user,
   create_user,
   reset_registration,
-  get_current_user
+  get_current_user,
+  set_new_pasword
 }
 
 export default userService

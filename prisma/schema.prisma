@@ -17,8 +17,13 @@ datasource db {
 
 model UserRole {
   id    Int    @id @default(autoincrement())
-  name  String
+  name  Roles
   users User[]
+} 
+
+enum Roles {
+  admin
+  employee
 }
 
 model User {
@@ -26,22 +31,36 @@ model User {
   clerk_id            String               @unique
   name                String
   email               String               @unique
+  phone               String               @default("Neuvedené")
   role_id             Int                  @default(2)
   role                UserRole             @relation(fields: [role_id], references: [id])
+  createdAt           DateTime             @default(now())
   OrganizationMember  OrganizationMember[]
   TaskUpdate          TaskUpdate[]
   meetings            MeetingAttendant[]
   meetingItems        MeetingItem[]
   meetingItemComments MeetingItemComment[]
+  File                File[]
+  TaskComment         TaskComment[]
+}
+
+model File {
+  id             Int              @id @default(autoincrement())
+  owner_id       Int
+  owner          User             @relation(fields: [owner_id], references: [id])
+  name           String
+  path           String
+  extension      String
+  createdAt      DateTime         @default(now())
+  TaskAttachment TaskAttachment[]
 }
 
 // Organizations
-
 model Organization {
   id        Int                  @id @default(autoincrement())
   parent_id Int?
   name      String               @unique
-  type      OrganizationType
+  type      OrganizationType     @default(main)
   parent    Organization?        @relation("OrganizationParent", fields: [parent_id], references: [id])
   children  Organization[]       @relation("OrganizationParent")
   members   OrganizationMember[]
@@ -63,7 +82,6 @@ model OrganizationMember {
   manager           OrganizationMember?  @relation("MemberManager", fields: [manager_id], references: [id])
   subordinates      OrganizationMember[] @relation("MemberManager")
   organization      Organization         @relation(fields: [organization_id], references: [id])
-  TaskComment       TaskComment[]
   AssignedTasks     Task[]               @relation("AssignedMember")
   CreatedTasks      Task[]               @relation("TaskCreator")
   TaskSubscriptions TaskSubscription[]
@@ -71,7 +89,6 @@ model OrganizationMember {
 }
 
 // Tasks
-
 model Task {
   id                Int                 @id @default(autoincrement())
   name              String
@@ -98,7 +115,8 @@ model Task {
   SubTasks          Task[]              @relation("ParentTask")
   Subscriptions     TaskSubscription[]
   Reminders         TaskReminder[]
-  Meta              TaskMeta[]
+  meta              TaskMeta[]
+  attachments       TaskAttachment[]
 
   @@fulltext([name])
 }
@@ -123,8 +141,8 @@ model TaskUpdate {
   id          Int      @id @default(autoincrement())
   task_id     Int
   task        Task     @relation(fields: [task_id], references: [id])
-  user_id     Int
-  user        User     @relation(fields: [user_id], references: [id])
+  user_id     Int?
+  user        User?     @relation(fields: [user_id], references: [id])
   key         String
   title       String
   description String?
@@ -133,14 +151,15 @@ model TaskUpdate {
 }
 
 model TaskComment {
-  id         Int                @id @default(autoincrement())
-  task_id    Int
-  task       Task               @relation(fields: [task_id], references: [id])
-  creator_id Int
-  creator    OrganizationMember @relation(fields: [creator_id], references: [id])
-  message    String             @db.VarChar(250)
-  createdAt  DateTime           @default(now())
-  updateAt   DateTime           @default(now())
+  id                   Int      @id @default(autoincrement())
+  task_id              Int
+  task                 Task     @relation(fields: [task_id], references: [id])
+  user_id              Int      @default(1)
+  user                 User     @relation(fields: [user_id], references: [id])
+  message              String   @db.VarChar(250)
+  createdAt            DateTime @default(now())
+  updateAt             DateTime @default(now())
+  organizationMemberId Int?
 }
 
 model TaskReminder {
@@ -151,6 +170,14 @@ model TaskReminder {
   member      OrganizationMember? @relation(fields: [member_id], references: [id])
   description String
   datetime    DateTime
+}
+
+model TaskAttachment {
+  id      Int  @id @default(autoincrement())
+  task_id Int
+  tasj    Task @relation(fields: [task_id], references: [id])
+  file_id Int
+  file    File @relation(fields: [file_id], references: [id])
 }
 
 model TaskType {
@@ -191,7 +218,7 @@ model MeetingAttendant {
   meeting_id Int
   meeting    Meeting              @relation(fields: [meeting_id], references: [id])
   user_id    Int
-  user       User                @relation(fields: [user_id], references: [id])
+  user       User                 @relation(fields: [user_id], references: [id])
   role       MeetingAttendantRole @default(ATTENDANT)
 }
 
@@ -232,6 +259,6 @@ model MeetingItemComment {
   item       MeetingItem @relation(fields: [item_id], references: [id])
   creator_id Int
   creator    User        @relation(fields: [creator_id], references: [id])
-  message    String @db.Text
+  message    String      @db.Text
   createdAt  DateTime    @default(now())
 }

@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { paginate, parseFilter, parseQueryParams } from "../../services/api.service";
-import { Prisma } from "@prisma/client";
-import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP, TaskUpdateSchema } from "../../models/task.model";
+import { Prisma, Task } from "@prisma/client";
+import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP, taskColumns, TaskUpdateSchema } from "../../models/task.model";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "../../db/user.repository";
 import { z } from "zod";
 import taskService from "../../services/tasks/task.service";
+import { createPaginator } from "prisma-pagination";
+import { parseGetManyParams } from "@/lib/utils/api.utils";
+import prisma from "@/lib/prisma";
 
 
 const getTask = async (req: NextRequest, params: any) => {
@@ -20,42 +23,8 @@ const getTask = async (req: NextRequest, params: any) => {
 }
 
 const getTasks = async (req: NextRequest) => {
-
   const params = req.nextUrl.searchParams
-  const {
-    pagination: {page, pageSize},
-    filters,
-    order
-  } = parseQueryParams(params)
-
-  const where: Prisma.TaskWhereInput = parseFilter(filters, {name: 'string'})
-  for (const [field, value] of Object.entries(filters)) {
-    switch(field) {
-      case 'status':
-        if(Object.keys(TASK_STATUSES_MAP).includes(value)) where.status = value
-        break;
-      case 'priority':
-        if(Object.keys(TASK_PRIORITIES_MAP).includes(value)) where.priority = value
-        break;
-      case 'creator_name':
-        where.creator = {
-          user: {name: {contains: value}}
-        }
-        break;
-      case 'assignee_name':
-        where.assignee = {
-          user: {name: {contains: value}}
-        }
-        break;
-      case 'organization_name':
-        where.organization = {name: {contains: value}}
-        break;
-      case 'parent_id':
-        where.parent_id = {equals: parseInt(value)}
-        break;
-    }
-    
-  }
+  const {where, orderBy, pagination} = parseGetManyParams(params, taskColumns)
 
   const include: Prisma.TaskInclude = {
     assignee: { 
@@ -69,15 +38,15 @@ const getTasks = async (req: NextRequest) => {
     }
   } 
 
-  const data = await paginate({
-    modelName: 'Task',
-    page,
-    pageSize,
-    where,
-    orderBy: order,
-    include: include as any
-  })
-  
+  const paginate = createPaginator({ page: pagination.page, perPage: pagination.pageSize })
+  const data = await paginate<Task, Prisma.TaskFindManyArgs>(
+    prisma.task,
+    {
+      where,
+      orderBy,
+      include: include,
+    }
+  )
 
   return NextResponse.json(data, { status: 200 })
 }

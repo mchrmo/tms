@@ -1,5 +1,4 @@
 import { Prisma, Meeting } from "@prisma/client";
-import { getMember } from "../../db/organizations";
 import { sendAssigneeChangeNotification } from "../mail.service";
 import prisma from "../../prisma";
 import userService from "../user.service";
@@ -98,6 +97,13 @@ const delete_meeting = async (meeting_id: number) => {
       meeting_id
     }
   })
+
+  const attendants = await prisma.meetingAttendant.deleteMany({
+    where: {
+      meeting_id
+    }
+  })
+
 
   const meeting = await prisma.meeting.delete({
       where: {

@@ -10,13 +10,14 @@ import clsx from "clsx"
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowUpDown, ChevronDown, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ChevronUp } from "lucide-react"
-import Filter from "@/components/common/table/filter"
-import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP } from "@/lib/models/task.model"
+import Filter, { TableFilter } from "@/components/common/table/filter"
+import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP, taskColumns } from "@/lib/models/task.model"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import TableComponent, { FilteredHeaderCell } from "@/components/common/table/table"
 import { PaginatedResponse } from "@/lib/services/api.service"
 import { useTasks } from "@/lib/hooks/task/task.hooks"
 import TablePagination from "@/components/common/table/pagination"
+import { userColumns } from "@/lib/models/user.model"
 
 
 const columns: ColumnDef<Task>[] = [
@@ -83,7 +84,9 @@ const columns: ColumnDef<Task>[] = [
     accessorKey: "organization.name",
     header: "Organizácia",
   },
-  
+  {
+    id: 'fulltext',
+  },
 ]
 
 
@@ -100,13 +103,9 @@ export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFil
   const { isLoading, isError } = query
 
   const data = useMemo(() => {
-    return query.data ? query.data.items : [];
+    return query.data ? query.data.data : [];
   }, [query.data]);
   
-  // useEffect(() => {
-  //   query.refetch()
-  // }, [sorting, pagination])
-
 
   const table = useReactTable({
     data,
@@ -124,8 +123,8 @@ export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFil
 
     onPaginationChange: setPagination,
     manualPagination: true,
-    rowCount: query.data?.totalCount,
-    pageCount: Math.ceil((query.data?.totalCount || 0) / (pagination.pageSize || 1)),
+    rowCount: query.data?.meta.total,
+    pageCount: Math.ceil((query.data?.meta.total || 0) / (pagination.pageSize || 1)),
 
     state: {
       columnFilters,
@@ -135,21 +134,22 @@ export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFil
   })
 
 
-  const customHeader = (header: Header<Task, unknown>) => <FilteredHeaderCell key={header.id} header={header} />
-
   return (
     <div>
+      <div className="mb-4">
+        <TableFilter table={table} columns={taskColumns} primaryFilterColumn="fulltext"></TableFilter>
+      </div>
+
       <div className="">
         <TableComponent table={table} isError={isError} isLoading={isLoading}
           templateParts={{
-            headerCell: customHeader
+            // headerCell: customHeader
           }}
         >
         </TableComponent>
         <TablePagination table={table}></TablePagination>
       </div>
     </div>
-    
   )
 }
 

@@ -7,8 +7,5 @@ export default function CreateMeeting() {
 
   return <>
     <MeetingForm></MeetingForm>
-
   </>
-
-
 }

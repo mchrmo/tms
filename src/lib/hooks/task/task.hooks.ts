@@ -9,7 +9,8 @@ import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react
 import { AxiosError } from "axios";
 import { PaginatedResponse } from "../../services/api.service";
 import { taskUpdateQueryKeys } from "./taskUpdate.hooks";
-import { parseListHookParams } from "@/lib/utils/api.utils";
+import { parseListHookParams, parseListHookParamsNew } from "@/lib/utils/api.utils";
+import { TaskDetail } from "@/lib/services/tasks/task.service";
 
 
 const tasksApiClient = getApiClient('/tasks')
@@ -24,16 +25,16 @@ export const taskQueryKeys = {
   assigned: () => [...taskQueryKeys.all, 'assigned']
 };
 
-export const useTask = (id?: number, options?: UseQueryOptions<Task, Error>) => {
+export const useTask = (id?: number, options?: UseQueryOptions<TaskDetail, Error>) => {
   const { toast } = useToast()
 
 
   const getTaskFn = async () => {
-    const response = await tasksApiClient.get<Task>(`/${id}`);
+    const response = await tasksApiClient.get<TaskDetail>(`/${id}`);
     return response.data;
   };
 
-  const query = useQuery<Task, Error>({
+  const query = useQuery<TaskDetail, Error>({
     queryKey: taskQueryKeys.detail(Number(id)), 
     queryFn: getTaskFn,
     enabled: !!id,
@@ -53,9 +54,7 @@ export const useTask = (id?: number, options?: UseQueryOptions<Task, Error>) => 
 
 export const useTasks = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) => {
   const { toast } = useToast()
-
-  const { urlParams, params } = parseListHookParams(pagination, filter, sort)
-
+  const { urlParams, params } = parseListHookParamsNew(pagination, filter, sort)
 
   const getTasksFn = async (params: {[key: string]: string}) => {
     const response = await tasksApiClient.get('', {
@@ -174,8 +173,8 @@ export const useCreateTask = () => {
         title: "Úloha vytvorená!"
       })
     },
-    onError: (err: AxiosError<{error: string}>, newTask, context?: any) => {
-      const errMessage = err.response?.data ? err.response.data.error : err.message
+    onError: (err: AxiosError<{message: string}>, newTask, context?: any) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message
 
       toast({
         title: "Chyba",
@@ -204,4 +203,109 @@ export const useMyTasks = () => {
     queryFn: () => getTasksFn(),
   })
 
+}
+
+
+export const useDeleteTaskAttachment = (taskId: number) => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const deleteTaskAttachmerFn = async (id: number) => {
+      const response = await tasksApiClient.delete(`/attachments/${id}`);
+      return response.data;
+  };
+
+  return useMutation({
+      mutationFn: deleteTaskAttachmerFn,
+      onMutate: async () => {
+      if (!confirm("Určite to chcete vymazať?")) {
+          throw new Error('Nič nebolo vymazané');
+      }
+      },
+      onSuccess: () => {
+      toast({
+          title: 'Príloha odstránená!',
+      });
+      },
+      onError: (err: AxiosError<{ message: string }>, _, context?: any) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message;
+      toast({
+          title: 'Chyba',
+          description: errMessage,
+      });
+
+      },
+      onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(taskId) });
+      },
+  });
+}
+
+
+export const useAddTaskMeta = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast()
+
+  const addTaskMetaFn = async (metaData: {taskId: number, key: string, value: string}) => {
+    const response = await tasksApiClient.post('/meta', {metaData})
+    return response.data
+  }
+  
+  return useMutation({
+    mutationFn: addTaskMetaFn,
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: taskQueryKeys.all })
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Zmeny uložené!"
+      })
+    },
+    onError: (err: AxiosError<{message: string}>) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message
+
+      toast({
+        title: "Chyba",
+        description: errMessage
+      })
+
+    },
+    onSettled: (metaData) => {
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(metaData.taskId) })
+    }
+  })
+}
+
+export const useDeleteTaskMeta = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast()
+
+  const deleteTaskMeta = async ({taskId, key}: {taskId: number, key: string}) => {
+    const response = await tasksApiClient.delete(`/meta?taskId=${taskId}&key=${key}`,)
+    return response.data
+  }
+  
+  return useMutation({
+    mutationFn: deleteTaskMeta,
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: taskQueryKeys.all })
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Zmeny uložené!"
+      })
+    },
+    onError: (err: AxiosError<{message: string}>) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message
+
+      toast({
+        title: "Chyba",
+        description: errMessage
+      })
+
+    },
+    onSettled: (metaData) => {  
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(metaData.taskId) })
+    }
+  })
 }

@@ -2,21 +2,14 @@
 
 import { Meeting  } from "@prisma/client"
 import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, Header, PaginationState, SortingState, Table as TableType, useReactTable } from "@tanstack/react-table"
-
-import { format } from "date-fns"
-import { DATE_FORMAT } from "@/lib/utils"
 import Link from "next/link"
-import clsx from "clsx"
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { ArrowUpDown, ChevronDown, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ChevronUp } from "lucide-react"
-import Filter from "@/components/common/table/filter"
-import LoadingSpinner from "@/components/ui/loading-spinner"
+import {  useMemo, useState } from "react"
 import TableComponent, { FilteredHeaderCell } from "@/components/common/table/table"
-import { PaginatedResponse } from "@/lib/services/api.service"
 import { useMeetings } from "@/lib/hooks/meeting/meeting.hooks"
 import TablePagination from "@/components/common/table/pagination"
 import { formatDateTime } from "@/lib/utils/dates"
+import { TableFilter } from "../common/table/filter"
+import { meetingColumns } from "@/lib/models/meeting/meeting.model"
 
 
 const columns: ColumnDef<Meeting>[] = [
@@ -64,7 +57,7 @@ export default function MeetingsTable({defaultFilters}: {defaultFilters?: Column
   const { isLoading, isError } = query
 
   const data = useMemo(() => {
-    return query.data ? query.data.items : [];
+    return query.data ? query.data.data : [];
   }, [query.data]);
 
 
@@ -84,8 +77,8 @@ export default function MeetingsTable({defaultFilters}: {defaultFilters?: Column
 
     onPaginationChange: setPagination,
     manualPagination: true,
-    rowCount: query.data?.totalCount,
-    pageCount: Math.ceil((query.data?.totalCount || 0) / (pagination.pageSize || 1)),
+    rowCount: query.data?.meta.total,
+    pageCount: Math.ceil((query.data?.meta.total || 0) / (pagination.pageSize || 1)),
 
     state: {
       columnFilters,
@@ -99,11 +92,12 @@ export default function MeetingsTable({defaultFilters}: {defaultFilters?: Column
 
   return (
     <div>
+      <div className="mb-4">
+        <TableFilter table={table} columns={meetingColumns} primaryFilterColumn="name"></TableFilter>
+      </div>
+
       <div className="">
         <TableComponent table={table} isError={isError} isLoading={isLoading}
-          templateParts={{
-            headerCell: customHeader
-          }}
         >
         </TableComponent>
         <TablePagination table={table}></TablePagination>

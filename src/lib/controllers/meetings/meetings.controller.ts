@@ -1,11 +1,11 @@
-import { MeetingCreateSchema, MeetingUpdateSchema, ZMeetingCreateForm } from "@/lib/models/meeting/meeting.model"
-import { paginate, parseQueryParams } from "@/lib/services/api.service"
+import { meetingColumns, MeetingCreateSchema, MeetingUpdateSchema, ZMeetingCreateForm } from "@/lib/models/meeting/meeting.model"
+import prisma from "@/lib/prisma"
 import meetingService, { meetingListItem } from "@/lib/services/meetings/meeting.service"
-import userService from "@/lib/services/user.service"
-import { parseFilter } from "@/lib/utils/api.utils"
-import { Prisma } from "@prisma/client"
+import { parseGetManyParams } from "@/lib/utils/api.utils"
+import { Meeting, Prisma } from "@prisma/client"
 import { ApiError } from "next/dist/server/api-utils"
 import { NextRequest, NextResponse } from "next/server"
+import { createPaginator } from "prisma-pagination"
 
 
 const getMeeting = async (req: NextRequest, params: any) => {
@@ -20,27 +20,17 @@ const getMeeting = async (req: NextRequest, params: any) => {
 const getMeetings = async (req: NextRequest) => {
 
   const params = req.nextUrl.searchParams
-  const {
-    pagination: {page, pageSize},
-    filters,
-    order
-  } = parseQueryParams(params)
+  const {where, orderBy, pagination} = parseGetManyParams(params, meetingColumns)
 
-  const where: Prisma.MeetingWhereInput = parseFilter(filters, {name: 'string', id: 'number', order: 'date'})
-  for (const [field, value] of Object.entries(filters)) {
-    switch(field) {
+  const paginate = createPaginator({ page: pagination.page, perPage: pagination.pageSize })
+  const data = await paginate<Meeting, Prisma.MeetingFindManyArgs>(
+    prisma.meeting,
+    {
+      where,
+      orderBy,
+      include: meetingListItem.include,
     }
-  }
-
-  const data = await paginate({
-    modelName: 'Meeting',
-    page,
-    pageSize,
-    where,
-    orderBy: order,
-    ...meetingListItem as any 
-  })
-  
+  )
 
   return NextResponse.json(data, { status: 200 })
 }

@@ -49,7 +49,7 @@ export default function OrgTree({data}: {data: RawNodeDatum}) {
             scaleExtent={	{min: 0.5, max: 1.5}}
             collapsible={false}
             separation={{
-              siblings: 1.5
+              siblings: 3
             }}
             rootNodeClassName="node__root"
             branchNodeClassName="node__branch"

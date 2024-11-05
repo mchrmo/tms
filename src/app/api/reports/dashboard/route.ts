@@ -14,6 +14,9 @@ const fetchNextMeeting = async (user_id: number) => {
         some: {
           user_id
         }
+      },
+      date: {
+        gte: new Date()
       }
     },
     orderBy: {
