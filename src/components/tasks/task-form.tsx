@@ -1,16 +1,15 @@
 "use client"
 
 import { SubmitHandler, useForm } from "react-hook-form"
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Textarea } from "@/components/ui/textarea";
-import OrganizationMemberCombobox from "../members/member-combobox";
+import OrganizationMemberCombobox from "../organizations/members/member-combobox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TaskPriority, TaskStatus } from "@prisma/client";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCreateTask, useTask, useUpdateTask } from "@/lib/hooks/task/task.hooks";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -201,8 +200,6 @@ export default function TaskForm({ onUpdate, defaultValues: _def, edit }: { edit
           )}
         />
 
-
-
         <Accordion type="single" className="col-span-full" collapsible>
           <AccordionItem value="item-1">
             <AccordionTrigger>Podrobnosti</AccordionTrigger>
@@ -235,12 +232,11 @@ export default function TaskForm({ onUpdate, defaultValues: _def, edit }: { edit
                   </FormItem>
                 )}
               />
+
+              
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-
-
-
 
         {isDirty && <div className="space-x-3 col-span-full flex mt-5">
           <Button variant="secondary" type="button" onClick={() => { onCancel(); }}>Zrušiť</Button>

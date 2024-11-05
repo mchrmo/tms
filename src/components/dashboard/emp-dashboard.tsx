@@ -2,10 +2,6 @@
 
 import { getUserByClerkId } from "@/lib/db/user.repository";
 import ViewHeadline from "@/components/common/view-haedline";
-import MyTasks from "../tasks/my-tasks";
-import { auth } from "@clerk/nextjs/server";
-import { getTaskList } from "@/lib/db/task.repository";
-import SendReportButton from "../common/buttons/sendReportButton";
 import { Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -100,7 +96,7 @@ export default function EmpDashboard() {
             <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl cursor-pointer" onClick={() => router.push('/tasks')}>
               <h3 className="text-lg font-semibold mb-2">Nedokončené úlohy</h3>
               <p className="text-gray-700">Mne delegované: {data.unfinishedTasksCount?.owned ?? 0}</p>
-              <p className="text-gray-700">Mnou delegobvané: {data.unfinishedTasksCount?.assigned ?? 0}</p>
+              <p className="text-gray-700">Mnou delegované: {data.unfinishedTasksCount?.assigned ?? 0}</p>
             </div>
   
             {/* Reminders Widget */}

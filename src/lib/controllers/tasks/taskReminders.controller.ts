@@ -78,7 +78,6 @@ const updateTaskReminder = async (request: NextRequest) => {
 
 
   const updateData = {...parsedSchema.data}
-
   const taskReminder = await taskReminderService.update_taskReminder(updateData)
 
 

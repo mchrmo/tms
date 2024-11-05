@@ -1,9 +1,9 @@
 import { Prisma, Task, TaskPriority, TaskStatus, User } from "@prisma/client";
-import { getMember } from "../../db/organizations";
 import { sendAssigneeChangeNotification } from "../mail.service";
 import prisma from "../../prisma";
 import { z } from "zod";
 import userService from "../user.service";import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP } from "../../models/task.model";
+import organizationMemberService from "../organizations/organizationMembers.service";
 
 export const taskUpdateListItem = Prisma.validator<Prisma.TaskUpdateDefaultArgs>()({
   include: {
@@ -23,37 +23,44 @@ const get_taskUpdate = async (id: number) => {
 
 export type TaskUpdateDetail = Prisma.PromiseReturnType<typeof get_taskUpdate>
 
-const create_taskUpdate = async (task: Task, user: User, key: string, value?: any) => {
+const create_taskUpdate = async (task: Task, user: User | null, key: string, value?: any) => {
 
   let description;
   let title = ''
 
+  let changerName = user ? user.name : 'Systém'
 
   switch(key) {
     case 'created': {
-      const member = await getMember(task.assignee_id!)
+      const member = await organizationMemberService.get_organizationMember(task.assignee_id!)
       title = 'Úloha vytvorená'
-      description = `Úlohu vytvoril ${user.name} pre ${member?.user.name}`
+      description = `Úlohu vytvoril ${changerName} pre ${member?.user.name}`
     } break;
     case 'assignee_id': {
       if(!value) break; 
-      const member = await getMember(value)
+      const member = await organizationMemberService.get_organizationMember(value)
       title = `Zmena poverenej osoby`
-      description = `${user.name} poveril/a ${member && member.user.name}`
+      description = `${changerName} poveril ${member && member.user.name}`
+    } break;
+    case 'creator_id': {
+      if(!value) break; 
+      const member = await organizationMemberService.get_organizationMember(value)
+      title = `Zmena vlastníka`
+      description = `${changerName} zmenil vlastníka na ${member && member.user.name}`
     } break;
     case 'status': 
       if(!value) break; 
       title = `Stav zmenený`
-      description = `${user.name} zmenil stav na ${TASK_STATUSES_MAP[task.status]}`
+      description = `${changerName} zmenil stav na ${TASK_STATUSES_MAP[task.status]}`
       break;
     case 'priority':  
       title = `Priorita zmenená`
-      description = `${user.name} zmenil prioritu na ${TASK_PRIORITIES_MAP[task.priority]}`
+      description = `${changerName} zmenil prioritu na ${TASK_PRIORITIES_MAP[task.priority]}`
       break;
 
 
     default:
-      title = `Neidentifikovaná zmena - ${key}/${value}`
+      title = `Ostatná zmena - ${key}/${value}`
       break;
   }
 
@@ -66,7 +73,7 @@ const create_taskUpdate = async (task: Task, user: User, key: string, value?: an
     },
     key,
     value,
-    user: {connect: {id: user.id}},
+    user: user ? {connect: {id: user.id}} : {},
     title,
     description
   }

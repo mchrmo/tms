@@ -1,10 +1,10 @@
 import { Prisma, Task, TaskPriority, TaskStatus } from "@prisma/client";
 import { createTask, createTaskUpdate, updateTask } from "../../db/task.repository";
-import { getMember } from "../../db/organizations";
 import { sendAssigneeChangeNotification } from "../mail.service";
 import prisma from "../../prisma";
 import taskUpdateService from "./taskUpdate.service";
 import userService from "../user.service";
+import organizationMemberService from "../organizations/organizationMembers.service";
 
 
 type CreateTaskReqs = {
@@ -29,6 +29,12 @@ const get_task = async (id: number) => {
       },
       parent: {
         select: {name: true, id: true}
+      },
+      meta: {
+        select: {
+          key: true,
+          value: true
+        }
       },
       attachments: {
         select: {
@@ -58,7 +64,7 @@ const create_task = async (taskData: CreateTaskReqs) => {
   const currentUser = await userService.get_current_user()
   if(!currentUser) return null
 
-  const member = await getMember(taskData.creator_id)
+  const member = await organizationMemberService.get_organizationMember(taskData.creator_id)
 
 
   const organization_id = taskData.organization_id ? taskData.organization_id : member?.organization_id;
@@ -102,12 +108,13 @@ const update_task = async (taskData: Partial<Task>) => {
 
   const updates: {[key: string]: any}= {}
   if(taskData.assignee_id && taskData.assignee_id !== originalTask?.assignee_id) updates.assignee_id = taskData.assignee_id
+  if(taskData.creator_id && taskData.creator_id !== originalTask?.creator_id) updates.creator_id = taskData.creator_id
   if(taskData.status && taskData.status !== originalTask?.status) updates.status = taskData.status
   if(taskData.priority && taskData.priority !== originalTask?.priority) updates.priority = taskData.priority
 
   
   if(Object.keys(updates).includes('assignee_id')) {
-    const member = await getMember(taskData.assignee_id!)
+    const member = await organizationMemberService.get_organizationMember(taskData.assignee_id!)
     if(member) {
       await sendAssigneeChangeNotification(member?.user_id, taskData.name! || originalTask?.name!)
     }

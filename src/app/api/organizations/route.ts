@@ -1,32 +1,9 @@
-import { getMainOrganization } from '@/lib/db/organizations';
-import prisma from '@/lib/prisma';
-import { NextRequest, NextResponse } from 'next/server';
+import organizationsController from "@/lib/controllers/organizations/organizations.controller"
+import { errorHandler } from "@/lib/services/api.service"
 
-export const POST = async (request: NextRequest) => {
-  const data = await request.json()
-  
-  data.type = 'main'
 
-  // auth().protect()
-  const newOrg = await prisma.organization.create({
-    data: data
-  })    
-  return NextResponse.json(newOrg, { status: 200 });
-};
+export const GET = errorHandler(organizationsController.getOrganizations)
 
-export const GET = async (request: NextRequest) => {
+export const POST = errorHandler(organizationsController.createOrganization)
 
-  const search = request.nextUrl.searchParams.get("search")
-
-  
-  // auth().protect()
-  const data = await prisma.organization.findMany({
-    where: {
-      name: {
-        contains: search ? search : ''
-      }
-    }
-  })
-  
-  return NextResponse.json(data, { status: 200 });
-};
+export const PATCH = errorHandler(organizationsController.updateOrganization)
