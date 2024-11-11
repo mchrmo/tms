@@ -1,14 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { paginate, parseFilter, parseQueryParams } from "../../services/api.service";
-import { Prisma, Task } from "@prisma/client";
+import { Prisma, Task, User } from "@prisma/client";
 import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP, taskColumns, TaskUpdateSchema } from "../../models/task.model";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "../../db/user.repository";
 import { z } from "zod";
-import taskService from "../../services/tasks/task.service";
+import taskService, { TaskDetail } from "../../services/tasks/task.service";
 import { createPaginator } from "prisma-pagination";
 import { parseGetManyParams } from "@/lib/utils/api.utils";
 import prisma from "@/lib/prisma";
+import { AuthUser, getMembership, isHierachicalyAbove } from "@/lib/services/auth.service";
+
+type TaskRole = 'assignee' | 'owner' | 'viewer'
+
+export const getTaskRelationship = async (task: TaskDetail, user: AuthUser): Promise<null | TaskRole> => {
+
+
+  const membership = await getMembership(user.id)!
+
+  if(!membership) return null
+
+  if(task?.assignee_id == membership?.id) return 'assignee'
+  if(task?.creator_id == membership?.id) return 'owner'
+
+  const isSuperiorToCreator = await isHierachicalyAbove(membership?.id, task?.creator_id!)
+  if(isSuperiorToCreator) return 'viewer'
+
+  const isSuperiorToAssignee = await isHierachicalyAbove(membership?.id, task?.creator_id!)
+  if(isSuperiorToAssignee) return 'viewer'
+
+  return null
+}
 
 
 const getTask = async (req: NextRequest, params: any) => {

@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { getApiClient, PaginatedResponse, parseListHookParams } from "@/lib/utils/api.utils";
+import { getApiClient, parseListHookParams } from "@/lib/utils/api.utils";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { TaskComment } from "@prisma/client";
 // import { TaskCommentFormInputs } from "@/components/taskComments/taskComment-form";
@@ -9,6 +9,7 @@ import { AxiosError } from "axios";
 import { z } from "zod";
 import { TaskCommentDetail, TaskCommentListItem } from "../../services/tasks/taskComment.service";
 import { TaskCommentCreateSchema, TaskCommentUpdateSchema } from "@/lib/models/taksComment.model";
+import { PaginatedResponse } from "@/lib/services/api.service";
 
 
 const taskCommentsApiClient = getApiClient('/tasks/comments')

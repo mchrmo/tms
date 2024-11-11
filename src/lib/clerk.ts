@@ -1,7 +1,6 @@
 // utils/clerk.js
 
 import { User, clerkClient } from "@clerk/nextjs/server";
-import { isKnownError } from '@clerk/nextjs/errors';
 import { UserRole } from "@prisma/client";
 
 
@@ -20,10 +19,8 @@ export const createClerkUser = async (name: string, email: string, password: str
 
     return user
   } catch (error) {
-    
     console.log(error);
     throw new Error("Nepodarilo sa vytvoriť užívatela")
-
   }
 };
 
