@@ -1,34 +1,55 @@
-import { auth, clerkMiddleware, createRouteMatcher, currentUser } from "@clerk/nextjs/server";
+import { auth, clerkClient, clerkMiddleware, ClerkMiddlewareAuth, createRouteMatcher, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-import { getUserByClerkId } from "./lib/db/user.repository";
 import { UserRole } from "@prisma/client";
+import { getUser } from "./lib/services/auth.service";
 
 
-const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/api(.*)']);
+const isPublicRoute = createRouteMatcher(['/sign-in(.*)']);
+
+const isApiRoute = createRouteMatcher(['/api(.*)']);
+
 const isAdminRoute = createRouteMatcher(['/users(.*)'])
 
-export default clerkMiddleware(async (auth, req) => {
+
+async function middleware(req: NextRequest, auth: ClerkMiddlewareAuth) {
+  const userId = auth().userId
+  const requestHeaders = new Headers(req.headers)
+
+  if(!userId) {
+    return NextResponse.json({'message': "Unauthorized"}, {status: 403})
+  }
+
+  const user = await clerkClient.users.getUser(userId)
+  if(!user) {
+    return NextResponse.json({'message': "User not found"}, {status: 403})
+  }
+
+  if(user) {
+    requestHeaders.set('x-clerkUserId', userId); // Or store entire user object as JSON
+  }
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    }
+  })
+
+}
+
+export default clerkMiddleware(async (auth, req, evt) => {
  
     
-  if(!isPublicRoute(req)) {
-    auth().protect();
+  const { userId, redirectToSignIn } = await auth()
+  
+  if(isPublicRoute(req)) {
+    return NextResponse.next()
   }
 
-  const { sessionClaims } = auth()
-
-  const isRole = (roleName: string) => {
-    if(!sessionClaims || !sessionClaims.metadata || !sessionClaims.metadata.role) return false
-    const role = sessionClaims.metadata.role as UserRole
-    if(role.name === roleName) return true
-    return false
+  if (!userId && !isPublicRoute(req) && !isApiRoute(req))  {
+    return redirectToSignIn()
   }
 
-  
-  if(isAdminRoute(req) && !isRole('admin')) {
-    return NextResponse.redirect(new URL('/', req.url))
-  } 
-
-  
+  return middleware(req, auth)
 }, {debug: false});
 
 export const config = {

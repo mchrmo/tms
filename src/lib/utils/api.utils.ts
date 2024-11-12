@@ -42,13 +42,6 @@ type PaginationOptions<ModelName extends ModelNames> = {
   pageSize?: string; // Number of items per page for pagination
 };
 
-export type PaginatedResponse<T> = {
-  items: T[],
-  totalCount: number,
-  currentPage: number,
-  prevPage: number | null,
-  nextPage: number | null
-}
 
 
 export async function paginate<ModelName extends ModelNames>({
@@ -351,6 +344,12 @@ export const getFilters = (params: any, columns: ModelColumns) => {
           }
 
           currentLevel[part] = dFilter;
+        }
+
+        if(colDef.type == 'number') {
+          currentLevel[part] = {
+            [filterMethod]: val,
+          };
         }
       } else {
         currentLevel[part] = {};

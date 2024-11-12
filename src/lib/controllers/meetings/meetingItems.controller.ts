@@ -1,15 +1,38 @@
-import { MeetingItemCreateSchema, MeetingItemStatusEnum, MeetingItemUpdateSchema, ZMeetingItemCreateForm, ZMeetingItemUpdateForm } from "@/lib/models/meeting/meetingItem.model"
+import { meetingItemColumns, MeetingItemCreateSchema, MeetingItemStatusEnum, MeetingItemUpdateSchema, ZMeetingItemCreateForm, ZMeetingItemUpdateForm } from "@/lib/models/meeting/meetingItem.model"
 import { MeetingItemCommentCreateSchema, ZMeetingItemCommentCreateForm } from "@/lib/models/meeting/meetingItemComment.model"
 import prisma from "@/lib/prisma"
-import meetingItemService from "@/lib/services/meetings/meetingItem.service"
+import meetingItemService, { meetingItemListItem } from "@/lib/services/meetings/meetingItem.service"
 import meetingItemCommentService from "@/lib/services/meetings/meetingItemComment.service"
 import userService from "@/lib/services/user.service"
+import { parseGetManyParams } from "@/lib/utils/api.utils"
+import { MeetingItem, Prisma } from "@prisma/client"
 import { th } from "date-fns/locale"
 import { waitForDebugger } from "inspector"
 import { ApiError } from "next/dist/server/api-utils"
 import { NextRequest, NextResponse } from "next/server"
+import { createPaginator } from "prisma-pagination"
 import { z } from "zod"
 
+
+
+
+const getMeetingItems = async (req: NextRequest) => {
+
+  const params = req.nextUrl.searchParams
+  const {where, orderBy, pagination} = parseGetManyParams(params, meetingItemColumns)
+
+  const paginate = createPaginator({ page: pagination.page, perPage: pagination.pageSize })
+  const data = await paginate<MeetingItem, Prisma.MeetingItemFindManyArgs>(
+    prisma.meetingItem,
+    {
+      where,
+      orderBy,
+      include: meetingItemListItem.include,
+    }
+  )
+
+  return NextResponse.json(data, { status: 200 })
+}
 
 const getMeetingItem = async (req: NextRequest, params: any) => {
 
@@ -60,7 +83,7 @@ const updateMeetingItem = async (request: NextRequest) => {
   const item = await prisma.meetingItem.findUnique({where: {id: updateData.id}})
   if(!item) throw new ApiError(404, "Not found")
   
-  if(item.status !== 'DRAFT') throw new ApiError(403, "Unable to edit published item")
+  // if(item.status !== 'DRAFT') throw new ApiError(403, "Unable to edit published item")
   
   const updatedItem = await meetingItemService.update_meetingItem(updateData)
   return NextResponse.json(updatedItem, { status: 200 })
@@ -160,6 +183,7 @@ const deleteComment = async (req: NextRequest, params: any) => {
 
 const meetingItemsController = {
   getMeetingItem,
+  getMeetingItems,
   createMeetingItem,
   updateMeetingItem,
   deleteMeetingItem,

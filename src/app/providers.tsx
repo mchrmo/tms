@@ -1,10 +1,9 @@
 'use client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { useUser } from '@clerk/nextjs';
 import userService from '@/lib/services/user.service';
 import prisma from '@/lib/prisma';
-import { Prisma, UserRole } from '@prisma/client';
+import { Prisma, User, UserRole } from '@prisma/client';
 
 
 const queryClient = new QueryClient();
@@ -12,9 +11,9 @@ const queryClient = new QueryClient();
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      {/* <RoleProvider> */}
+      {/* <UserProvider> */}
         {children}
-      {/* </RoleProvider> */}
+      {/* </UserProvider> */}
 
     </QueryClientProvider>
   );
@@ -25,18 +24,24 @@ export function Providers({ children }: { children: React.ReactNode }) {
 type Role = UserRole['name']; // Add roles as needed
 
 
-// Define the RoleContext type
+// Define the UserContext type
 
-interface RoleProviderProps {
-  role: Role;
+interface UserProviderProps {
+  user: User | null;
   children: ReactNode;
 }
 
-const RoleContext = createContext<Role | null>(null);
+interface UserContextType  {
+  user: User
+}
 
-const RoleProvider: React.FC<RoleProviderProps> = ({ role, children }) => {
-  return <RoleContext.Provider value={role}>{children}</RoleContext.Provider>;
+const UserContext = createContext<UserContextType  | null>(null);
+
+const UserProvider: React.FC<UserProviderProps> = ({ user, children }) => {
+
+  if(!user) return "Error" 
+  return <UserContext.Provider value={{user}}>{children}</UserContext.Provider>;
 };
 
-export const useRole = (): Role | null => useContext(RoleContext);
-export default RoleProvider;
+export const useUser = (): UserContextType | null => useContext(UserContext);
+export default UserProvider;

@@ -4,13 +4,13 @@ import { useMeeting } from "@/lib/hooks/meeting/meeting.hooks"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import MeetingForm from "./meeting-form"
 import MeetingAttendantsList from "./attendants/list"
-import MeetingItemsTable from "./items/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import clsx from "clsx"
 import { useState } from "react"
 import AddButton from "../common/buttons/add-button"
 import MeetingItemForm from "./items/item-form"
 import CreateMeetingItem from "./items/create"
+import MeetingDetailItemsTable from "./items/detail-table"
 
 export default function MeetingDetail({ params }: {params: {id: string}}) {
   const [tab, setTab] = useState('items')
@@ -46,8 +46,7 @@ export default function MeetingDetail({ params }: {params: {id: string}}) {
                     <CreateMeetingItem meeting_id={meeting.data.id} ></CreateMeetingItem>
                     </div>
                   </div>
-                  
-                  <MeetingItemsTable meeting={meeting.data}></MeetingItemsTable>
+                  <MeetingDetailItemsTable meeting={meeting.data}></MeetingDetailItemsTable>
                 </TabsContent>
               {/* </div> */}
             </Tabs>

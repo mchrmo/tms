@@ -11,6 +11,8 @@ import { Toaster } from "@/components/ui/toaster";
 import RoleProvider, { Providers } from "../providers";
 import { auth, getAuth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import UserProvider from "../providers";
+import { cloneElement } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,28 +34,20 @@ export default async function RootLayout({
     return <p>Please log in to access the dashboard.</p>;
   }
 
-  // Fetch user role from your database
-  const userRole = await prisma.user.findUnique({
-    where: { clerk_id: userId },
-    select: { role: { select: { name: true } } },
-  });
-
-  const role = userRole?.role.name || 'employee';
 
   return (
-    <ClerkProvider 
+    <ClerkProvider
       localization={skSK}
       appearance={{
         elements: {
           footer: "hidden",
         }
-      }}  
+      }}
     >
-    <html lang='en' className="">
-      <Providers>
-        <RoleProvider role={role}>
+      <html lang='en' className="">
+        <Providers>
           <body className={`bg-gray-50 ${inter.className} flex flex-col min-h-screen`}>
-          <Navbar/>
+            <Navbar />
             <div className="flex flex-1  bg-gray-50 dark:bg-gray-900">
               <div className="hidden lg:block">
                 <Sidebar />
@@ -66,9 +60,8 @@ export default async function RootLayout({
             </div>
             <Toaster />
           </body>
-        </RoleProvider>
-      </Providers>
-    </html>
-  </ClerkProvider>
+        </Providers>
+      </html>
+    </ClerkProvider>
   );
 }

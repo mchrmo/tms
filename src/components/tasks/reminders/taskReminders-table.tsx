@@ -31,7 +31,7 @@ const columns: ColumnDef<TaskReminderListItem>[] = [
     accessorKey: "datetime",
     header: "Termín",
     cell: (props) => {
-      return props.getValue() ? format(props.getValue() as string, 'dd.MM.yyyy hh:mm') : ''
+      return props.getValue() ? format(props.getValue() as string, 'dd.MM.yyyy') : ''
     },
     enableColumnFilter: false
   },

@@ -1,12 +1,13 @@
 import { useToast } from "@/components/ui/use-toast";
 import { ZMeetingItemCreateForm } from "@/lib/models/meeting/meetingItem.model";
-import { MeetingItemDetail } from "@/lib/services/meetings/meetingItem.service";
-import { getApiClient } from "@/lib/utils/api.utils";
-import { MeetingItem } from "@prisma/client";
+import { MeetingItemDetail, MeetingItemListItem } from "@/lib/services/meetings/meetingItem.service";
+import { getApiClient, parseListHookParamsNew } from "@/lib/utils/api.utils";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useEffect } from "react";
 import { meetingQueryKeys } from "./meeting.hooks";
+import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react-table";
+import { PaginatedResponse } from "@/lib/services/api.service";
 
 
 const meetingItemsApi = getApiClient('/meetings/items')
@@ -44,6 +45,35 @@ export const useMeetingItem = (id?: number, options?: UseQueryOptions<MeetingIte
   }, [query.error])
 
   return query
+}
+
+export const useMeetingItems = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) => {
+  const { toast } = useToast()
+
+  const {params, urlParams} = parseListHookParamsNew(pagination, filter, sort)
+
+
+  const getOrganizationsFn = async (params: {[key: string]: string}) => {
+    const response = await meetingItemsApi.get('', {
+      params
+    })
+    return response.data
+  }
+
+  const query = useQuery<PaginatedResponse<MeetingItemListItem>>({
+    queryKey: meetingItemQueryKeys.searched(urlParams),
+    queryFn: () => getOrganizationsFn(params),
+  })
+
+  useEffect(() => {
+    if(!query.error) return
+    toast({
+      title: "Chyba",
+      description: `Nepodarilo sa načítať - kód chyby: ${query.error.message}`
+    })
+  }, [query.error])
+
+  return query 
 }
 
 export const useUpdateMeetingItem = (id: number) => {

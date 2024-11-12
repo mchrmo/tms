@@ -92,6 +92,10 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
         {
           href: '/meetings',
           name: 'Všetky porady'
+        },
+        {
+          href: '/meetings/items',
+          name: 'Hľadať bod porady'
         }
       ]
     },
@@ -137,6 +141,10 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
         {
           href: '/meetings',
           name: 'Všetky porady'
+        },
+        {
+          href: '/meetings/items',
+          name: 'Hľadať bod porady'
         }
       ]
     },
@@ -196,7 +204,7 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
                             defaultValue="item-1"
                           >
                             <AccordionItem value="item-1" className="m-0 p-0 font-normal">
-                              <AccordionTrigger className="p-0">
+                              <AccordionTrigger className="p-0" >
                                 <a key={menu.name} className="w-full flex justify-start text-base font-normal h-8 bg-background p-4 px-2 my-2 items-center rounded-md">
                                   <div className={cn("flex justify-between w-full [&[data-state=open]>svg]:rotate-180")}>
                                     <div className="flex">
@@ -209,6 +217,7 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
                               <AccordionContent className="ms-3">
                                 {menu.submenu.map((submenu) => (
                                   <Link key={submenu.name} href={submenu.href} 
+                                  onClick={() => setOpen && setOpen(false)}
                                   className={clsx(
                                     "mt-0 mb-0 px-2 flex text-md h-9 items-center rounded-md",
                                       {

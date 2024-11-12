@@ -105,8 +105,7 @@ export default function TaskForm({ onUpdate, defaultValues: _def, edit }: { edit
 
   const onCancel = () => {
     reset()
-    // router.push('/tasks') 
-
+    // router.push('/tasks')
   }
 
 

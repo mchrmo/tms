@@ -14,6 +14,12 @@ type CreateMeetingItemReqs = {
 
 export const meetingItemListItem = Prisma.validator<Prisma.MeetingItemDefaultArgs>()({
   include: {
+    meeting: {
+      select: {
+        name: true,
+        date: true
+      }
+    }
   }
 })
 export type MeetingItemListItem = Prisma.MeetingItemGetPayload<typeof meetingItemListItem>
