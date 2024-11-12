@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { paginate, parseFilter, parseQueryParams } from "../../services/api.service";
 import { Prisma, Task, TaskUserRole, User } from "@prisma/client";
-import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP, taskColumns, TaskUpdateSchema } from "../../models/task.model";
+import { CreateTaskSchema, TASK_PRIORITIES_MAP, TASK_STATUSES_MAP, taskColumns, TaskUpdateSchema } from "../../models/task.model";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "../../db/user.repository";
 import { z } from "zod";
@@ -111,19 +111,8 @@ const createTask = async (request: NextRequest) => {
     return NextResponse.json({error: "Vytvárateľ nie je súčasťou žiadnej organizácie."}, {status: 400})
   }
   
-  const schema = z.object({
-    name: z.string(),
-    description: z.string(),
-    deadline: z.coerce.date(),
-    assignee_id: z.number(),
-    priority: z.enum(['LOW', 'MEDIUM', "HIGH", "CRITICAL"]),
-    parent_id: z.number().or(z.null()).optional().default(null)
-  });
-
-  
-  
   const body = await request.json()
-  const parsedSchema = schema.safeParse(body);
+  const parsedSchema = CreateTaskSchema.safeParse(body);
 
   if (!parsedSchema.success) {
     const { errors } = parsedSchema.error;
@@ -133,16 +122,13 @@ const createTask = async (request: NextRequest) => {
     }, {status: 400});
   }
 
-
   const newTaskData = {...parsedSchema.data, ...{
     creator_id: memberId
   }}
-
   const task = await taskService.create_task(newTaskData)
 
 
   return NextResponse.json(task, { status: 200 })
-  
 };
 
 const updateTask = async (request: NextRequest) => {

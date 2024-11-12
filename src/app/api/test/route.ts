@@ -2,8 +2,8 @@ import { getTask } from "@/lib/db/task.repository"
 import { getUser } from "@/lib/db/user.repository"
 import prisma from "@/lib/prisma"
 import { AuthUser, getAllSuperierors, isSuperior } from "@/lib/services/auth.service"
-import taskService from "@/lib/services/tasks/task.service"
-import taskRelService from "@/lib/services/tasks/taskRelationship.service"
+import { newMeetingAttendantEmail } from "@/lib/services/mail.service"
+import meetingService from "@/lib/services/meetings/meeting.service"
 import { errorHandler } from "@/lib/utils/api.utils"
 import { auth, clerkClient } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
@@ -19,12 +19,8 @@ import { NextResponse } from "next/server"
     const task_id = parseInt(params.get("task_id")!)
     const user_id = parseInt(params.get("user_id")!)
 
-
-    const allTasks = await prisma.task.findMany({include: {assignee: true, creator: true}})
-    for (const task of allTasks) {
-      await taskRelService.update_allTaskRelationships(task)    
-    }
-    
+    const meeting = await meetingService.get_meeting(4)
+    const email = newMeetingAttendantEmail(7, meeting!)    
     // const task = await taskService.get_task(task_id)
     // if(!task) return NextResponse.json({"message": "Task"})
 

@@ -1,22 +1,20 @@
 
 
-import SendReportButton from "@/components/common/buttons/sendReportButton";
-import Filter from "@/components/common/table/filter";
-import ViewHeadline from "@/components/common/view-haedline";
 import AdminDashboard from "@/components/dashboard/admin-dashboard";
 import EmpDashboard from "@/components/dashboard/emp-dashboard";
-import { getUserRole, isRole } from "@/lib/utils";
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { User } from "@prisma/client";
-import { useUser } from "../providers";
+import { getUser } from "@/lib/services/auth.service";
 
 
-export default async function Home({user}: {user: User}) {
+export default async function Home() {
 
-  // const user = await currentUser()
-  // const userContext = useUser();
+  const user = await getUser()
+  let isAdmin = false
 
-  const isAdmin = true
+
+  if(user) {
+    if(user.role.name == 'admin') isAdmin = true
+  }
+  
 
   
   return (

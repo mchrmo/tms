@@ -94,6 +94,7 @@ const create_task = async (taskData: CreateTaskReqs) => {
     assignee_id,
     creator_id: taskData.creator_id,
     deadline: taskData.deadline,
+    source: taskData.source
   }
 
   
