@@ -1,8 +1,9 @@
-import { getTaskRelationship } from "@/lib/controllers/tasks/tasks.controller"
 import { getTask } from "@/lib/db/task.repository"
 import { getUser } from "@/lib/db/user.repository"
-import { AuthUser, isHierachicalyAbove } from "@/lib/services/auth.service"
+import prisma from "@/lib/prisma"
+import { AuthUser, getAllSuperierors, isSuperior } from "@/lib/services/auth.service"
 import taskService from "@/lib/services/tasks/task.service"
+import taskRelService from "@/lib/services/tasks/taskRelationship.service"
 import { errorHandler } from "@/lib/utils/api.utils"
 import { auth, clerkClient } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
@@ -15,16 +16,28 @@ import { NextResponse } from "next/server"
 
     const params = req.nextUrl.searchParams
     
-    const task_id = params.get("task_id") as string
-    const user_id = params.get("user_id") as string
+    const task_id = parseInt(params.get("task_id")!)
+    const user_id = parseInt(params.get("user_id")!)
 
-    const task = await taskService.get_task(parseInt(task_id!))
-    if(!task) return NextResponse.json({"message": "Task"})
 
-    const user = (await getUser(parseInt(user_id)) as unknown) as AuthUser
+    const allTasks = await prisma.task.findMany({include: {assignee: true, creator: true}})
+    for (const task of allTasks) {
+      await taskRelService.update_allTaskRelationships(task)    
+    }
+    
+    // const task = await taskService.get_task(task_id)
+    // if(!task) return NextResponse.json({"message": "Task"})
 
-    const relationship = await getTaskRelationship(task, user)
 
-    return NextResponse.json({relationship})
+    // const user = (await getUser(user_id) as unknown) as AuthUser
+    // if(!user) return NextResponse.json({"message": "User"})
+
+
+    // const relationship = await taskRelService.checkTaskRelationship(task, user)
+
+    // const res = await taskRelService.update_taskRel(task_id, user_id, relationship)
+
+
+    return NextResponse.json({})
   })
 

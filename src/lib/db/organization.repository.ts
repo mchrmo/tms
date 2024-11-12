@@ -27,6 +27,7 @@ export async function getMainOrganization() {
         }
       }
     })
+    
     return mainOrganizationMembers
   }
   
@@ -39,7 +40,7 @@ export async function getMainOrganization() {
             attributes: {
                 id: member.id,
                 org: member.organization.name,
-                pos: member.position_name
+                pos: member.position_name + " " + member.user_id,
             },
             children: buildTree(members, member.id)
         }));

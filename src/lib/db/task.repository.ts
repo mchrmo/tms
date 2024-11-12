@@ -47,7 +47,8 @@ export async function createTask(taskData: Prisma.TaskUncheckedCreateInput | Pri
   const task = await prisma.task.create({
     data: taskData,
     include: {
-      creator: true
+      creator: true,
+      assignee: true
     }
   })
 
@@ -58,6 +59,10 @@ export async function updateTask(id: number, taskData: Prisma.TaskUncheckedUpdat
   const task = await prisma.task.update({
     where: {id},
     data: taskData,
+    include: {
+      creator: true,
+      assignee: true
+    }
   })
 
   return task

@@ -14,7 +14,6 @@ const Tree = dynamic(
 )
 export default function OrgTree({data}: {data: RawNodeDatum}) {
   const { push } = useRouter();
-
   const [treeState, setTreeState] = useState({translate: {x: 0, y:0}})
 
   const treeContainer = useRef<HTMLDivElement>(null);

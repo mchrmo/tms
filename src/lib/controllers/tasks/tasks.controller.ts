@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { paginate, parseFilter, parseQueryParams } from "../../services/api.service";
-import { Prisma, Task, User } from "@prisma/client";
+import { Prisma, Task, TaskUserRole, User } from "@prisma/client";
 import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP, taskColumns, TaskUpdateSchema } from "../../models/task.model";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "../../db/user.repository";
@@ -9,36 +9,34 @@ import taskService, { TaskDetail } from "../../services/tasks/task.service";
 import { createPaginator } from "prisma-pagination";
 import { parseGetManyParams } from "@/lib/utils/api.utils";
 import prisma from "@/lib/prisma";
-import { AuthUser, getMembership, isHierachicalyAbove } from "@/lib/services/auth.service";
-
-type TaskRole = 'assignee' | 'owner' | 'viewer'
-
-export const getTaskRelationship = async (task: TaskDetail, user: AuthUser): Promise<null | TaskRole> => {
+import { AuthUser, getMembership, getUser, isSuperior, isRole } from "@/lib/services/auth.service";
 
 
-  const membership = await getMembership(user.id)!
 
-  if(!membership) return null
-
-  if(task?.assignee_id == membership?.id) return 'assignee'
-  if(task?.creator_id == membership?.id) return 'owner'
-
-  const isSuperiorToCreator = await isHierachicalyAbove(membership?.id, task?.creator_id!)
-  if(isSuperiorToCreator) return 'viewer'
-
-  const isSuperiorToAssignee = await isHierachicalyAbove(membership?.id, task?.creator_id!)
-  if(isSuperiorToAssignee) return 'viewer'
-
-  return null
-}
 
 
 const getTask = async (req: NextRequest, params: any) => {
 
   const taskId = parseInt(params.id)
 
-  // auth().protect()
-  const task = await taskService.get_task(taskId)  
+  const user = await getUser({user_id: 14})
+  let where: Partial<Prisma.TaskFindUniqueArgs['where']> = {
+  }
+
+  if(!await isRole('admin', user)) {
+    where = {
+      OR: [
+        {assignee: {user_id: user?.id}},
+        {creator: {user_id: user?.id}},
+        {TaskRelationship: {
+          some: {user_id: user?.id}
+        }}
+      ]  
+    }
+  }
+  
+  
+  const task = await taskService.get_task(taskId, {where})
 
   return NextResponse.json(task, { status: 200 })
 
@@ -46,7 +44,29 @@ const getTask = async (req: NextRequest, params: any) => {
 
 const getTasks = async (req: NextRequest) => {
   const params = req.nextUrl.searchParams
-  const {where, orderBy, pagination} = parseGetManyParams(params, taskColumns)
+  const {where: paramsWhere, orderBy, pagination} = parseGetManyParams(params, taskColumns)
+
+  const user = await getUser({user_id: 17})
+
+  let where: Prisma.TaskWhereInput = {
+  }
+
+  if(!await isRole('admin', user)) {
+    where = {
+      OR: [
+        {assignee: {user_id: user?.id}},
+        {creator: {user_id: user?.id}},
+        {TaskRelationship: {
+          some: {user_id: user?.id}
+        }}
+      ]  
+    }
+  }
+  
+  where = {
+    ...paramsWhere,
+    ...where
+  }
 
   const include: Prisma.TaskInclude = {
     assignee: { 
