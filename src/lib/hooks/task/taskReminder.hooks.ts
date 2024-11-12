@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { getApiClient, PaginatedResponse, parseListHookParams } from "@/lib/utils/api.utils";
+import { getApiClient, parseListHookParams } from "@/lib/utils/api.utils";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { TaskReminder } from "@prisma/client";
 // import { TaskReminderFormInputs } from "@/components/taskReminders/taskReminder-form";
@@ -9,6 +9,7 @@ import { AxiosError } from "axios";
 import { z } from "zod";
 import { TaskReminderDetail, TaskReminderListItem } from "../../services/tasks/taskReminder.service";
 import { TaskReminderUpdateSchema } from "../../models/taskReminder.model";
+import { PaginatedResponse, PaginatedResponseOld } from "@/lib/services/api.service";
 
 
 const taskRemindersApiClient = getApiClient('/tasks/reminders')
@@ -60,7 +61,7 @@ export const useTaskReminders = (pagination: PaginationState, filter?: ColumnFil
     return response.data
   }
 
-  const query = useQuery<PaginatedResponse<TaskReminderListItem>>({
+  const query = useQuery<PaginatedResponseOld<TaskReminderListItem>>({
     queryKey: taskReminderQueryKeys.searched(urlParams),
     queryFn: () => getTaskRemindersFn(params),
   })

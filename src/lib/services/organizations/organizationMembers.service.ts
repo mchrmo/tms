@@ -92,7 +92,11 @@ const swap_organizationMember = async (orgMember_id: number, newUser_id: number)
   })
 
   const assignedTasks = await prisma.task.findMany({
-    where: {assignee_id: orgMember_id}
+    where: {assignee_id: orgMember_id},
+    include: {
+      creator: true,
+      assignee: true
+    }
   })
 
   for (const task of assignedTasks) {
@@ -100,7 +104,11 @@ const swap_organizationMember = async (orgMember_id: number, newUser_id: number)
   }
 
   const createdTasks = await prisma.task.findMany({
-    where: {creator_id: orgMember_id}
+    where: {creator_id: orgMember_id},
+    include: {
+      creator: true,
+      assignee: true
+    }
   })
   for (const task of createdTasks) {
     await taskUpdateService.create_taskUpdate(task, currentUser, 'creator_id', newUser_id)
