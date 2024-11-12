@@ -345,6 +345,12 @@ export const getFilters = (params: any, columns: ModelColumns) => {
 
           currentLevel[part] = dFilter;
         }
+
+        if(colDef.type == 'number') {
+          currentLevel[part] = {
+            [filterMethod]: val,
+          };
+        }
       } else {
         currentLevel[part] = {};
         currentLevel = currentLevel[part];

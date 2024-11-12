@@ -19,7 +19,7 @@ const getTask = async (req: NextRequest, params: any) => {
 
   const taskId = parseInt(params.id)
 
-  const user = await getUser({user_id: 14})
+  const user = await getUser()
   let where: Partial<Prisma.TaskFindUniqueArgs['where']> = {
   }
 
@@ -46,7 +46,7 @@ const getTasks = async (req: NextRequest) => {
   const params = req.nextUrl.searchParams
   const {where: paramsWhere, orderBy, pagination} = parseGetManyParams(params, taskColumns)
 
-  const user = await getUser({user_id: 17})
+  const user = await getUser()
 
   let where: Prisma.TaskWhereInput = {
   }

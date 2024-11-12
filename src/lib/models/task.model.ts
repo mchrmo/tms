@@ -95,6 +95,10 @@ export const taskColumns: ModelColumns = {
     path: 'organization.name',
     method: 'contains'
   },
+  "parent_id": {
+    type: "number",
+    method: "equals"
+  },
   'fulltext': {
     type: 'string',
     customFn: (val) => ({OR: [
