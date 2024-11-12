@@ -2,12 +2,12 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react"
 import { getApiClient } from "@/lib/api-client";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
-import { Task, TaskUpdate } from "@prisma/client";
+import { Task, TaskUpdate, TaskUserRole } from "@prisma/client";
 import { TaskFormInputs } from "@/components/tasks/task-form";
 import { useToast } from "@/components/ui/use-toast";
 import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react-table";
 import { AxiosError } from "axios";
-import { PaginatedResponse } from "../../services/api.service";
+import { DetailResponse, PaginatedResponse } from "../../services/api.service";
 import { taskUpdateQueryKeys } from "./taskUpdate.hooks";
 import { parseListHookParams, parseListHookParamsNew } from "@/lib/utils/api.utils";
 import { TaskDetail } from "@/lib/services/tasks/task.service";
@@ -25,16 +25,16 @@ export const taskQueryKeys = {
   assigned: () => [...taskQueryKeys.all, 'assigned']
 };
 
-export const useTask = (id?: number, options?: UseQueryOptions<TaskDetail, Error>) => {
+export const useTask = (id?: number, options?: UseQueryOptions<DetailResponse<TaskDetail, TaskUserRole>, Error>) => {
   const { toast } = useToast()
 
 
   const getTaskFn = async () => {
-    const response = await tasksApiClient.get<TaskDetail>(`/${id}`);
+    const response = await tasksApiClient.get(`/${id}`);
     return response.data;
   };
 
-  const query = useQuery<TaskDetail, Error>({
+  const query = useQuery<DetailResponse<TaskDetail, TaskUserRole>, Error>({
     queryKey: taskQueryKeys.detail(Number(id)), 
     queryFn: getTaskFn,
     enabled: !!id,

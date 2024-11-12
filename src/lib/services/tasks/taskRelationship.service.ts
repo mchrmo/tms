@@ -5,12 +5,14 @@ import prisma from "@/lib/prisma"
 
 
 export type TaskWithUsers = Prisma.TaskGetPayload<{
-  include: {assignee: {
-    select: {user_id: true}
-  },
-  creator: {
-    select: {user_id: true}
-  }};
+  include: {
+    assignee: {
+      select: { user_id: true }
+    },
+    creator: {
+      select: { user_id: true }
+    }
+  };
 }>;
 
 
@@ -35,27 +37,38 @@ const checkTaskRelationship = async (task: TaskWithUsers, user: AuthUser): Promi
   return null
 }
 
+const get_taskRelationship = async (task_id: number, user_id: number) => {
+  const rel = await prisma.taskRelationship.findUnique({
+    where: {
+      user_id_task_id: {
+        user_id,
+        task_id
+      }
+    }
+  })
+
+  return rel
+}
 
 const update_allTaskRelationships = async (task: Exclude<TaskWithUsers, null>) => {
 
   // Get all affected users = (onwer + superiors) + (assignee + superiors) 
-
   const affectedUserIds: Set<number> = new Set([])
 
-  if(task.assignee) {
+  if (task.assignee) {
     affectedUserIds.add(task.assignee?.user_id)
 
     const assigneeSuperiors = await getAllSuperierors(task.assignee?.user_id)
     assigneeSuperiors.forEach(m => affectedUserIds.add(m.user_id))
   }
 
-  if(task.creator) {
+  if (task.creator) {
     affectedUserIds.add(task.creator?.user_id!)
 
     const ownerSuperiors = await getAllSuperierors(task.creator?.user_id!)
     ownerSuperiors.forEach(m => affectedUserIds.add(m.user_id))
   }
-  
+
   const affectedUserIdsArr = Array.from(affectedUserIds)
 
   // Delete relations if user_id not in the list
@@ -72,9 +85,9 @@ const update_allTaskRelationships = async (task: Exclude<TaskWithUsers, null>) =
   for (const user_id of affectedUserIdsArr) {
     await update_taskRelationship(task.id, user_id)
   }
-  
 
-} 
+
+}
 
 
 const update_taskRelationship = async (task_id: number, user_id: number, relationship?: TaskUserRole | null) => {
@@ -124,6 +137,7 @@ const update_taskRelationship = async (task_id: number, user_id: number, relatio
 
 const taskRelService = {
   checkTaskRelationship,
+  get_taskRelationship,
   update_allTaskRelationships,
   update_taskRelationship,
 }

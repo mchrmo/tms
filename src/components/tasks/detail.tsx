@@ -25,9 +25,9 @@ import { Button } from "../ui/button";
 export default function TaskDetail({ params }: { params: { id: string } }) {
 
   const taskId = parseInt(params.id)
-  const task = useTask(taskId)
-
-  const parent = useTask((task.data && task.data.parent_id) ? task.data.parent_id : undefined)
+  const taskQ = useTask(taskId)
+  const task: TaskDetailT | undefined = taskQ.data ?  taskQ.data.data : undefined
+  // const parent = useTask((task && task.parent_id) ? task.parent_id : undefined)
 
   const [tab, setTab] = useState('subtasks')
 
@@ -35,14 +35,14 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
   const [variant, setVariant] = useState<'ghost' | 'default'>('ghost') 
 
 
-  if (task.isLoading) return <span>Úloha sa načitáva <LoadingSpinner></LoadingSpinner></span>
+  if (taskQ.isLoading) return <span>Úloha sa načitáva <LoadingSpinner></LoadingSpinner></span>
 
   return (
     <>
-      {task.error instanceof Error && <div>{task.error.message}</div>}
+      {taskQ.error instanceof Error && <div>{taskQ.error.message}</div>}
 
       {
-        task.data && (
+        task && (
           <>
 
             <div className="">
@@ -52,17 +52,17 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
                   <Button onClick={() => setVariant(variant == 'ghost' ? 'default' : 'ghost')} variant={variant} size={'icon'}>
                     <EyeIcon  />
                   </Button>
-                  <TaskSettings task={task.data} />
+                  <TaskSettings task={task} />
                 </div>
               </div>
             </div>
-            {
+            {/* {
               parent.data && <Label className="text-md">
                 Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${parent.data.id}`}>{parent.data.name}</Link>
               </Label>
-            }
+            } */}
 
-            <TaskForm defaultValues={task.data} edit={true}></TaskForm>
+            <TaskForm defaultValues={task} edit={true}></TaskForm>
 
             <Tabs value={tab} onValueChange={setTab} className="">
               <TabsList className="flex gap-4 overflow-x-auto">
@@ -74,19 +74,19 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
               </TabsList>
               {/* <div className="mt-5"> */}
               <TabsContent value="subtasks">
-                <SubTasksOverview task={task.data} />
+                <SubTasksOverview task={task} />
               </TabsContent>
               <TabsContent value="reminders">
-                <TaskRemindersOverview task={task.data}></TaskRemindersOverview>
+                <TaskRemindersOverview task={task}></TaskRemindersOverview>
               </TabsContent>
               <TabsContent value="comments">
-                <TaskCommentsOverview task={task.data}></TaskCommentsOverview>
+                <TaskCommentsOverview task={task}></TaskCommentsOverview>
               </TabsContent>
               <TabsContent value="updates">
-                <TaskUpdatesOverview task={task.data}></TaskUpdatesOverview>
+                <TaskUpdatesOverview task={task}></TaskUpdatesOverview>
               </TabsContent>
               <TabsContent value="files">
-                <TaskAttachmentsOverview task={task.data}></TaskAttachmentsOverview>
+                <TaskAttachmentsOverview task={task}></TaskAttachmentsOverview>
               </TabsContent>
 
               {/* </div> */}

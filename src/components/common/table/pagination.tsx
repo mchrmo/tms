@@ -10,23 +10,23 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectTrigger, SelectValue, SelectItem } from "@/components/ui/select";
-import {Table as TableType } from '@tanstack/react-table'
+import { Table as TableType } from '@tanstack/react-table'
 import { ChevronLeft, ChevronLeftIcon, ChevronRight, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function TablePagination<TData>({
   table,
-}: {table: TableType<TData>}) {
+}: { table: TableType<TData> }) {
 
   const [pageSize, setPageSize] = useState(table.getState().pagination.pageSize.toString())
 
   const pageSizeOptions = [5, 10, 50]
   const showPreviousNext = true
-  const currentPage = table.getState().pagination.pageIndex+1
+  const currentPage = table.getState().pagination.pageIndex + 1
   const totalPages = table?.getPageCount()
-  
+
   const onPageChange = (pageIndex: number) => {
-    table.setPageIndex(pageIndex-1)
+    table.setPageIndex(pageIndex - 1)
   }
 
   useEffect(() => {
@@ -61,8 +61,9 @@ export default function TablePagination<TData>({
           </Select>
         </div>
         <div className="flex items-center justify-center text-sm font-medium">
-          Stránka {table.getState().pagination.pageIndex + 1} z{" "}
-          {table.getPageCount()}
+          Stránka {" "}
+          {table.getState().pagination.pageIndex + 1} z{" "}
+          {table.getPageCount() ? table.getPageCount() : 1}
         </div>
         <div className="flex items-center space-x-2">
           <Button

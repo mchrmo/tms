@@ -42,6 +42,12 @@ export type PaginatedResponse<T> = {
   }
 }
 
+export type DetailResponse<T, R> = {
+  data: T,
+  role: R
+}
+
+
 export type PaginatedResponseOld<T> = {
   items: T[],
   totalCount: number
