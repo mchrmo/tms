@@ -1,5 +1,5 @@
 import taskRemindersController from "@/lib/controllers/tasks/taskReminders.controller";
-import { errorHandler } from "@/lib/utils/api.utils";
+import { errorHandler } from "@/lib/services/api.service";
 
 
 

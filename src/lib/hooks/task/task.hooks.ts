@@ -38,7 +38,15 @@ export const useTask = (id?: number, options?: UseQueryOptions<DetailResponse<Ta
     queryKey: taskQueryKeys.detail(Number(id)), 
     queryFn: getTaskFn,
     enabled: !!id,
-    ...options
+    ...options,
+    retry(failureCount, error) {
+      if((error as AxiosError).response?.status == 403) {
+        return false
+      }
+      if(failureCount > 2) return false
+      return true
+    },
+
   });
 
   useEffect(() => {
@@ -79,42 +87,6 @@ export const useTasks = (pagination: PaginationState, filter?: ColumnFiltersStat
   return query 
 }
 
-export const useSubTasks = (parentId: number, sort?: ColumnSort) => {
-  const { toast } = useToast()
-
-  const params: {[key: string]: any} = {}
-  let urlQuery = ''
-
-
-  if(sort) {
-    params['sortBy'] = sort.id
-    params['sortDirection'] = sort.desc ? 'desc' : 'asc'
-  }
-  params['parent_id'] = parentId
-  
-  const getSubTasksFn = async (params: {[key: string]: string}) => {
-    const response = await tasksApiClient.get('', {
-      params
-    })
-    return response.data
-  }
-
-  const query = useQuery<Task[]>({
-    queryKey: taskQueryKeys.searched(urlQuery),
-    queryFn: () => getSubTasksFn(params),
-  })
-
-  useEffect(() => {
-    if(!query.error) return
-    toast({
-      title: "Chyba",
-      description: `Nepodarilo sa načítať úlohy - kód chyby: ${query.error.name}`
-    })
-  }, [query.error])
-
-  return query 
-}
-
 export const useUpdateTask = (id: number) => {
 
   const queryClient = useQueryClient()
@@ -128,10 +100,10 @@ export const useUpdateTask = (id: number) => {
   return useMutation({
     mutationFn: updateTaskFn,
     onMutate: async (updatedUser) => {
-      await queryClient.cancelQueries({queryKey: taskQueryKeys.detail(id)});
-      const previousUser = queryClient.getQueryData(taskQueryKeys.detail(id));
-      queryClient.setQueryData(taskQueryKeys.detail(Number(id)), updatedUser);
-      return { previousUser: previousUser, updatedUser: updatedUser };
+      // await queryClient.cancelQueries({queryKey: taskQueryKeys.detail(id)});
+      // const previousUser = queryClient.getQueryData(taskQueryKeys.detail(id));
+      // queryClient.setQueryData(taskQueryKeys.detail(Number(id)), updatedUser);
+      // return { previousUser: previousUser, updatedUser: updatedUser };
     },
     onSuccess: (data) => {
       toast({

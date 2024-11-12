@@ -187,7 +187,6 @@ export function parseFilter(filter: Filter, fields: FieldDef): Where {
   return where;
 }
 
-
 export function errorHandler(
   handler: (req: NextRequest, {params}: {params: any}) => Promise<NextResponse>
 ) {
@@ -195,11 +194,13 @@ export function errorHandler(
     try {
       return await handler(req, params);
     } catch (error) {
-      console.error('Error occurred:', error);
 
       if (error instanceof ApiError) {
+        if(![403].includes(error.statusCode)) console.warn('API:', error);
+
         return NextResponse.json({ message: error.message, statusCode: error.statusCode }, { status: error.statusCode });
       } else {
+        console.error('Error occurred:', error);
 
         const response: any = {message: 'Internal Server Error'}
 
@@ -207,7 +208,6 @@ export function errorHandler(
           response.error = error.message
           response.stack = error.stack
         }
-        
         return NextResponse.json(response, { status: 500 });
       }
     }

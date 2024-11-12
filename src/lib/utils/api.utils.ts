@@ -235,23 +235,6 @@ export function parseFilter(filter: Filter, fields: FieldDef): Where {
 }
 
 
-export function errorHandler(
-  handler: (req: NextRequest, {params}: {params: any}) => Promise<NextResponse>
-) {
-  return async (req: NextRequest, {params}: {params: any}): Promise<NextResponse> => {
-    try {
-      return await handler(req, params);
-    } catch (error) {
-      console.error('Error occurred:', error);
-
-      if (error instanceof ApiError) {
-        return NextResponse.json({ message: error.message, statusCode: error.statusCode }, { status: error.statusCode });
-      } else {
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
-      }
-    }
-  };
-}
 
 
 // Filtering And Sorting
