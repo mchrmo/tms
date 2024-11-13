@@ -1,22 +1,22 @@
 
 
-import SendReportButton from "@/components/common/buttons/sendReportButton";
-import Filter from "@/components/common/table/filter";
-import ViewHeadline from "@/components/common/view-haedline";
 import AdminDashboard from "@/components/dashboard/admin-dashboard";
 import EmpDashboard from "@/components/dashboard/emp-dashboard";
-import { getUserRole, isRole } from "@/lib/utils";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { getUser } from "@/lib/services/auth.service";
 
 
 export default async function Home() {
 
-  const user = await currentUser()
-  const isAdmin = isRole(user, 'admin')
+  const user = await getUser()
+  let isAdmin = false
+
+
+  if(user) {
+    if(user.role.name == 'admin') isAdmin = true
+  }
+  
 
   
-  
-
   return (
     <>
       {

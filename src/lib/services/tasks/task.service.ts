@@ -19,13 +19,28 @@ type CreateTaskReqs = {
   deadline: Date;
 }
 
-const get_task = async (id: number) => {
+
+interface GetDetailOptions {
+  where?: Partial<Prisma.TaskFindUniqueArgs['where']>
+}
+
+const get_task = async (id: number, options?: GetDetailOptions) => {
+
+  const where = {
+    id,
+    ...(options && options.where)
+  }
 
   const task = await prisma.task.findUnique({
-    where: {id},
+    where,
     include: {
       assignee: {
-        include: {user: true},
+        select: {user: true, user_id: true, position_name: true},
+      },
+      creator: {
+        select: {
+          user_id: true
+        }
       },
       parent: {
         select: {name: true, id: true}
@@ -79,6 +94,7 @@ const create_task = async (taskData: CreateTaskReqs) => {
     assignee_id,
     creator_id: taskData.creator_id,
     deadline: taskData.deadline,
+    source: taskData.source
   }
 
   

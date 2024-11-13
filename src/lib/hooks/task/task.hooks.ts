@@ -2,12 +2,12 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react"
 import { getApiClient } from "@/lib/api-client";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
-import { Task, TaskUpdate } from "@prisma/client";
+import { Task, TaskUpdate, TaskUserRole } from "@prisma/client";
 import { TaskFormInputs } from "@/components/tasks/task-form";
 import { useToast } from "@/components/ui/use-toast";
 import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react-table";
 import { AxiosError } from "axios";
-import { PaginatedResponse } from "../../services/api.service";
+import { DetailResponse, PaginatedResponse } from "../../services/api.service";
 import { taskUpdateQueryKeys } from "./taskUpdate.hooks";
 import { parseListHookParams, parseListHookParamsNew } from "@/lib/utils/api.utils";
 import { TaskDetail } from "@/lib/services/tasks/task.service";
@@ -25,20 +25,28 @@ export const taskQueryKeys = {
   assigned: () => [...taskQueryKeys.all, 'assigned']
 };
 
-export const useTask = (id?: number, options?: UseQueryOptions<TaskDetail, Error>) => {
+export const useTask = (id?: number, options?: UseQueryOptions<DetailResponse<TaskDetail, TaskUserRole>, Error>) => {
   const { toast } = useToast()
 
 
   const getTaskFn = async () => {
-    const response = await tasksApiClient.get<TaskDetail>(`/${id}`);
+    const response = await tasksApiClient.get(`/${id}`);
     return response.data;
   };
 
-  const query = useQuery<TaskDetail, Error>({
+  const query = useQuery<DetailResponse<TaskDetail, TaskUserRole>, Error>({
     queryKey: taskQueryKeys.detail(Number(id)), 
     queryFn: getTaskFn,
     enabled: !!id,
-    ...options
+    ...options,
+    retry(failureCount, error) {
+      if((error as AxiosError).response?.status == 403) {
+        return false
+      }
+      if(failureCount > 2) return false
+      return true
+    },
+
   });
 
   useEffect(() => {
@@ -79,42 +87,6 @@ export const useTasks = (pagination: PaginationState, filter?: ColumnFiltersStat
   return query 
 }
 
-export const useSubTasks = (parentId: number, sort?: ColumnSort) => {
-  const { toast } = useToast()
-
-  const params: {[key: string]: any} = {}
-  let urlQuery = ''
-
-
-  if(sort) {
-    params['sortBy'] = sort.id
-    params['sortDirection'] = sort.desc ? 'desc' : 'asc'
-  }
-  params['parent_id'] = parentId
-  
-  const getSubTasksFn = async (params: {[key: string]: string}) => {
-    const response = await tasksApiClient.get('', {
-      params
-    })
-    return response.data
-  }
-
-  const query = useQuery<Task[]>({
-    queryKey: taskQueryKeys.searched(urlQuery),
-    queryFn: () => getSubTasksFn(params),
-  })
-
-  useEffect(() => {
-    if(!query.error) return
-    toast({
-      title: "Chyba",
-      description: `Nepodarilo sa načítať úlohy - kód chyby: ${query.error.name}`
-    })
-  }, [query.error])
-
-  return query 
-}
-
 export const useUpdateTask = (id: number) => {
 
   const queryClient = useQueryClient()
@@ -128,10 +100,10 @@ export const useUpdateTask = (id: number) => {
   return useMutation({
     mutationFn: updateTaskFn,
     onMutate: async (updatedUser) => {
-      await queryClient.cancelQueries({queryKey: taskQueryKeys.detail(id)});
-      const previousUser = queryClient.getQueryData(taskQueryKeys.detail(id));
-      queryClient.setQueryData(taskQueryKeys.detail(Number(id)), updatedUser);
-      return { previousUser: previousUser, updatedUser: updatedUser };
+      // await queryClient.cancelQueries({queryKey: taskQueryKeys.detail(id)});
+      // const previousUser = queryClient.getQueryData(taskQueryKeys.detail(id));
+      // queryClient.setQueryData(taskQueryKeys.detail(Number(id)), updatedUser);
+      // return { previousUser: previousUser, updatedUser: updatedUser };
     },
     onSuccess: (data) => {
       toast({

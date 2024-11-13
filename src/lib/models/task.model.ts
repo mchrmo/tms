@@ -34,12 +34,12 @@ export const TaskSchema = z.object({
   name: z.string().min(1, "Názov je povinný"),
   status: z.enum(["TODO", "INPROGRESS", "WAITING", "CHECKREQ", "DONE"]).default("TODO"),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
-  description: z.string().optional(),
+  description: z.string().optional().default(''),
   parent_id: z.number().nullable(),
   organization_id: z.number().optional(),
   creator_id: z.number().optional(),
   assignee_id: z.number({message: "Zadajte zodpovednú osobu"}),
-  source: z.string().default("Organizačná úloha"),
+  source: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   updateAt: z.coerce.date().optional(),
   deadline: z.coerce.date(),
@@ -74,17 +74,17 @@ export const taskColumns: ModelColumns = {
     enum: TASK_STATUSES_MAP
   },
   'deadline': {
-    label: "Termín",
+    label: "Termín dokončenia",
     type: 'datetime',
   },
   'creator_name': {
-    label: "Vytvoril",
+    label: "Vytvárateľ",
     type: 'string',
     path: 'creator.user.name',
     method: 'contains'
   },
   'assignee_name': {
-    label: "Zodpovedný",
+    label: "Zodpovedná osoba",
     type: 'string',
     path: 'assignee.user.name',
     method: 'contains'
@@ -94,6 +94,10 @@ export const taskColumns: ModelColumns = {
     type: 'string',
     path: 'organization.name',
     method: 'contains'
+  },
+  "parent_id": {
+    type: "number",
+    method: "equals"
   },
   'fulltext': {
     type: 'string',

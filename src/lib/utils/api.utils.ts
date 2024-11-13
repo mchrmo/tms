@@ -42,13 +42,6 @@ type PaginationOptions<ModelName extends ModelNames> = {
   pageSize?: string; // Number of items per page for pagination
 };
 
-export type PaginatedResponse<T> = {
-  items: T[],
-  totalCount: number,
-  currentPage: number,
-  prevPage: number | null,
-  nextPage: number | null
-}
 
 
 export async function paginate<ModelName extends ModelNames>({
@@ -242,23 +235,6 @@ export function parseFilter(filter: Filter, fields: FieldDef): Where {
 }
 
 
-export function errorHandler(
-  handler: (req: NextRequest, {params}: {params: any}) => Promise<NextResponse>
-) {
-  return async (req: NextRequest, {params}: {params: any}): Promise<NextResponse> => {
-    try {
-      return await handler(req, params);
-    } catch (error) {
-      console.error('Error occurred:', error);
-
-      if (error instanceof ApiError) {
-        return NextResponse.json({ message: error.message, statusCode: error.statusCode }, { status: error.statusCode });
-      } else {
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
-      }
-    }
-  };
-}
 
 
 // Filtering And Sorting
@@ -352,6 +328,12 @@ export const getFilters = (params: any, columns: ModelColumns) => {
 
           currentLevel[part] = dFilter;
         }
+
+        if(colDef.type == 'number') {
+          currentLevel[part] = {
+            [filterMethod]: val,
+          };
+        }
       } else {
         currentLevel[part] = {};
         currentLevel = currentLevel[part];
@@ -416,3 +398,5 @@ export const parseGetManyParams = (urlParams: URLSearchParams, columns: ModelCol
 
   return {where, orderBy, pagination}
 }  
+
+export const unauthorizedError = new ApiError(403, "Unauthorized")

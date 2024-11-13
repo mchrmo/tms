@@ -4,6 +4,7 @@ import prisma from "../../prisma";
 import { z } from "zod";
 import userService from "../user.service";import { TASK_PRIORITIES_MAP, TASK_STATUSES_MAP } from "../../models/task.model";
 import organizationMemberService from "../organizations/organizationMembers.service";
+import taskRelService, { TaskWithUsers } from "./taskRelationship.service";
 
 export const taskUpdateListItem = Prisma.validator<Prisma.TaskUpdateDefaultArgs>()({
   include: {
@@ -23,7 +24,7 @@ const get_taskUpdate = async (id: number) => {
 
 export type TaskUpdateDetail = Prisma.PromiseReturnType<typeof get_taskUpdate>
 
-const create_taskUpdate = async (task: Task, user: User | null, key: string, value?: any) => {
+const create_taskUpdate = async (task: TaskWithUsers, user: User | null, key: string, value?: any) => {
 
   let description;
   let title = ''
@@ -35,18 +36,24 @@ const create_taskUpdate = async (task: Task, user: User | null, key: string, val
       const member = await organizationMemberService.get_organizationMember(task.assignee_id!)
       title = 'Úloha vytvorená'
       description = `Úlohu vytvoril ${changerName} pre ${member?.user.name}`
+
+      taskRelService.update_allTaskRelationships(task)
     } break;
     case 'assignee_id': {
       if(!value) break; 
       const member = await organizationMemberService.get_organizationMember(value)
       title = `Zmena poverenej osoby`
       description = `${changerName} poveril ${member && member.user.name}`
+
+      taskRelService.update_allTaskRelationships(task)
     } break;
     case 'creator_id': {
       if(!value) break; 
       const member = await organizationMemberService.get_organizationMember(value)
       title = `Zmena vlastníka`
       description = `${changerName} zmenil vlastníka na ${member && member.user.name}`
+
+      taskRelService.update_allTaskRelationships(task)
     } break;
     case 'status': 
       if(!value) break; 
@@ -57,8 +64,6 @@ const create_taskUpdate = async (task: Task, user: User | null, key: string, val
       title = `Priorita zmenená`
       description = `${changerName} zmenil prioritu na ${TASK_PRIORITIES_MAP[task.priority]}`
       break;
-
-
     default:
       title = `Ostatná zmena - ${key}/${value}`
       break;

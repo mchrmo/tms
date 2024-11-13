@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { TaskDetail } from "@/lib/services/tasks/task.service";
 
 
 export default function CreateTask() {
@@ -17,11 +18,12 @@ export default function CreateTask() {
   const parentId = searchParams.get('parent_id')
 
 
-  const parent = useTask(parentId ? parseInt(parentId) : undefined)  
+  const parentQ = useTask(parentId ? parseInt(parentId) : undefined)  
+  const parent: TaskDetail | undefined = parentQ.data ? parentQ.data.data : undefined
 
   useEffect(() => {
     
-    if(parent.data === null && parentId) {
+    if(parent === null && parentId) {
 
       toast({
         title: "Chyba",
@@ -29,12 +31,12 @@ export default function CreateTask() {
       })
       router.push('/tasks')
     }
-  }, [parent.data])
+  }, [parent])
 
   return <>
     {
-      parent.data && <Label className="text-md">
-        Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${parent.data.id}`}>{parent.data.name}</Link>
+      parent && <Label className="text-md">
+        Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${parent.id}`}>{parent.name}</Link>
       </Label>
     }
     <TaskForm></TaskForm>

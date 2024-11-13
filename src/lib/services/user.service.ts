@@ -53,6 +53,12 @@ const create_user = async ({name, email, roleId}: {name: string, email: string, 
   const existingUser = await prisma.user.findUnique({where: {email}})
   if(existingUser) throw new ApiError(400, "Užívateľ s takýmto emailom už existuje.")
 
+  await clerkClient.users.updateUserMetadata(clerkUser.id, {
+    privateMetadata: {
+      user: existingUser
+    },
+  })
+
 
   const user = await prisma.user.create({
     data: {

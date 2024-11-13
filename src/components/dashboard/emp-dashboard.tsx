@@ -52,7 +52,7 @@ export default function EmpDashboard() {
 
 
   const taskStatusData = {
-    labels: [TASK_STATUSES_MAP.DONE, TASK_STATUSES_MAP.WAITING, TASK_STATUSES_MAP.INPROGRESS, TASK_STATUSES_MAP.CHECKREQ, TASK_STATUSES_MAP.DONE], // TaskStatus enum
+    labels: [TASK_STATUSES_MAP.TODO, TASK_STATUSES_MAP.WAITING, TASK_STATUSES_MAP.INPROGRESS, TASK_STATUSES_MAP.CHECKREQ, TASK_STATUSES_MAP.DONE], // TaskStatus enum
     datasets: [
       {
         data: data ? [

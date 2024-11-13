@@ -1,5 +1,5 @@
 import taskCommentController from "@/lib/controllers/tasks/taskComments.controller";
-import { errorHandler } from "@/lib/utils/api.utils";
+import { errorHandler } from "@/lib/services/api.service";
 
 
 export const GET = errorHandler(taskCommentController.getTaskComments)

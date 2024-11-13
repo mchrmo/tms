@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { getApiClient, PaginatedResponse, parseListHookParams } from "@/lib/utils/api.utils";
+import { getApiClient, parseListHookParams } from "@/lib/utils/api.utils";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { TaskComment } from "@prisma/client";
 // import { TaskCommentFormInputs } from "@/components/taskComments/taskComment-form";
@@ -9,6 +9,7 @@ import { AxiosError } from "axios";
 import { z } from "zod";
 import { TaskCommentDetail, TaskCommentListItem } from "../../services/tasks/taskComment.service";
 import { TaskCommentCreateSchema, TaskCommentUpdateSchema } from "@/lib/models/taksComment.model";
+import { PaginatedResponse, PaginatedResponseOld } from "@/lib/services/api.service";
 
 
 const taskCommentsApiClient = getApiClient('/tasks/comments')
@@ -60,7 +61,7 @@ export const useTaskComments = (pagination: PaginationState, filter?: ColumnFilt
     return response.data
   }
 
-  const query = useQuery<PaginatedResponse<TaskCommentListItem>>({
+  const query = useQuery<PaginatedResponseOld<TaskCommentListItem>>({
     queryKey: taskCommentQueryKeys.searched(urlParams),
     queryFn: () => getTaskCommentsFn(params),
   })
