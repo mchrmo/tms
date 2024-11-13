@@ -1,3 +1,4 @@
+"use server"
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import prisma from "../prisma";
 import { NextRequest } from "next/server";
@@ -33,7 +34,9 @@ export const getUser = async (props: GetUserProps = { clerk_id: undefined, user_
       }
     },
   )
-  if (!user) throw new Error("User not found!")
+  if (!user) {
+    return null
+  }
   return user;
 }
 export type AuthUser = Exclude<Prisma.PromiseReturnType<typeof getUser>, null>

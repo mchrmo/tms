@@ -9,7 +9,10 @@ export function formatDate(date: Date) {
 export function formatDateTime(date: Date) {
 
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone; // Automatically uses local time zone
-  const localDate = toZonedTime(date, timeZone);
+
+  console.log(timeZone);
+  
+  const localDate = toZonedTime(date, "Europe/Bratislava");
   
 
   return format(date, 'dd.MM.yyyy HH:mm')
