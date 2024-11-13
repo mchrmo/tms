@@ -62,7 +62,7 @@ const columns: ColumnDef<Task>[] = [
   }, 
   {
     accessorKey: "deadline",
-    header: "Termín",
+    header: "Termín dokončenia",
     cell: (props) => format(props.getValue() as Date, DATE_FORMAT),
     enableColumnFilter: false,
     meta: {
@@ -72,12 +72,12 @@ const columns: ColumnDef<Task>[] = [
   {
     id: 'creator_name',
     accessorKey: "creator.user.name",
-    header: "Vytvoril"
+    header: "Vytvárateľ"
   },
   {
     id: 'assignee_name',
     accessorKey: "assignee.user.name",
-    header: "Zodpovedný"
+    header: "Zodpovedná osoba"
   },
   {
     id: 'organization_name',

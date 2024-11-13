@@ -74,17 +74,17 @@ export const taskColumns: ModelColumns = {
     enum: TASK_STATUSES_MAP
   },
   'deadline': {
-    label: "Termín",
+    label: "Termín dokončenia",
     type: 'datetime',
   },
   'creator_name': {
-    label: "Vytvoril",
+    label: "Vytvárateľ",
     type: 'string',
     path: 'creator.user.name',
     method: 'contains'
   },
   'assignee_name': {
-    label: "Zodpovedný",
+    label: "Zodpovedná osoba",
     type: 'string',
     path: 'assignee.user.name',
     method: 'contains'

@@ -35,7 +35,7 @@ const get_task = async (id: number, options?: GetDetailOptions) => {
     where,
     include: {
       assignee: {
-        include: {user: true},
+        select: {user: true, user_id: true, position_name: true},
       },
       creator: {
         select: {

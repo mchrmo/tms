@@ -1,6 +1,6 @@
 import { getUserByClerkId } from "@/lib/db/user.repository";
 import fileService from "@/lib/services/file.service";
-import { errorHandler } from "@/lib/utils/api.utils";
+import { errorHandler } from "@/lib/services/api.service";
 import { auth } from "@clerk/nextjs/server";
 import { ApiError } from "next/dist/server/api-utils";
 import { NextResponse } from "next/server";

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { paginate, parseFilter, parseQueryParams } from "../../services/api.service";
+import { DetailResponse, paginate, parseFilter, parseQueryParams } from "../../services/api.service";
 import { Prisma, Task, TaskUserRole, User } from "@prisma/client";
 import { CreateTaskSchema, TASK_PRIORITIES_MAP, TASK_STATUSES_MAP, taskColumns, TaskUpdateSchema } from "../../models/task.model";
 import { auth } from "@clerk/nextjs/server";
@@ -7,9 +7,10 @@ import { getUserByClerkId } from "../../db/user.repository";
 import { z } from "zod";
 import taskService, { TaskDetail } from "../../services/tasks/task.service";
 import { createPaginator } from "prisma-pagination";
-import { parseGetManyParams } from "@/lib/utils/api.utils";
+import { parseGetManyParams, unauthorizedError } from "@/lib/utils/api.utils";
 import prisma from "@/lib/prisma";
 import { AuthUser, getMembership, getUser, isSuperior, isRole } from "@/lib/services/auth.service";
+import taskRelService from "@/lib/services/tasks/taskRelationship.service";
 
 
 
@@ -20,26 +21,30 @@ const getTask = async (req: NextRequest, params: any) => {
   const taskId = parseInt(params.id)
 
   const user = await getUser()
+  const isAdmin = await isRole('admin', user)
   let where: Partial<Prisma.TaskFindUniqueArgs['where']> = {
   }
 
-  if(!await isRole('admin', user)) {
-    where = {
-      OR: [
-        {assignee: {user_id: user?.id}},
-        {creator: {user_id: user?.id}},
-        {TaskRelationship: {
-          some: {user_id: user?.id}
-        }}
-      ]  
-    }
-  }
-  
-  
+  if(!user) throw unauthorizedError
+
+  let role: TaskUserRole;
+
+  if(!isAdmin) {
+    const rel = await taskRelService.get_taskRelationship(taskId, user.id)
+    if(!rel) throw unauthorizedError
+    role = rel.role
+  } else role = 'ADMIN'
+
   const task = await taskService.get_task(taskId, {where})
 
-  return NextResponse.json(task, { status: 200 })
+  if(!task) NextResponse.json({}, { status: 404 })
+  
+  const response: DetailResponse<TaskDetail, TaskUserRole> = {
+    role,
+    data: task
+  }
 
+  return NextResponse.json(response, { status: 200 })
 }
 
 const getTasks = async (req: NextRequest) => {

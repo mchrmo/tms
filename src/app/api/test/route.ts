@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma"
 import { AuthUser, getAllSuperierors, isSuperior } from "@/lib/services/auth.service"
 import { newMeetingAttendantEmail } from "@/lib/services/mail.service"
 import meetingService from "@/lib/services/meetings/meeting.service"
-import { errorHandler } from "@/lib/utils/api.utils"
+import { errorHandler } from "@/lib/services/api.service"
 import { auth, clerkClient } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 
