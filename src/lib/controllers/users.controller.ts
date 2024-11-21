@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import userService, { CurrentUserDetail, UserDetail } from "../services/user.service";
 import { ApiError } from "next/dist/server/api-utils";
-import { NewUserSchema, passwordSchema, userColumns, userListIncludes } from "../models/user.model";
+import { passwordSchema, userColumns, UserCreateSchema, userListIncludes, UserUpdateSchema } from "../models/user.model";
 import { Prisma, User } from "@prisma/client";
 import prisma from "../prisma";
 import { createPaginator } from 'prisma-pagination'
@@ -45,10 +45,28 @@ const getUser = async (req: NextRequest, params: any) => {
   return NextResponse.json(user, { status: 200 })
 }
 
+const updateUser = async (req: NextRequest, params: any) => {
+  const body = await req.json()
+  const parsedSchema = UserUpdateSchema.safeParse(body);
+
+  if (!parsedSchema.success) {
+    const { errors } = parsedSchema.error;
+
+    return NextResponse.json({
+      error: { message: "Invalid request", errors },
+    }, {status: 400});
+  }
+  
+  const user = await userService.update_user(parsedSchema.data)
+
+  return NextResponse.json(user, { status: 200 })
+  
+}
+
 const createUser = async (request: NextRequest) => {
 
   const body = await request.json()
-  const parsedSchema = NewUserSchema.safeParse(body);
+  const parsedSchema = UserCreateSchema.safeParse(body);
 
   if (!parsedSchema.success) {
     const { errors } = parsedSchema.error;
@@ -58,10 +76,10 @@ const createUser = async (request: NextRequest) => {
     }, {status: 400});
   }
 
-  const {name, email}  = parsedSchema.data
+  const {name, email, phone}  = parsedSchema.data
 
   
-  const user = await userService.create_user({name, email})
+  const user = await userService.create_user({name, email, phone})
 
 
   return NextResponse.json(user, { status: 200 })
@@ -96,6 +114,7 @@ const usersController = {
   getUsers,
   getUser,
   createUser,
+  updateUser,
   changePassword
 }
 

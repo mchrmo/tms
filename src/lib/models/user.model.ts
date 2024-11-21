@@ -11,14 +11,29 @@ export const USER_ROLES_MAP: {[key: string]: string} = {
 
 export const passwordSchema =  z.string().min(8, "Heslo musí mať minimálne 8 znakov.")
 
-export const NewUserSchema = z.object({
+export const UserSchema = z.object({
+  id: z.number().optional(), // Optional for creation (auto-increment)
   email: z.string().email("Zadajte správny tvar emailu."),
-  name: z.string().regex(new RegExp(/^[A-Z][a-z]*\s[A-Z][a-z]*/), "Zadajte meno a priezvisko"),
+  name: z.string().regex(new RegExp(/^[A-ZÁ-Ž][a-zá-ž]*\s[A-ZÁ-Ž][a-zá-ž]*/), "Zadajte meno a priezvisko"),
   phone: z.string().regex(/^\+\d+$/, "Musí začínať symbolom '+' a môže obsahovať len čísla").min(8, "Zadajte správne telefónne číslo")
 })
 
 
-export type UserRegistrationFormInputs = z.infer<typeof NewUserSchema>;
+export type ZUser = z.infer<typeof UserSchema>;
+
+export const UserCreateSchema = UserSchema.omit({
+  id: true, // Remove id for creation
+});
+
+export type ZUserCreateForm = z.infer<typeof UserCreateSchema>;
+
+export const UserUpdateSchema = UserSchema.partial().merge(z.object({ id: z.number() }));
+
+// Zod type for UpdateForm
+export type ZUserUpdateForm = z.infer<typeof UserUpdateSchema>;
+
+
+export type UserRegistrationFormInputs = z.infer<typeof UserCreateSchema>;
 
 
 export const userListIncludes: Prisma.UserInclude = {

@@ -161,6 +161,43 @@ export const useCreateTask = () => {
   })
 }
 
+export const useDeleteTask = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast()
+
+  const deleteTask = async ({taskId}: {taskId: number}) => {
+    const response = await tasksApiClient.delete(`/${taskId}`,)
+    return response.data
+  }
+  
+  return useMutation({
+    mutationFn: deleteTask,
+    onMutate: async () => {
+      if (!confirm("Určite chcete úlohu vymazať?")) {
+        throw new Error('Úloha nebola vymazaná');
+      }
+
+      await queryClient.cancelQueries({ queryKey: taskQueryKeys.all })
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Úloha vymazaná!"
+      })
+    },
+    onError: (err: AxiosError<{message: string}>) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message
+
+      toast({
+        title: "Chyba",
+        description: errMessage
+      })
+
+    },
+    onSettled: (task) => {  
+      // queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(task.id) })
+    }
+  })
+}
 // addds
 
 export const useMyTasks = () => {

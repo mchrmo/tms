@@ -1,5 +1,5 @@
 'use client'
-import { useTask } from "@/lib/hooks/task/task.hooks";
+import { useDeleteTask, useTask } from "@/lib/hooks/task/task.hooks";
 import { Task } from "@prisma/client";
 import ViewHeadline from "@/components/common/view-haedline";
 import TaskForm from "./task-form";
@@ -21,6 +21,10 @@ import { EyeIcon, icons, SettingsIcon } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
 import { AxiosError } from "axios";
+import { useUser } from "@clerk/nextjs";
+import { isRole } from "@/lib/utils";
+import { User } from "@clerk/nextjs/server";
+import { useRouter } from "next/navigation";
 
 
 export default function TaskDetail({ params }: { params: { id: string } }) {
@@ -30,10 +34,24 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
   const task: TaskDetailT | undefined = taskQ.data ? taskQ.data.data : undefined
   // const parent = useTask((task && task.parent_id) ? task.parent_id : undefined)
 
+  const deleteTaskQ = useDeleteTask();
   const [tab, setTab] = useState('subtasks')
 
   const [variant, setVariant] = useState<'ghost' | 'default'>('ghost')
+  const { user } = useUser()
+  const isAdmin = isRole((user as unknown) as User, 'admin')
+  const router = useRouter()
+  
+  
+  const onDelete = () => {
+    deleteTaskQ.mutate({taskId})
+  }
 
+  useEffect(() => {
+    if(deleteTaskQ.isSuccess) router.push('/tasks')
+  }, [deleteTaskQ.isSuccess]) 
+  
+  
   if (taskQ.isFetching) return <span>Úloha sa načitáva <LoadingSpinner></LoadingSpinner></span>
 
   return (
@@ -91,6 +109,8 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
 
                   {/* </div> */}
                 </Tabs>
+
+                { isAdmin && <Button onClick={onDelete} variant={"linkDestructive"}>Vymazať úlohu</Button>}
               </div>
             )}
 

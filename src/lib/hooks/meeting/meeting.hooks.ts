@@ -109,8 +109,6 @@ export const useUpdateMeeting = (id: number) => {
       queryClient.invalidateQueries({queryKey: meetingQueryKeys.all});
     },
   });
-
-
 }
 
 export const useCreateMeeting = () => {

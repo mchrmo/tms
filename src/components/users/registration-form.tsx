@@ -1,53 +1,69 @@
 'use client'
 
-import { createUserAction, RegistrationFields, State } from "@/lib/actions/user.actions";
 import { useEffect } from "react";
 import { useFormState } from "react-dom";
-import {  SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { revalidatePath } from "next/cache";
 import { redirect, useRouter } from "next/navigation";
-import { NewUserSchema, UserRegistrationFormInputs } from "@/lib/models/user.model";
-import { useCreateUser } from "@/lib/hooks/user.hooks";
+import { UserCreateSchema, UserRegistrationFormInputs, UserUpdateSchema, ZUser, ZUserCreateForm, ZUserUpdateForm } from "@/lib/models/user.model";
+import { useCreateUser, useUpdateUser } from "@/lib/hooks/user.hooks";
 import SubmitButton from "../common/buttons/submit";
 
 
-const formSchema = NewUserSchema
 
 
-export default function UserRegistrationForm({onClose}: {onClose: () => void}) {
+export default function UserRegistrationForm({ onClose, defaultValues: _def }: { onClose?: () => void, defaultValues?: any }) {
 
   const router = useRouter()
   const createUser = useCreateUser();
+  const updateUser = useUpdateUser(_def ? _def.id : 0);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      name: "",
-      phone: '+421'
-    },
+  const defaultValues: ZUserUpdateForm = {
+    ...{
+      id: undefined,
+      name: '',
+    }, ...(_def ? _def : {})
+  }
+
+
+  const form = useForm<ZUser>({
+    resolver: zodResolver(defaultValues.id ? UserUpdateSchema : UserCreateSchema),
+    defaultValues,
     mode: "onSubmit"
   })
+
   const { handleSubmit, reset, setValue, formState: { errors, isDirty, isValid } } = form
 
   useEffect(() => {
-    if(!createUser.isSuccess) return
-    const newId = createUser.data.id
-    if(newId) router.push('/users')
+    if (createUser.isSuccess) {
+      const newId = createUser.data.id
+      if (newId) router.push('/users')
 
-    createUser.reset()
-    onClose()
-  }, [createUser.isSuccess])
+      if (onClose) onClose()
+      createUser.reset()
+
+    } else if(updateUser.isSuccess) {
+      router.push('/users')
+      createUser.reset()
+
+    }
 
 
-  const onSubmit: SubmitHandler<UserRegistrationFormInputs> = async (data) => {
-    createUser.mutate(data)
+
+  }, [createUser.isSuccess, updateUser.isSuccess])
+
+
+  const onSubmit: SubmitHandler<any> = async (data) => {
+    if(data.id) {
+      updateUser.mutate(data)
+    } else {
+      createUser.mutate(data)
+    }
   }
 
   return (
@@ -78,7 +94,7 @@ export default function UserRegistrationForm({onClose}: {onClose: () => void}) {
                 <FormItem>
                   <FormLabel>E-mail</FormLabel>
                   <FormControl>
-                    <Input placeholder="@" {...field} />
+                    <Input placeholder="@" {...field} disabled={!!defaultValues.id} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -101,11 +117,15 @@ export default function UserRegistrationForm({onClose}: {onClose: () => void}) {
             />
 
             <div className="flex justify-end gap-3">
-              <Button variant="secondary" type="button" onClick={() => {onClose();}}>Zrušiť</Button>
-              <SubmitButton isLoading={createUser.isPending || createUser.isPending} type="submit" className="">Registrovať</SubmitButton>
+              <Button variant="secondary" type="button" onClick={() => { if (onClose) onClose(); }}>Zrušiť</Button>
+              <SubmitButton isLoading={createUser.isPending || updateUser.isPending} type="submit" className="">
+                {
+                  defaultValues.id ? "Aktualizovať" : "Registrovať"
+                }
+              </SubmitButton>
             </div>
           </div>
-          
+
         </form>
       </Form>
 
