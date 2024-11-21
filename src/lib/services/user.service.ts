@@ -36,7 +36,7 @@ export const userListItem = Prisma.validator<Prisma.UserDefaultArgs>()({
 export type UserListItem = Prisma.UserGetPayload<typeof userListItem>
 
 
-const create_user = async ({name, email, roleId}: {name: string, email: string, roleId?: number}) => {
+const create_user = async ({name, email, phone, roleId}: {name: string, phone: string, email: string, roleId?: number}) => {
 
   const password =  Math.random().toString(36).slice(-8);
 
@@ -65,6 +65,7 @@ const create_user = async ({name, email, roleId}: {name: string, email: string, 
     data: {
       name: name,
       email: email,
+      phone: phone,
       clerk_id: clerkUser.id,
       role: {
         connect: {id: 2}
