@@ -187,9 +187,7 @@ function RowActions({ user }: { user: User }) {
   const { mutate: resetRegistration } = useResetRegistration()
 
   const handleResetRegistration = () => {
-
     if (!confirm("Určite chcete resetovať registráciu?")) return
-
     resetRegistration(user.clerk_id)
   }
 
@@ -204,6 +202,12 @@ function RowActions({ user }: { user: User }) {
         <DropdownMenuItem onClick={handleResetRegistration}>
           Resetovať registráciu
         </DropdownMenuItem>
+        <Link href={`/users/${user.id}`}>
+          <DropdownMenuItem >
+            Upraviť
+          </DropdownMenuItem>
+        </Link>
+
       </DropdownMenuContent>
     </DropdownMenu>
   )

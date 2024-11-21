@@ -110,7 +110,7 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
                   {/* </div> */}
                 </Tabs>
 
-                <Button onClick={onDelete} variant={"linkDestructive"}>Vymazať úlohu</Button>
+                { isAdmin && <Button onClick={onDelete} variant={"linkDestructive"}>Vymazať úlohu</Button>}
               </div>
             )}
 

@@ -6,6 +6,7 @@ import { User, clerkClient, currentUser } from "@clerk/nextjs/server";
 import prisma from "../prisma";
 import { Prisma } from "@prisma/client";
 import { ApiError } from "next/dist/server/api-utils";
+import { ZUserUpdateForm } from "../models/user.model";
 
 
 const get_user = async (id: number) => {
@@ -81,6 +82,16 @@ const create_user = async ({name, email, roleId}: {name: string, email: string, 
 
 }
 
+const update_user = async (data: ZUserUpdateForm) => {
+
+  const user = await prisma.user.update({
+    where: {id: data.id},
+    data
+  });
+  
+  return user
+}
+
 const reset_registration = async (clerk_id: string) => {
  
   const user = await getUserByClerkId(clerk_id)
@@ -123,6 +134,7 @@ export type CurrentUserDetail = Prisma.PromiseReturnType<typeof get_current_user
 const userService = {
   get_user,
   create_user,
+  update_user,
   reset_registration,
   get_current_user,
   set_new_pasword

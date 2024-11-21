@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { revalidatePath } from "next/cache";
 import { redirect, useRouter } from "next/navigation";
-import { NewUserSchema, passwordSchema, UserRegistrationFormInputs } from "@/lib/models/user.model";
+import { passwordSchema } from "@/lib/models/user.model";
 import { useChangeUserPassword, useCreateUser } from "@/lib/hooks/user.hooks";
 import SubmitButton from "../common/buttons/submit";
 import {
