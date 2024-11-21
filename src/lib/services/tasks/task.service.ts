@@ -144,6 +144,13 @@ const update_task = async (taskData: Partial<Task>) => {
 }
 
 const delete_task = async (task_id: number) => {
+console.log(task_id);
+
+  const rels = await prisma.taskRelationship.deleteMany({
+    where: {
+        task_id
+    }
+  })
 
   const reminders = await prisma.taskReminder.deleteMany({
       where: {
