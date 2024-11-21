@@ -37,7 +37,7 @@ const create_taskUpdate = async (task: TaskWithUsers, user: User | null, key: st
       title = 'Úloha vytvorená'
       description = `Úlohu vytvoril ${changerName} pre ${member?.user.name}`
 
-      taskRelService.update_allTaskRelationships(task)
+      await taskRelService.update_allTaskRelationships(task)
     } break;
     case 'assignee_id': {
       if(!value) break; 
@@ -45,7 +45,7 @@ const create_taskUpdate = async (task: TaskWithUsers, user: User | null, key: st
       title = `Zmena poverenej osoby`
       description = `${changerName} poveril ${member && member.user.name}`
 
-      taskRelService.update_allTaskRelationships(task)
+      await taskRelService.update_allTaskRelationships(task)
     } break;
     case 'creator_id': {
       if(!value) break; 
@@ -53,7 +53,7 @@ const create_taskUpdate = async (task: TaskWithUsers, user: User | null, key: st
       title = `Zmena vlastníka`
       description = `${changerName} zmenil vlastníka na ${member && member.user.name}`
 
-      taskRelService.update_allTaskRelationships(task)
+      await taskRelService.update_allTaskRelationships(task)
     } break;
     case 'status': 
       if(!value) break; 
