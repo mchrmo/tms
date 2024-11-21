@@ -76,10 +76,10 @@ const createUser = async (request: NextRequest) => {
     }, {status: 400});
   }
 
-  const {name, email}  = parsedSchema.data
+  const {name, email, phone}  = parsedSchema.data
 
   
-  const user = await userService.create_user({name, email})
+  const user = await userService.create_user({name, email, phone})
 
 
   return NextResponse.json(user, { status: 200 })
