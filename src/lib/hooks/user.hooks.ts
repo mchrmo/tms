@@ -2,11 +2,10 @@ import { useToast } from "@/components/ui/use-toast"
 import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react-table"
 import { getApiClient } from "../api-client"
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
-import { User } from "@/lib/db/user.repository";
 import { useEffect } from "react";
 import { AxiosError } from "axios";
 import { PaginatedResponse } from "../services/api.service";
-import { UserRegistrationFormInputs } from "../models/user.model";
+import { UserRegistrationFormInputs, ZUserUpdateForm } from "../models/user.model";
 import { UserDetail, UserListItem } from "../services/user.service";
 import { parseListHookParamsNew } from "../utils/api.utils";
 
@@ -113,6 +112,41 @@ export const useCreateUser = () => {
       queryClient.invalidateQueries({ queryKey: userQueryKeys.all })
     }
   })
+}
+
+export const useUpdateUser = (id: number) => {
+
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  const updateUserFn = async (updateUserData: ZUserUpdateForm) => {
+    const response = await userApiClient.patch(`/`, updateUserData)
+    return response.data
+  }
+
+  return useMutation({
+    mutationFn: updateUserFn,
+    onMutate: async (updatedUser) => {
+      await queryClient.cancelQueries({queryKey: userQueryKeys.detail(id)});
+      const previousUser = queryClient.getQueryData(userQueryKeys.detail(id));
+      queryClient.setQueryData(userQueryKeys.detail(Number(id)), updatedUser);
+      return { previousUser: previousUser, updatedUser: updatedUser };
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Údaje užívateľa aktualizované!"
+      })
+    },
+    onError: (err, updatedUser, context?: any) => {
+      queryClient.setQueryData(
+        userQueryKeys.detail(Number(id)),
+        context.previousUser
+      );
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({queryKey: userQueryKeys.all});
+    },
+  });
 }
 
 export const useResetRegistration = () => {

@@ -31,8 +31,7 @@ const getTask = async (req: NextRequest, params: any) => {
 
   if(!isAdmin) {
     const rel = await taskRelService.get_taskRelationship(taskId, user.id)
-    console.log("Rel", rel, user.id);
-    
+
     if(!rel) throw unauthorizedError
     role = rel.role
   } else role = 'ADMIN'
