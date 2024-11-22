@@ -1,8 +1,5 @@
-import { auth, clerkClient, clerkMiddleware, ClerkMiddlewareAuth, createRouteMatcher, currentUser } from "@clerk/nextjs/server";
+import { clerkClient, clerkMiddleware, ClerkMiddlewareAuth, createRouteMatcher, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-import { UserRole } from "@prisma/client";
-import { getUser } from "./lib/services/auth.service";
-
 
 const isPublicRoute = createRouteMatcher(['/sign-in(.*)']);
 
@@ -16,7 +13,7 @@ async function middleware(req: NextRequest, auth: ClerkMiddlewareAuth) {
   const requestHeaders = new Headers(req.headers)
 
   if(!userId) {
-    return NextResponse.json({'message': "Unauthorized"}, {status: 403})
+    return NextResponse.json({'message': "Unauthorized - no user"}, {status: 403})
   }
 
   const user = await clerkClient.users.getUser(userId)
