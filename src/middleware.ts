@@ -13,7 +13,7 @@ async function middleware(req: NextRequest, auth: ClerkMiddlewareAuth) {
   const requestHeaders = new Headers(req.headers)
 
   if(!userId) {
-    return NextResponse.json({'message': "Unauthorized - test"}, {status: 403})
+    return NextResponse.json({'message': "Unauthorized - no user"}, {status: 403})
   }
 
   const user = await clerkClient.users.getUser(userId)

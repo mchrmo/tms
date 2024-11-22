@@ -22,11 +22,16 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 // })
 
 async function sendEmail(email: any) {
-  if(process.env.DISABLE_EMAIL) {
+if(process.env.DISABLE_EMAIL && email.to !== 'mchrmo@gmail.com') {
     console.log("Email not send - disabled", email.to)
     return
   }
-  return await sgMail.send(email)
+  try {
+    return await sgMail.send(email)
+  } catch (error) {
+    console.error(error);
+    
+  }
 }
 
 

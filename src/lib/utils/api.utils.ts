@@ -399,4 +399,4 @@ export const parseGetManyParams = (urlParams: URLSearchParams, columns: ModelCol
   return {where, orderBy, pagination}
 }  
 
-export const unauthorizedError = new ApiError(403, "Test auth")
+export const unauthorizedError = new ApiError(403, "Unauthorized")
