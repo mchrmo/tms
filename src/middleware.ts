@@ -1,8 +1,5 @@
-import { auth, clerkClient, clerkMiddleware, ClerkMiddlewareAuth, createRouteMatcher, currentUser } from "@clerk/nextjs/server";
+import { clerkClient, clerkMiddleware, ClerkMiddlewareAuth, createRouteMatcher, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-import { UserRole } from "@prisma/client";
-import { getUser } from "./lib/services/auth.service";
-
 
 const isPublicRoute = createRouteMatcher(['/sign-in(.*)']);
 
