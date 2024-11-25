@@ -10,9 +10,8 @@ import Sidebar from "@/components/common/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import RoleProvider, { Providers } from "../providers";
 import { auth, getAuth } from "@clerk/nextjs/server";
-import prisma from "@/lib/prisma";
-import UserProvider from "../providers";
-import { cloneElement } from "react";
+import NextBreadcrumb from "@/components/common/breadcrumbs";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -54,6 +53,9 @@ export default async function RootLayout({
               </div>
               <main className="w-full py-4 md:p-4 overflow-auto">
                 <div className="p-4 lg:p-8 bg-white block border-b rounded-md border-gray-200 lg:mt-1.5">
+                  <div className="space-y-4 mb-5">
+                    <NextBreadcrumb />
+                  </div>
                   {children}
                 </div>
               </main>
