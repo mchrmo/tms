@@ -17,6 +17,9 @@ import {
 import Link from "next/link"
 import AddButton from "../common/buttons/add-button"
 import AddMember from "./members/add-member"
+import { useUser } from "@clerk/nextjs"
+import { isRole } from "@/lib/utils"
+import { User } from "@clerk/nextjs/server"
 
 
 
@@ -24,6 +27,9 @@ export default function OrganizationDetail({ params }: { params: { id: string } 
 
   const organizationId = parseInt(params.id)
   const organization = useOrganization(organizationId)
+
+  const { user } = useUser()
+  const isAdmin = isRole((user as unknown) as User, 'admin')
 
   const deleteOrgQ = useDeleteOrganization(organizationId)
   const router = useRouter()
@@ -42,8 +48,8 @@ export default function OrganizationDetail({ params }: { params: { id: string } 
         organization.data && (
           <div className="space-y-7">
             {
-              organization.data.parent && 
-              <span>Nadriadená organizácia <Link href={'/organizations/'+organization.data.parent_id}><Button className="p-0" variant={'link'}>{organization.data.parent.name}</Button></Link></span>
+              organization.data.parent &&
+              <span>Nadriadená organizácia <Link href={'/organizations/' + organization.data.parent_id}><Button className="p-0" variant={'link'}>{organization.data.parent.name}</Button></Link></span>
             }
 
             <OrganizationForm defaultValues={organization.data}></OrganizationForm>
@@ -55,7 +61,9 @@ export default function OrganizationDetail({ params }: { params: { id: string } 
             <div>
               <div className="flex justify-between">
                 <h3 className="text-lg">Členovia organizácie:</h3>
-                <AddMember defaultValues={{organization: organization.data, organization_id: organizationId}}><AddButton size={'sm'} className="">Pridať člena</AddButton></AddMember>
+                {isAdmin &&
+                  <AddMember defaultValues={{ organization: organization.data, organization_id: organizationId }}><AddButton size={'sm'} className="">Pridať člena</AddButton></AddMember>
+                }
               </div>
 
               <Table className="">
@@ -93,10 +101,11 @@ export default function OrganizationDetail({ params }: { params: { id: string } 
             <div>
               <div className="flex justify-between mb-2">
                 <h3 className="text-lg">Podriadené organizácie:</h3>
-                <Link href={`/organizations/create?parent_id=${organizationId}`}>
+
+                {isAdmin && <Link href={`/organizations/create?parent_id=${organizationId}`}>
                   <AddButton size={"sm"}>Pridať organizáciu</AddButton>
                 </Link>
-              </div>
+                }              </div>
 
               <Table className="">
                 <TableHeader>
