@@ -6,7 +6,7 @@ import { auth, currentUser } from "@clerk/nextjs/server"
 import Link from "next/link"
 
 
-export default async function Users() {
+export default async function Organization() {
 
   // const orgData = await getMainOrganization()
   
@@ -18,9 +18,13 @@ export default async function Users() {
       <div className="flex items-center justify-between">
       <ViewHeadline>Organizácie</ViewHeadline>
 
-        <Link href={'/organizations/create'}>
-          <AddButton>Nová organizácia</AddButton>
-        </Link>
+        {
+          isAdmin &&
+          <Link href={'/organizations/create'}>
+            <AddButton>Nová organizácia</AddButton>
+          </Link>
+        }
+        
       </div>
 
 

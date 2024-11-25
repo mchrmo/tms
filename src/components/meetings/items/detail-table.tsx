@@ -25,13 +25,21 @@ export type MeetingDetailItems = NonNullable<MeetingDetail>['items'][number];
 
 const columns: ColumnDef<MeetingDetailItems>[] = [
   {
-    accessorKey: "description",
-    header: "Popis",
+    accessorKey: "title",
+    header: "Predmet",
     cell: (props) => {
       const id = props.row.original.id
-      return <Link className="link" href={'/meetings/items/' + id}>{props.getValue() as string}</Link>
+      return <Link className="link" href={'/meetings/items/'+id}>{props.getValue() ? props.getValue() as string : "zobraziť"}</Link>
     }
   },
+  // {
+  //   accessorKey: "description",
+  //   header: "Popis",
+  //   cell: (props) => {
+  //     const id = props.row.original.id
+  //     return <Link className="link" href={'/meetings/items/' + id}>{props.getValue() as string}</Link>
+  //   }
+  // },
   {
     accessorKey: "creator.name",
     header: "Navrhovateľ",

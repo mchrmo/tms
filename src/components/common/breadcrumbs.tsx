@@ -23,11 +23,19 @@ const pathLabels: { label: string, matcher: string | RegExp }[] = [
         matcher: /^\/tasks$/
     },
     {
+        label: "Detail",
+        matcher: /^\/tasks\/\d+$/
+    },
+    {
+        label: "Nová úloha",
+        matcher: /^\/tasks\/create$/
+    },
+    {
         label: "Porady",
         matcher: /^\/meetings$/
     },
     {
-        label: "Vyhladávanie",
+        label: "Vyhladávanie bodov",
         matcher: /^\/meetings\/search$/
     },
     {
@@ -49,6 +57,14 @@ const pathLabels: { label: string, matcher: string | RegExp }[] = [
     {
         label: "Profil",
         matcher: /^\/profile$/
+    },
+    {
+        label: "Užívatelia",
+        matcher: /^\/users$/
+    },
+    {
+        label: "Detail",
+        matcher: /^\/users\/\d+$/
     }
 ]
 
