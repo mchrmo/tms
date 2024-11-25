@@ -47,7 +47,8 @@ const get_meeting = async (id: number) => {
           id: true,
           description: true,
           creator: {select: {name: true}},
-          status: true
+          status: true,
+          title: true,
         }
       }
     },
