@@ -143,7 +143,7 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
           name: 'Všetky porady'
         },
         {
-          href: '/meetings/items',
+          href: '/meetings/search',
           name: 'Hľadať bod porady'
         }
       ]
