@@ -50,7 +50,7 @@ export const meetingItemColumns: ModelColumns = {
   },
   'meetingName': {
       type: 'string',
-      method: 'equals',
+      method: 'contains',
       path: "meeting.name",
       label: 'Názov porady'
   },
