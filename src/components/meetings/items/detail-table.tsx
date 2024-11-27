@@ -128,7 +128,7 @@ export default function MeetingDetailItemsTable({ meeting }: { meeting?: Meeting
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    // getPaginationRowModel: getPaginationRowModel(),
 
   })
 
