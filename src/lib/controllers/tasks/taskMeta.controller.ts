@@ -20,7 +20,7 @@ const addTaskMeta = async (req: NextRequest, params: any) => {
   }
   
   const {taskId, key, value} = parsedSchema.data
-  const meta = await taskMetaService.add_meta(taskId, key, value)
+  const meta = await taskMetaService.update_meta(taskId, key, value)
   
   return NextResponse.json(meta, { status: 200 })
 }

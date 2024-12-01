@@ -62,3 +62,11 @@ export function isRole(user: User | null, roleName: string) {
   
   return false
 }
+
+
+
+export const parseBoolean = (value?: string | null): boolean => {
+  const bool = (value === "true")
+  if(bool) return true
+  else return false
+} 

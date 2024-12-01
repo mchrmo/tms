@@ -3,28 +3,6 @@ import prisma from "../prisma";
 
 
 
-
-export async function getTaskList(filter?: Prisma.TaskWhereInput, sort?: Prisma.TaskOrderByWithRelationAndSearchRelevanceInput) {
-
-  const tasks = await prisma.task.findMany({
-    include: {
-      assignee: {
-        select: {user: {select: {name: true}}}
-      },
-      creator: {
-        select: {user: {select: {name: true}}}
-      },
-      organization: {
-        select: {name: true}
-      }
-    },
-    where: filter ? filter : {},
-    orderBy: sort
-  });
-
-  return tasks
-}
-
 export async function getTask(id: number) {
 
   const task = await prisma.task.findUnique({

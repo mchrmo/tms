@@ -45,7 +45,8 @@ const create_user = async ({name, email, phone, roleId}: {name: string, phone: s
   if(!role) throw new Error("Incorrect user role")
 
   let clerkUser: User | undefined;
-  const clerkUsers = await clerkClient.users.getUserList({ emailAddress: [email] })
+  const client = clerkClient()
+  const clerkUsers = await client.users.getUserList({ emailAddress: [email] })
   if(clerkUsers.totalCount > 0) clerkUser = clerkUsers.data[0]
   else clerkUser = await createClerkUser(name, email, password, role)
 
@@ -54,7 +55,7 @@ const create_user = async ({name, email, phone, roleId}: {name: string, phone: s
   const existingUser = await prisma.user.findUnique({where: {email}})
   if(existingUser) throw new ApiError(400, "Užívateľ s takýmto emailom už existuje.")
 
-  await clerkClient.users.updateUserMetadata(clerkUser.id, {
+  await client.users.updateUserMetadata(clerkUser.id, {
     privateMetadata: {
       user: existingUser
     },
@@ -116,7 +117,7 @@ const get_current_user = async () => {
   if(!clerkUser) return null
 
   const user = await getUserByClerkId(clerkUser.id)
-
+  
   return user
 }
 

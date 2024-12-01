@@ -34,7 +34,7 @@ export const TaskSchema = z.object({
   name: z.string().min(1, "Názov je povinný"),
   status: z.enum(["TODO", "INPROGRESS", "WAITING", "CHECKREQ", "DONE"]).default("TODO"),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
-  description: z.string().optional().default(''),
+  description: z.string().max(500, "Popis nemôže presiahnuť 500 znakov.").optional().default(''),
   parent_id: z.number().nullable(),
   organization_id: z.number().optional(),
   creator_id: z.number().optional(),
@@ -101,7 +101,7 @@ export const taskColumns: ModelColumns = {
   },
   'fulltext': {
     type: 'string',
-    customFn: (val) => ({OR: [
+    customFilter: (val) => ({OR: [
       {name: {contains: val}}
     ]})
   },

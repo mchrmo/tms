@@ -27,6 +27,10 @@ if(process.env.DISABLE_EMAIL && email.to !== 'mchrmo@gmail.com') {
     return
   }
   try {
+
+    email.html += `<br> <br> <i style="color: #7e7e7e;">Email je automaticky generovaný, prosím neodpovedajte naň.</i>`
+
+
     return await sgMail.send(email)
   } catch (error) {
     console.error(error);
