@@ -35,8 +35,8 @@ export type TaskFormInputs = {
 }
 
 interface TaskFormProps {
-  defaultValues: any,
-  role: TaskUserRole
+  defaultValues?: any,
+  role?: TaskUserRole
 }
 
 export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
@@ -45,7 +45,7 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
 
   let edit = false
 
-  let meta: GenericMeta[] = _def.meta || [];
+  let meta: GenericMeta[] = (_def && _def.meta) || [];
 
   // Parse def values
   if (_def) {
@@ -72,9 +72,9 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
   let fieldsAccess: { [key: string]: boolean } = {
     name: true,
     status: true,
-    priority: false,
-    assignee_id: false,
-    deadline: false,
+    priority: true,
+    assignee_id: true,
+    deadline: true,
   }
 
 
@@ -89,20 +89,29 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
 
 
   const statusItems = Object.entries(TASK_STATUSES_MAP).map(([key, label]) => ({ key, label, disabled: false }))
-  if (isTaskRole(['PERSONAL', 'OWNER'], role)) {
-    fieldsAccess = {
-      ...fieldsAccess, 
-      assignee_id: true,
-      deadline: true,
-      priority: true
+  if(role) {
+    if (isTaskRole(['PERSONAL', 'OWNER'], role)) {
+      fieldsAccess = {
+        ...fieldsAccess, 
+        assignee_id: true,
+        deadline: true,
+        priority: true
+      }
+    } else {
+      fieldsAccess = {
+        ...fieldsAccess, 
+        assignee_id: false,
+        deadline: false,
+        priority: false
+      }
+    
+      if (watch('status') === "DONE") fieldsAccess.status = false
+      if (parseBoolean(getMetaValue(meta, 'checkRequired'))) {
+        const i = statusItems.findIndex(s => s.key === "DONE")
+        statusItems[i].disabled = true
+      }
+  
     }
-  } else {
-    if (watch('status') === "DONE") fieldsAccess.status = false
-    if (parseBoolean(getMetaValue(meta, 'checkRequired'))) {
-      const i = statusItems.findIndex(s => s.key === "DONE")
-      statusItems[i].disabled = true
-    }
-
   }
 
 
