@@ -117,7 +117,7 @@ export default function UserRegistrationForm({ onClose, defaultValues: _def }: {
             />
 
             <div className="flex justify-end gap-3">
-              <Button variant="secondary" type="button" onClick={() => { if (onClose) onClose(); }}>Zrušiť</Button>
+              <Button variant="secondary" type="button" onClick={() => { router.back() }}>Zrušiť</Button>
               <SubmitButton isLoading={createUser.isPending || updateUser.isPending} type="submit" className="">
                 {
                   defaultValues.id ? "Aktualizovať" : "Registrovať"

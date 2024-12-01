@@ -16,7 +16,8 @@ async function middleware(req: NextRequest, auth: ClerkMiddlewareAuth) {
     return NextResponse.json({'message': "Unauthorized - no user"}, {status: 403})
   }
 
-  const user = await clerkClient.users.getUser(userId)
+  const clerkC = clerkClient()
+  const user = await clerkC.users.getUser(userId)
   if(!user) {
     return NextResponse.json({'message': "User not found"}, {status: 403})
   }
@@ -34,8 +35,7 @@ async function middleware(req: NextRequest, auth: ClerkMiddlewareAuth) {
 }
 
 export default clerkMiddleware(async (auth, req, evt) => {
- 
-    
+
   const { userId, redirectToSignIn } = await auth()
   
   if(isPublicRoute(req)) {

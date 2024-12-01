@@ -16,12 +16,13 @@ import { OrganizationMemberListItem } from "@/lib/services/organizations/organiz
 const POPOVER_WIDTH = 'w-full';
 
 
-export default function OrganizationMemberCombobox({onSelectResult, label, defaultValue: _def, managersToOrg}: 
+export default function OrganizationMemberCombobox({onSelectResult, label, defaultValue: _def, managersToOrg, disabled}: 
   {
     onSelectResult: (organizationMember: OrganizationMemberListItem) => void,
     label?: string
     defaultValue?: OrganizationMemberListItem
-    managersToOrg?: number
+    managersToOrg?: number,
+    disabled?: boolean
   }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<OrganizationMemberListItem | undefined>(_def);
@@ -43,6 +44,7 @@ export default function OrganizationMemberCombobox({onSelectResult, label, defau
           variant="outline"
           role="combobox"
           className={cn('justify-between', POPOVER_WIDTH)}
+          disabled={disabled}
         >
           {displayName}
 

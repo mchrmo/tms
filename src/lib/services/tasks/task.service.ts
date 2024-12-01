@@ -14,7 +14,7 @@ type CreateTaskReqs = {
   parent_id?: number | null;
   organization_id?: number;
   creator_id: number;
-  assignee_id?: number;
+  assignee_id: number;
   source?: string;
   deadline: Date;
 }
@@ -79,11 +79,13 @@ const create_task = async (taskData: CreateTaskReqs) => {
   const currentUser = await userService.get_current_user()
   if(!currentUser) return null
 
+  const assignee = await organizationMemberService.get_organizationMember(taskData.assignee_id)
+  if(!assignee) return null
+
   const member = await organizationMemberService.get_organizationMember(taskData.creator_id)
 
 
-  const organization_id = taskData.organization_id ? taskData.organization_id : member?.organization_id;
-  const assignee_id = taskData.assignee_id ? taskData.assignee_id : member?.organization_id;
+  const organization_id = taskData.organization_id || assignee?.organization_id;
 
   const newTaskData: Prisma.TaskUncheckedCreateInput = {
     name: taskData.name,
@@ -91,7 +93,7 @@ const create_task = async (taskData: CreateTaskReqs) => {
     description: taskData.description,
     parent_id: taskData.parent_id,
     organization_id,
-    assignee_id,
+    assignee_id: taskData.assignee_id,
     creator_id: taskData.creator_id,
     deadline: taskData.deadline,
     source: taskData.source
@@ -100,12 +102,10 @@ const create_task = async (taskData: CreateTaskReqs) => {
   
   const task = await createTask(newTaskData);
 
-  if(member) {
-    await sendAssigneeChangeNotification(member?.user_id, taskData.name)
-  }
+  await sendAssigneeChangeNotification(assignee?.user_id, taskData.name)
+
 
   const update = await taskUpdateService.create_taskUpdate(task, currentUser, 'created')
-
 
   return task
 }

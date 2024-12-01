@@ -1,6 +1,6 @@
 'use client'
-import { useDeleteTask, useTask } from "@/lib/hooks/task/task.hooks";
-import { Task } from "@prisma/client";
+import { useDeleteTask, useTask, useUpdateTaskMeta } from "@/lib/hooks/task/task.hooks";
+import { Task, TaskUserRole } from "@prisma/client";
 import ViewHeadline from "@/components/common/view-haedline";
 import TaskForm from "./task-form";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -25,6 +25,7 @@ import { useUser } from "@clerk/nextjs";
 import { isRole } from "@/lib/utils";
 import { User } from "@clerk/nextjs/server";
 import { useRouter } from "next/navigation";
+import { getMetaValue } from "@/lib/utils/api.utils";
 
 
 export default function TaskDetail({ params }: { params: { id: string } }) {
@@ -32,6 +33,7 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
   const taskId = parseInt(params.id)
   const taskQ = useTask(taskId)
   const task: TaskDetailT | undefined = taskQ.data ? taskQ.data.data : undefined
+  const taskRole = taskQ.data ? taskQ.data.role : undefined
   // const parent = useTask((task && task.parent_id) ? task.parent_id : undefined)
 
   const deleteTaskQ = useDeleteTask();
@@ -41,17 +43,17 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
   const { user } = useUser()
   const isAdmin = isRole((user as unknown) as User, 'admin')
   const router = useRouter()
-  
-  
+
+
   const onDelete = () => {
-    deleteTaskQ.mutate({taskId})
+    deleteTaskQ.mutate({ taskId })
   }
 
   useEffect(() => {
-    if(deleteTaskQ.isSuccess) router.push('/tasks')
-  }, [deleteTaskQ.isSuccess]) 
-  
-  
+    if (deleteTaskQ.isSuccess) router.push('/tasks')
+  }, [deleteTaskQ.isSuccess])
+
+
   if (taskQ.isFetching) return <span>Úloha sa načitáva <LoadingSpinner></LoadingSpinner></span>
 
   return (
@@ -62,18 +64,23 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
         <>
           <div className="">
             <div className="flex justify-between">
-              <ViewHeadline>Detail úlohy</ViewHeadline>
+              <ViewHeadline>Detail úlohy {taskRole}</ViewHeadline>
               <div className="">
-                {/* <Button onClick={() => setVariant(variant == 'ghost' ? 'default' : 'ghost')} variant={variant} size={'icon'}>
-                    <EyeIcon  />
-                  </Button>
-                  <TaskSettings task={task} /> */}
+                {
+                  task && taskRole &&
+                  <>
+                    {/* <Button onClick={() => setVariant(variant == 'ghost' ? 'default' : 'ghost')} variant={variant} size={'icon'}>
+                      <EyeIcon />
+                    </Button> */}
+                    <TaskSettings task={task} role={taskRole} />
+                  </>
+                }
               </div>
             </div>
           </div>
 
           {
-            task && (
+            task && taskRole && (
 
               <div>
                 {
@@ -81,7 +88,7 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
                     Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${task.parent.id}`}>{task.parent.name}</Link>
                   </Label>
                 }
-                <TaskForm defaultValues={task} edit={true}></TaskForm>
+                <TaskForm defaultValues={task} role={taskRole}></TaskForm>
                 <Tabs value={tab} onValueChange={setTab} className="">
                   <TabsList className="flex gap-4 overflow-x-auto">
                     <TabsTrigger value="subtasks" className={clsx({ 'border-b-3': tab == 'subtasks', 'mb-1': tab !== 'subtasks' })}>Podúlohy</TabsTrigger>
@@ -110,7 +117,7 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
                   {/* </div> */}
                 </Tabs>
 
-                { isAdmin && <Button onClick={onDelete} variant={"linkDestructive"}>Vymazať úlohu</Button>}
+                {isAdmin && <Button onClick={onDelete} variant={"linkDestructive"}>Vymazať úlohu</Button>}
               </div>
             )}
 
@@ -135,8 +142,20 @@ function SubTasksOverview({ task }: { task: Task }) {
   )
 }
 
-function TaskSettings({ task }: { task: TaskDetailT }) {
+function TaskSettings({ task, role }: { task: TaskDetailT, role: TaskUserRole  }) {
 
+  const updateMetaQ = useUpdateTaskMeta()
+
+  let requiredCheck = false
+  useEffect(() => {
+    if(!task) return
+    const checkReqMeta = getMetaValue(task.meta, 'checkRequired')
+    if(checkReqMeta) {
+      requiredCheck = (checkReqMeta === "true")
+    }
+  }, [task])
+
+  if(!task) return <></>
 
   return (
     <>
@@ -146,16 +165,14 @@ function TaskSettings({ task }: { task: TaskDetailT }) {
             <SettingsIcon />
           </Button>
         </DialogTrigger>
-        <DialogContent onInteractOutside={(e) => e.preventDefault()} className="w-screen h-screen lg:h-auto lg:max-w-[600px]">
+        <DialogContent  className="w-screen lg:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Nastavenia úlohy</DialogTitle>
-            <DialogDescription>
-
-            </DialogDescription>
           </DialogHeader>
+
           <div>
             <div className="flex items-center space-x-2">
-              <Checkbox id="terms" />
+              <Checkbox defaultChecked={requiredCheck}  onCheckedChange={(checked) => updateMetaQ.mutate({key: 'checkRequired', value: checked.toString(), taskId: task.id})} id="terms" disabled={!['OWNER', 'PERSONAL'].includes(role)} />
               <Label
                 htmlFor="terms"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -163,8 +180,9 @@ function TaskSettings({ task }: { task: TaskDetailT }) {
                 Vyžadovať kontrolu dokončenia úlohy
               </Label>
             </div>
-
           </div>
+
+
           {/* <DialogFooter>
           <Button variant="secondary" type="submit" onClick={() => setOpen(false)}>Zrušiť</Button>
           <Button type="submit" >Uložiť</Button>

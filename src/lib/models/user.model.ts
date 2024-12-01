@@ -75,11 +75,11 @@ export const userColumns: ModelColumns = {
     method: 'contains',
     path: 'OrganizationMember.organization.name',
     disableSorting: true,
-    customFn: (val) => ({OrganizationMember: {some: {organization: {name: {contains: val}}}}})
+    customFilter: (val) => ({OrganizationMember: {some: {organization: {name: {contains: val}}}}})
   },
   'fulltext': {
     type: 'string',
-    customFn: (val) => ({OR: [
+    customFilter: (val) => ({OR: [
       {name: {contains: val}},
       {email: {contains: val}},
     ]})

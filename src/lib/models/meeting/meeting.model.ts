@@ -33,4 +33,14 @@ export const meetingColumns: ModelColumns = {
     label: "Dátum",
     type: 'datetime',
   },
+  'attendantsCount': {
+    type: 'number',
+    path: 'attendants._count',
+    disableFilter: true
+  },
+  'itemsCount': {
+    type: 'number',
+    path: 'items._count',
+    disableFilter: true
+  }
 }

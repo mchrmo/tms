@@ -28,16 +28,16 @@ const columns: ColumnDef<Meeting>[] = [
     enableColumnFilter: false,
   },
   {
+    id: "attendantsCount",
     accessorKey: "_count.attendants",
     header: "Počet účastníkov",
     enableColumnFilter: false,
-    enableSorting: false
   },
   {
+    id: "itemsCount",
     accessorKey: "_count.items",
     header: "Počet bodov porady",
     enableColumnFilter: false,
-    enableSorting: false
   },
 
   

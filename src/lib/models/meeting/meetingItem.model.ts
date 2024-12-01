@@ -14,7 +14,7 @@ const MeetingItemSchema = z.object({
   id: z.number().optional(), // Optional for creation (auto-increment)
   status: MeetingItemStatusEnum.default('DRAFT'), // Defaults to 'DRAFT'
   title: z.string(),
-  description: z.string().min(1, "Description is required"),
+  description: z.string().max(500, "Popis nemôže presiahnuť 500 znakov."),
   meeting_id: z.number().min(1, "Meeting ID is required and should be a positive number"),
   creator_id: z.number().optional(), // Optional because creator may not exist yet (nullable)
   // comments: z.array(z.any()).optional(), // Assuming comments will be added later
@@ -62,7 +62,7 @@ export const meetingItemColumns: ModelColumns = {
   },
   'fulltext': {
     type: 'string',
-    customFn: (val) => ({OR: [
+    customFilter: (val) => ({OR: [
       {title: {contains: val}},
       {description: {contains: val}}
     ]})
