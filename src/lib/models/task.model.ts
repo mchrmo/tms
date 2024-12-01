@@ -101,7 +101,7 @@ export const taskColumns: ModelColumns = {
   },
   'fulltext': {
     type: 'string',
-    customFn: (val) => ({OR: [
+    customFilter: (val) => ({OR: [
       {name: {contains: val}}
     ]})
   },

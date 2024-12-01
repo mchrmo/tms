@@ -129,6 +129,7 @@ model TaskMeta {
   task    Task   @relation(fields: [task_id], references: [id])
   key     String
   value   String
+  @@unique([task_id, key]) // Add this unique constraint
 }
 
 model TaskSubscription {

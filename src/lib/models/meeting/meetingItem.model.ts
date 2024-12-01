@@ -62,7 +62,7 @@ export const meetingItemColumns: ModelColumns = {
   },
   'fulltext': {
     type: 'string',
-    customFn: (val) => ({OR: [
+    customFilter: (val) => ({OR: [
       {title: {contains: val}},
       {description: {contains: val}}
     ]})

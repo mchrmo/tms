@@ -1,8 +1,9 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient, Prisma, TaskMeta } from "@prisma/client";
 import { ApiError } from "next/dist/server/api-utils";
 import { NextRequest, NextResponse } from "next/server";
 import axios from 'axios';
 import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react-table";
+import { TaskDetail } from "../services/tasks/task.service";
 
 
 export const getApiClient = (pathURL: string) => axios.create({
@@ -244,8 +245,10 @@ export type SingleColumnDef = {
   label?: string, 
   path?: string,
   method?: 'equals' | 'contains',
-  customFn?: (val: string | number | Date[] | boolean) => any,
+  customFilter?: (val: string | number | Date[] | boolean) => any,
+  customSort?: (dir: 'asc' | 'desc') => any,
   disableSorting?: boolean,
+  disableFilter?: boolean,
   enum?: {[key: string]: string}
 }
 
@@ -288,6 +291,8 @@ export const getFilters = (params: any, columns: ModelColumns) => {
     if(!rawVal) continue
 
     const colDef = columns[colName]
+    if(colDef.disableFilter) throw new ApiError(400, `neplatný filter - '${colName}'`)
+
     const colPath = (colDef.path && colDef.path.split('.')) || [colName]
     const filterMethod = colDef.method || 'equals'
 
@@ -296,8 +301,8 @@ export const getFilters = (params: any, columns: ModelColumns) => {
 
     let filterCondition: any = {};
 
-    if(colDef.customFn) {
-      const customFilter = colDef.customFn(val)
+    if(colDef.customFilter) {
+      const customFilter = colDef.customFilter(val)
       Object.assign(filter, customFilter)
       continue
     }
@@ -361,6 +366,7 @@ export const getSorting = (params: any, columns: ModelColumns) => {
   const colDef = columns[colName]
   if(colDef.disableSorting) throw new ApiError(400, `orderBy má neplatnú hodnotu - '${orderBy}'`)
   const colPath = (colDef.path && colDef.path.split('.')) || [colName]
+  
 
   // let filterCondition: any = {};
   let currentLevel = sorting;
@@ -375,6 +381,7 @@ export const getSorting = (params: any, columns: ModelColumns) => {
       currentLevel = currentLevel[part];
     }
   });
+
 
   return sorting
 }
@@ -400,3 +407,12 @@ export const parseGetManyParams = (urlParams: URLSearchParams, columns: ModelCol
 }  
 
 export const unauthorizedError = new ApiError(403, "Unauthorized")
+
+
+export type GenericMeta = {key: string, value: string}
+
+export const getMetaValue = (metadata: {key: string, value: string}[], key: string) => {
+  const meta = metadata.find((m) => m.key === key)
+  if(!meta) return null
+  return meta.value
+} 

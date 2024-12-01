@@ -251,17 +251,17 @@ export const useDeleteTaskAttachment = (taskId: number) => {
 }
 
 
-export const useAddTaskMeta = () => {
+export const useUpdateTaskMeta = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast()
 
-  const addTaskMetaFn = async (metaData: {taskId: number, key: string, value: string}) => {
-    const response = await tasksApiClient.post('/meta', {metaData})
+  const updateTaskMetaFn = async (metaData: {taskId: number, key: string, value: string}) => {
+    const response = await tasksApiClient.post('/meta', metaData)
     return response.data
   }
   
   return useMutation({
-    mutationFn: addTaskMetaFn,
+    mutationFn: updateTaskMetaFn,
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: taskQueryKeys.all })
     },
