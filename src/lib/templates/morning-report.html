@@ -27,9 +27,9 @@
     <div class="content">
       {{#with deadlineTasks}}
       <div style="margin: 3rem 0;">
-        <h2>Expirujúce úlohy</h2>
+        <h2>Termín dokončenia úloh dnes:</h2>
         
-        <h3>Osobné</h3>
+        <h3>Vlastné úlohy</h3>
         <ul>
           {{#each personal}}
               <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
@@ -38,7 +38,7 @@
           {{/each}}
         </ul>
 
-        <h3>Moje</h3>
+        <h3>Mne delegované úlohy</h3>
         <ul>
             {{#each assignee_id}}
                 <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
@@ -47,7 +47,7 @@
             {{/each}}
         </ul>
 
-        <h3>Delegované</h3>
+        <h3>Delegované úlohy</h3>
         <ul>
             {{#each creator_id}}
                 <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
@@ -64,7 +64,7 @@
       <div style="margin: 3rem 0;">
         <h2>Pripomienky</h2>
 
-        <h3>Moje</h3>
+        <h3>Mne delegované úlohy</h3>
         <ul>
             {{#each assignee_id}}
                 <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.description}}</a></li>
@@ -73,7 +73,7 @@
             {{/each}}
         </ul>
 
-        <h3>Delegované</h3>
+        <h3>Delegované úlohy</h3>
         <ul>
             {{#each creator_id}}
                 <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.description}}</a></li>

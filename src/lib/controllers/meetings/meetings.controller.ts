@@ -1,5 +1,6 @@
 import { meetingColumns, MeetingCreateSchema, MeetingUpdateSchema, ZMeetingCreateForm } from "@/lib/models/meeting/meeting.model"
 import prisma from "@/lib/prisma"
+import { getUser, isRole } from "@/lib/services/auth.service"
 import meetingService, { meetingListItem } from "@/lib/services/meetings/meeting.service"
 import { parseGetManyParams } from "@/lib/utils/api.utils"
 import { Meeting, Prisma } from "@prisma/client"
@@ -11,16 +12,41 @@ import { createPaginator } from "prisma-pagination"
 const getMeeting = async (req: NextRequest, params: any) => {
 
   const id = parseInt(params.id)
-  const meeting = await meetingService.get_meeting(id)  
+
+  const user = await getUser()
+
+  const meeting = await meetingService.get_meeting(id, user?.id)  
   if(!meeting) throw new ApiError(404, 'Not found')
   
+    
   return NextResponse.json(meeting, { status: 200 })
 }
 
 const getMeetings = async (req: NextRequest) => {
 
   const params = req.nextUrl.searchParams
-  const {where, orderBy, pagination} = parseGetManyParams(params, meetingColumns)
+  const {where: paramsWhere, orderBy, pagination} = parseGetManyParams(params, meetingColumns)
+
+
+  const user = await getUser()
+
+  let where: Prisma.MeetingWhereInput = {
+  }
+
+  if(!await isRole('admin', user)) {
+    where = {
+      attendants: {
+        some: { 
+         user_id: user?.id
+        }
+     }
+    }
+  }
+  
+  where = {
+    ...paramsWhere,
+    ...where
+  }
 
   const paginate = createPaginator({ page: pagination.page, perPage: pagination.pageSize })
   const data = await paginate<Meeting, Prisma.MeetingFindManyArgs>(

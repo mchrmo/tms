@@ -39,7 +39,10 @@ const get_task = async (id: number, options?: GetDetailOptions) => {
       },
       creator: {
         select: {
-          user_id: true
+          user_id: true,
+          user: {
+            select: {name: true}
+          }
         }
       },
       parent: {
