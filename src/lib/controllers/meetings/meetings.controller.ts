@@ -14,18 +14,58 @@ const getMeeting = async (req: NextRequest, params: any) => {
   const id = parseInt(params.id)
 
   const user = await getUser()
+  const user_id = user?.id
 
-  const meeting = await meetingService.get_meeting(id, user?.id)  
-  if(!meeting) throw new ApiError(404, 'Not found')
-  
-    
-  return NextResponse.json(meeting, { status: 200 })
+  let items_where: Prisma.MeetingItemWhereInput = {}
+  const meetingRaw = await prisma.meeting.findUnique({
+    where: {
+      id,
+      attendants: {
+        some: {
+          user_id
+        }
+      }
+    }, include: {
+      attendants: {
+        where: {
+          user_id
+        }
+      }
+    }
+  })
+  if (!meetingRaw) throw new ApiError(404, 'Not found')
+
+  const attendant = meetingRaw.attendants[0]
+
+  if (attendant.role == "ATTENDANT") {
+    items_where = {
+      OR: [
+        {
+          status: {
+            notIn: ["PENDING", "DRAFT"]
+          }
+        },
+        {
+          creator_id: user_id
+        }
+      ]
+    }
+  }
+
+  const meeting = await meetingService.get_meeting(id, { items_where })
+  if (!meeting) throw new ApiError(404, 'Not found')
+
+
+  return NextResponse.json({
+    role: attendant.role,
+    data: meeting
+  }, { status: 200 })
 }
 
 const getMeetings = async (req: NextRequest) => {
 
   const params = req.nextUrl.searchParams
-  const {where: paramsWhere, orderBy, pagination} = parseGetManyParams(params, meetingColumns)
+  const { where: paramsWhere, orderBy, pagination } = parseGetManyParams(params, meetingColumns)
 
 
   const user = await getUser()
@@ -33,16 +73,16 @@ const getMeetings = async (req: NextRequest) => {
   let where: Prisma.MeetingWhereInput = {
   }
 
-  if(!await isRole('admin', user)) {
+  if (!await isRole('admin', user)) {
     where = {
       attendants: {
-        some: { 
-         user_id: user?.id
+        some: {
+          user_id: user?.id
         }
-     }
+      }
     }
   }
-  
+
   where = {
     ...paramsWhere,
     ...where
@@ -68,10 +108,10 @@ const createMeeting = async (request: NextRequest) => {
 
   if (!parsedSchema.success) {
     const { errors } = parsedSchema.error;
-    
+
     return NextResponse.json({
       error: { message: "Invalid request", errors },
-    }, {status: 400});
+    }, { status: 400 });
   }
 
 
@@ -84,7 +124,7 @@ const createMeeting = async (request: NextRequest) => {
   return NextResponse.json(meeting, { status: 200 })
 };
 
-const updateMeeting = async (request: NextRequest) => {  
+const updateMeeting = async (request: NextRequest) => {
   const body = await request.json()
   const parsedSchema = MeetingUpdateSchema.safeParse(body);
 
@@ -93,22 +133,22 @@ const updateMeeting = async (request: NextRequest) => {
 
     return NextResponse.json({
       error: { message: "Invalid request", errors },
-    }, {status: 400});
+    }, { status: 400 });
   }
 
 
-  const updateData = {...parsedSchema.data}
+  const updateData = { ...parsedSchema.data }
 
   const meeting = await meetingService.update_meeting(updateData)
 
 
   return NextResponse.json(meeting, { status: 200 })
-  
+
 };
 
 const deleteMeeting = async (req: NextRequest, params: any) => {
   const id = parseInt(params.id)
-  const meeting = await meetingService.delete_meeting(id)  
+  const meeting = await meetingService.delete_meeting(id)
 
   return NextResponse.json(meeting, { status: 200 })
 

@@ -32,53 +32,13 @@ export const meetingListItem = Prisma.validator<Prisma.MeetingDefaultArgs>()({
 export type MeetingListItem = Prisma.MeetingGetPayload<typeof meetingListItem>
 
 
-const get_meeting = async (id: number, user_id?: number) => {
+const get_meeting = async (id: number, options?: {items_where: Prisma.MeetingItemWhereInput}) => {
 
   let role: MeetingAttendantRole | undefined = undefined;
 
   let where = {id}
-  let itemsWhere: Prisma.MeetingItemWhereInput = { 
-  }
+  let itemsWhere: Prisma.MeetingItemWhereInput = (options && options.items_where) || {}
 
-  if(user_id) {
-
-    const meetingRaw = await prisma.meeting.findUnique({
-      where: {
-        id,
-        attendants: {
-          some: {
-            user_id
-          }
-        }
-      },include: {
-        attendants: {
-          where: {
-            user_id
-          }
-        }
-      }
-    })
-    if(!meetingRaw) return null
-
-    const attendant = meetingRaw.attendants[0]
-    role = attendant.role
-
-    if(role && role == "ATTENDANT") {    
-      itemsWhere = {
-        OR: [
-          {
-            status: {
-              notIn: ["PENDING", "DRAFT"]
-            }
-          },
-          {
-            creator_id: user_id
-          }
-        ]
-      }
-    }
-  }
-  
 
   const meeting = await prisma.meeting.findUnique({
     where,
