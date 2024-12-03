@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+  provider = "prisma-client-js"
+  // previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -27,22 +27,24 @@ enum Roles {
 }
 
 model User {
-  id                  Int                  @id @default(autoincrement())
-  clerk_id            String               @unique
-  name                String
-  email               String               @unique
-  phone               String               @default("Neuvedené")
-  role_id             Int                  @default(2)
-  role                UserRole             @relation(fields: [role_id], references: [id])
-  createdAt           DateTime             @default(now())
-  OrganizationMember  OrganizationMember[]
-  TaskUpdate          TaskUpdate[]
-  meetings            MeetingAttendant[]
-  meetingItems        MeetingItem[]
-  meetingItemComments MeetingItemComment[]
-  File                File[]
-  TaskComment         TaskComment[]
-  TaskRelationship    TaskRelationship[]
+  id                         Int                          @id @default(autoincrement())
+  clerk_id                   String                       @unique
+  name                       String
+  email                      String                       @unique
+  phone                      String                       @default("Neuvedené")
+  role_id                    Int                          @default(2)
+  role                       UserRole                     @relation(fields: [role_id], references: [id])
+  createdAt                  DateTime                     @default(now())
+  OrganizationMember         OrganizationMember[]
+  TaskUpdate                 TaskUpdate[]
+  meetings                   MeetingAttendant[]
+  meetingItems               MeetingItem[]
+  meetingItemComments        MeetingItemComment[]
+  File                       File[]
+  TaskComment                TaskComment[]
+  TaskRelationship           TaskRelationship[]
+  MeetingAttendantsGroup     MeetingAttendantsGroup[]
+  MeetingAttendantsGroupUser MeetingAttendantsGroupUser[]
 }
 
 model File {
@@ -95,7 +97,7 @@ model Task {
   name              String
   status            TaskStatus          @default(TODO)
   priority          TaskPriority
-  description       String @db.VarChar(500)
+  description       String              @db.VarChar(500)
   // type_id           Int
   // type              TaskType            @relation(fields: [type_id], references: [id])
   parent_id         Int?
@@ -119,8 +121,6 @@ model Task {
   meta              TaskMeta[]
   attachments       TaskAttachment[]
   TaskRelationship  TaskRelationship[]
-
-  @@fulltext([name])
 }
 
 model TaskMeta {
@@ -129,7 +129,8 @@ model TaskMeta {
   task    Task   @relation(fields: [task_id], references: [id])
   key     String
   value   String
-  @@unique([task_id, key]) // Add this unique constraint
+
+  @@unique([task_id, key])
 }
 
 model TaskSubscription {
@@ -148,7 +149,7 @@ model TaskUpdate {
   user        User?    @relation(fields: [user_id], references: [id])
   key         String
   title       String
-  description String? 
+  description String?
   createdAt   DateTime @default(now())
   value       String?
 }
@@ -247,6 +248,24 @@ model MeetingAttendant {
 enum MeetingAttendantRole {
   CREATOR
   ATTENDANT
+}
+
+model MeetingAttendantsGroup {
+  id                         Int                          @id @default(autoincrement())
+  name                       String
+  creator_id                 Int
+  creator                    User                         @relation(fields: [creator_id], references: [id])
+  MeetingAttendantsGroupUser MeetingAttendantsGroupUser[]
+}
+
+model MeetingAttendantsGroupUser {
+  id       Int                    @id @default(autoincrement())
+  group_id Int
+  group    MeetingAttendantsGroup @relation(fields: [group_id], references: [id])
+  user_id  Int
+  user     User                   @relation(fields: [user_id], references: [id])
+
+  @@unique([group_id, user_id])
 }
 
 model MeetingMeta {
