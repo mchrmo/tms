@@ -37,6 +37,9 @@ const delete_attendant = async (id: number) => {
   return attendant
 }
 
+
+
+
 const meetingAttendantService = {
   create_attendant,
   delete_attendant

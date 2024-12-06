@@ -1,12 +1,13 @@
 import { meetingItemColumns, MeetingItemCreateSchema, MeetingItemStatusEnum, MeetingItemUpdateSchema, ZMeetingItemCreateForm, ZMeetingItemUpdateForm } from "@/lib/models/meeting/meetingItem.model"
 import { MeetingItemCommentCreateSchema, ZMeetingItemCommentCreateForm } from "@/lib/models/meeting/meetingItemComment.model"
 import prisma from "@/lib/prisma"
+import { getUser, isRole } from "@/lib/services/auth.service"
 import meetingItemService, { meetingItemListItem } from "@/lib/services/meetings/meetingItem.service"
 import meetingItemCommentService from "@/lib/services/meetings/meetingItemComment.service"
 import userService from "@/lib/services/user.service"
 import { parseGetManyParams } from "@/lib/utils/api.utils"
 import { MeetingItem, Prisma } from "@prisma/client"
-import { th } from "date-fns/locale"
+import { id, th } from "date-fns/locale"
 import { waitForDebugger } from "inspector"
 import { ApiError } from "next/dist/server/api-utils"
 import { NextRequest, NextResponse } from "next/server"
@@ -19,8 +20,31 @@ import { z } from "zod"
 const getMeetingItems = async (req: NextRequest) => {
 
   const params = req.nextUrl.searchParams
-  const {where, orderBy, pagination} = parseGetManyParams(params, meetingItemColumns)
+  const {where: paramsWhere, orderBy, pagination} = parseGetManyParams(params, meetingItemColumns)
 
+  const user = await getUser()
+
+  let where: Prisma.MeetingItemWhereInput = {
+    
+  }
+
+  if(!await isRole('admin', user)) {
+    where = {
+      meeting: {
+        attendants: {
+          some: {
+            user_id: user?.id
+          }
+        }
+      }
+    }
+  }
+  
+  where = {
+    ...paramsWhere,
+    ...where,
+    ...{status: {notIn: ["DRAFT"]}}
+  }
   const paginate = createPaginator({ page: pagination.page, perPage: pagination.pageSize })
   const data = await paginate<MeetingItem, Prisma.MeetingItemFindManyArgs>(
     prisma.meetingItem,

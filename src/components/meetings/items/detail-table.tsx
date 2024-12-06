@@ -1,6 +1,6 @@
 "use client"
 
-import { Meeting, MeetingItem } from "@prisma/client"
+import { Meeting, MeetingAttendantRole, MeetingItem } from "@prisma/client"
 import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, Header, PaginationState, SortingState, Table as TableType, useReactTable } from "@tanstack/react-table"
 import Link from "next/link"
 import clsx from "clsx"
@@ -53,7 +53,7 @@ const columns: ColumnDef<MeetingDetailItems>[] = [
   },
 ]
 
-export default function MeetingDetailItemsTable({ meeting }: { meeting?: MeetingDetail }) {
+export default function MeetingDetailItemsTable({ meeting, role }: { meeting?: MeetingDetail, role: MeetingAttendantRole }) {
 
 
 
@@ -63,6 +63,7 @@ export default function MeetingDetailItemsTable({ meeting }: { meeting?: Meeting
   if (columnsIndex > -1) columns.splice(columnsIndex, 1)
 
   if (!columns.find(c => c.id == 'utils')) {
+    
     columns.push({
       id: 'utils',
       cell: (props) => {
@@ -78,7 +79,7 @@ export default function MeetingDetailItemsTable({ meeting }: { meeting?: Meeting
             <a target="_blank" href={`/tasks/create?source=${meeting?.name} ${formatDate(meeting?.date!)}&name=${props.row.original.description}`}><span className="link">Vytvoriť úlohu</span></a>
           )
         } else if (status == "PENDING") {
-
+          if(role !== "CREATOR") return
           return (
             <div>
             {

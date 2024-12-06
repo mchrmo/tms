@@ -1,9 +1,9 @@
 import { useToast } from "@/components/ui/use-toast";
 import { ZMeetingCreateForm } from "@/lib/models/meeting/meeting.model";
-import { PaginatedResponse } from "@/lib/services/api.service";
+import { DetailResponse, PaginatedResponse } from "@/lib/services/api.service";
 import { MeetingDetail } from "@/lib/services/meetings/meeting.service";
 import { getApiClient, parseListHookParams, parseListHookParamsNew } from "@/lib/utils/api.utils";
-import { Meeting } from "@prisma/client";
+import { Meeting, MeetingAttendantRole } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { ColumnFiltersState, ColumnSort, PaginationState } from "@tanstack/react-table";
 import { AxiosError } from "axios";
@@ -20,7 +20,7 @@ export const meetingQueryKeys = {
   pagination: (page: number) => [...meetingQueryKeys.all, 'pagination', page],
 };
 
-export const useMeeting = (id?: number, options?: UseQueryOptions<MeetingDetail, Error>) => {
+export const useMeeting = (id?: number, options?: UseQueryOptions<DetailResponse<MeetingDetail, MeetingAttendantRole>, Error>) => {
   const { toast } = useToast()
 
 
@@ -29,7 +29,7 @@ export const useMeeting = (id?: number, options?: UseQueryOptions<MeetingDetail,
     return response.data;
   };
 
-  const query = useQuery<MeetingDetail, Error>({
+  const query = useQuery<DetailResponse<MeetingDetail, MeetingAttendantRole>, Error>({
     queryKey: meetingQueryKeys.detail(Number(id)), 
     queryFn: getMeetingFn,
     enabled: !!id,

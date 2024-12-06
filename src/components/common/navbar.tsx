@@ -26,7 +26,7 @@ export default function Navbar() {
                     <div className="lg:hidden">
                         <Sheet open={opened} onOpenChange={setOpen}>
                             <SheetTrigger className='mt-1'><Menu /></SheetTrigger>
-                            <SheetContent aria-describedby={undefined} side={"left"} className="w-[300px] sm:w-[340px]">
+                            <SheetContent side={"left"} className="w-[300px] sm:w-[340px]">
                                 <SheetHeader>
                                     <SheetTitle className='text-left text-2xl font-bold ml-3'>TMS</SheetTitle>
                                 </SheetHeader>

@@ -44,3 +44,6 @@ export const meetingColumns: ModelColumns = {
     disableFilter: true
   }
 }
+
+
+export type MeetingUserRole = "ATTENDANT" | "CREATOR"

@@ -1,9 +1,11 @@
-import { Prisma, Meeting } from "@prisma/client";
-import { sendAssigneeChangeNotification } from "../mail.service";
+import { Prisma, Meeting, MeetingAttendantRole } from "@prisma/client";
+import { sendAssigneeChangeNotification, sendEmail } from "../mail.service";
 import prisma from "../../prisma";
 import userService from "../user.service";
 import meetingAttendantService from "./meetingAttendant.service";
 import { ApiError } from "next/dist/server/api-utils";
+import { MeetingUserRole } from "@/lib/models/meeting/meeting.model";
+import { formatDate, formatDateTime } from "@/lib/utils/dates";
 
 
 type CreateMeetingReqs = {
@@ -30,10 +32,16 @@ export const meetingListItem = Prisma.validator<Prisma.MeetingDefaultArgs>()({
 export type MeetingListItem = Prisma.MeetingGetPayload<typeof meetingListItem>
 
 
-const get_meeting = async (id: number) => {
+const get_meeting = async (id: number, options?: {items_where: Prisma.MeetingItemWhereInput}) => {
+
+  let role: MeetingAttendantRole | undefined = undefined;
+
+  let where = {id}
+  let itemsWhere: Prisma.MeetingItemWhereInput = (options && options.items_where) || {}
+
 
   const meeting = await prisma.meeting.findUnique({
-    where: {id},
+    where,
     include: {
       attendants: {
         select: {
@@ -43,6 +51,7 @@ const get_meeting = async (id: number) => {
         }
       },
       items: {
+        where: itemsWhere,
         select: {
           id: true,
           description: true,
@@ -73,12 +82,40 @@ const create_meeting = async (meetingData: CreateMeetingReqs) => {
 const update_meeting = async (meetingData: Partial<Meeting>) => {
 
   if(!meetingData.id) return null
-
   const id = meetingData.id
+
+  const originalMeeting = await prisma.meeting.findUnique({
+    where: {id},
+    include: {
+      attendants: {
+        select: {
+          user: true
+        }
+      }
+    }
+  })
+  if(!originalMeeting) return null
+
   const meeting = await prisma.meeting.update({
     where: {id},
     data: meetingData
   })
+
+  // check if date has changed
+  if(meetingData.date !== originalMeeting.date) {
+    const url = process.env.NEXT_PUBLIC_URL
+
+    for (const attendant  of originalMeeting.attendants) {
+      await sendEmail({
+        to: attendant.user.email,
+        subject: "Termín porady zmeneý",
+        html: `Porada: <a href="${url}/meetings/${meeting.id}">${originalMeeting.name}</a> <br>
+          Nový termín: <b>${formatDateTime(meeting.date)} </b> <br>
+        `
+      })
+    }
+  }
+
 
 
   return meeting

@@ -11,7 +11,7 @@ export default async function CreateOrganizationPage() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <ViewHeadline>Nová porada</ViewHeadline>
+        <ViewHeadline>Nová organizácia</ViewHeadline>
 
         <Link href={'/organizations'}>
           <Button variant={'secondary'}>Späť na organizácie</Button>

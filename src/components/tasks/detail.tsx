@@ -16,11 +16,10 @@ import { TabsTrigger, Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import TaskCommentsOverview from "./comments/taskComments-overview";
 import TaskAttachmentsOverview from "./attachments/taskAttachments-overview";
 import { TaskDetail as TaskDetailT } from "@/lib/services/tasks/task.service";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
-import { EyeIcon, icons, SettingsIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { SettingsIcon } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
-import { AxiosError } from "axios";
 import { useUser } from "@clerk/nextjs";
 import { isRole } from "@/lib/utils";
 import { User } from "@clerk/nextjs/server";
@@ -64,7 +63,7 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
         <>
           <div className="">
             <div className="flex justify-between">
-              <ViewHeadline>Detail úlohy {taskRole}</ViewHeadline>
+              <ViewHeadline>Detail úlohy</ViewHeadline>
               <div className="">
                 {
                   task && taskRole &&
@@ -86,6 +85,13 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
                 {
                   task.parent && <Label className="text-md">
                     Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${task.parent.id}`}>{task.parent.name}</Link>
+                  </Label>
+                }
+
+                {
+                  task.creator &&
+                  <Label className="text-md">
+                    Vlastník úlohy: {task.creator!.user.name}
                   </Label>
                 }
                 <TaskForm defaultValues={task} role={taskRole}></TaskForm>
@@ -146,16 +152,14 @@ function TaskSettings({ task, role }: { task: TaskDetailT, role: TaskUserRole  }
 
   const updateMetaQ = useUpdateTaskMeta()
 
+
+  if(!task) return <></>
+
   let requiredCheck = false
-  useEffect(() => {
-    if(!task) return
-    const checkReqMeta = getMetaValue(task.meta, 'checkRequired')
+  const checkReqMeta = getMetaValue(task.meta, 'checkRequired')
     if(checkReqMeta) {
       requiredCheck = (checkReqMeta === "true")
     }
-  }, [task])
-
-  if(!task) return <></>
 
   return (
     <>

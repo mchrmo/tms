@@ -52,7 +52,7 @@ const columns: ColumnDef<Task>[] = [
       return <span className={clsx("font-bold",{
         'text-green-700': val === 'DONE',
         'text-yellow-600': ['WAITING', 'INPROGRESS'].includes(val as string),
-        'text-green-500': val == 'CHECKREQ',
+        'text-red-500': val == 'CHECKREQ',
       })}>{TASK_STATUSES_MAP[val as TaskStatus]}</span>
     },
     meta: {
@@ -63,7 +63,13 @@ const columns: ColumnDef<Task>[] = [
   {
     accessorKey: "deadline",
     header: "Termín dokončenia",
-    cell: (props) => format(props.getValue() as Date, DATE_FORMAT),
+    cell: (props) => {
+      const done = props.row.original.status === "DONE"
+      const val = new Date(props.getValue() as string)
+      return <span className={clsx("font-bold",{
+        'text-red-700 font-bold': (new Date() >= val) && !done,
+      })}>{format(props.getValue() as Date, DATE_FORMAT)}</span>
+    },
     enableColumnFilter: false,
     meta: {
       filterVariant: 'range',

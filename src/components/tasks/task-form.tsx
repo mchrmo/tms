@@ -3,7 +3,6 @@
 import { SubmitHandler, useForm } from "react-hook-form"
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import { Textarea } from "@/components/ui/textarea";
 import OrganizationMemberCombobox from "../organizations/members/member-combobox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -75,6 +74,8 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
     priority: true,
     assignee_id: true,
     deadline: true,
+    description: true,
+    source: true
   }
 
 
@@ -89,31 +90,43 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
 
 
   const statusItems = Object.entries(TASK_STATUSES_MAP).map(([key, label]) => ({ key, label, disabled: false }))
-  if(role) {
-    if (isTaskRole(['PERSONAL', 'OWNER'], role)) {
+  if (role) {
+    if (isTaskRole(['PERSONAL', 'OWNER', 'ADMIN'], role)) {
       fieldsAccess = {
-        ...fieldsAccess, 
+        ...fieldsAccess,
         assignee_id: true,
         deadline: true,
-        priority: true
+        priority: true,
+        description: true,
       }
-    } else {
+    }
+    else if (isTaskRole(['VIEWER'], role)) {
       fieldsAccess = {
-        ...fieldsAccess, 
+        name: false,
+        status: false,
+        priority: false,
         assignee_id: false,
         deadline: false,
-        priority: false
+        description: false,
+        source: false
       }
-    
-      if (watch('status') === "DONE") fieldsAccess.status = false
+    }
+    else {
+      fieldsAccess = {
+        ...fieldsAccess,
+        assignee_id: false,
+        deadline: false,
+        priority: false,
+        description: true
+      }
       if (parseBoolean(getMetaValue(meta, 'checkRequired'))) {
         const i = statusItems.findIndex(s => s.key === "DONE")
         statusItems[i].disabled = true
+        if (watch('status') === "DONE") fieldsAccess.status = false
       }
-  
+
     }
   }
-
 
   useEffect(() => {
     const parentId = searchParams.get('parent_id')
@@ -273,6 +286,7 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
                     <Textarea
                       id="task-description"
                       placeholder="Popis zadania úlohy..."
+                      disabled={!fieldsAccess['description']}
                       {...field}
                     />
                     <FormMessage />
@@ -286,7 +300,7 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
                   <FormItem className="col-span-full">
                     <FormLabel>Zdroj úlohy</FormLabel>
                     <FormControl>
-                      <Input placeholder="Zdroj úlohy" {...field} />
+                      <Input placeholder="Zdroj úlohy" disabled={!fieldsAccess['source']} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
