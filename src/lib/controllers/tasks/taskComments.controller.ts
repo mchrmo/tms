@@ -66,12 +66,6 @@ const createTaskComment = async (request: NextRequest) => {
     error: { message: "Forbidden" },
   }, {status: 403});
 
-  const member = await memberService.get_current_member(currentUser.id)
-  
-  if(!member) { return NextResponse.json({
-    error: { message: "No member" },
-  }, {status: 403});}
-
   const data: z.infer<typeof TaskCommentCreateServiceSchema> = {
     ...parsedSchema.data
   }
