@@ -48,6 +48,9 @@ const create_taskComment = async (data: z.infer<typeof TaskCommentCreateServiceS
   const affectedUsers: number[] = [task?.assignee?.user_id!]
   allComments.forEach(c => !affectedUsers.includes(c.user_id) && affectedUsers.push(c.user_id))
 
+  const currUIndex = affectedUsers.findIndex(id => id == currentUser.id)
+  if(currUIndex > -1) affectedUsers.splice(currUIndex, 1)
+    
   const users = await prisma.user.findMany({where: {id: {
     in: affectedUsers
   }}, select: {email: true}})   
@@ -59,6 +62,8 @@ const create_taskComment = async (data: z.infer<typeof TaskCommentCreateServiceS
       ${taskComment.message}
     `
 
+    console.log(email);
+    
     await sendEmail({
       to: email,
       subject: `Nová správa od ${taskComment.user.name}`,
