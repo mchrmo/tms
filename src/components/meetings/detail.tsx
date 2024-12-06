@@ -7,8 +7,6 @@ import MeetingAttendantsList from "./attendants/list"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import clsx from "clsx"
 import { useState } from "react"
-import AddButton from "../common/buttons/add-button"
-import MeetingItemForm from "./items/item-form"
 import CreateMeetingItem from "./items/create"
 import MeetingDetailItemsTable from "./items/detail-table"
 
@@ -16,19 +14,21 @@ export default function MeetingDetail({ params }: {params: {id: string}}) {
   const [tab, setTab] = useState('items')
 
   const meetingId = parseInt(params.id)
-  const meeting = useMeeting(meetingId)
+  const meetingQ = useMeeting(meetingId)
 
-  if(meeting.isLoading) return <span>Porada sa načitáva <LoadingSpinner></LoadingSpinner></span> 
+  const meeting = meetingQ.data && meetingQ.data.data
+
+  if(meetingQ.isLoading) return <span>Porada sa načitáva <LoadingSpinner></LoadingSpinner></span> 
   
   return (
     <>
 
-      {meeting.error instanceof Error && <div>{meeting.error.message}</div>}
+      {meetingQ.error instanceof Error && <div>{meetingQ.error.message}</div>}
 
       {
-        meeting.data && (
+        meeting && (
           <>  
-            <MeetingForm defaultValues={meeting.data} edit={true}></MeetingForm>
+            <MeetingForm defaultValues={meeting} edit={true}></MeetingForm>
             
 
             <Tabs value={tab} onValueChange={setTab}  className="">
@@ -38,15 +38,15 @@ export default function MeetingDetail({ params }: {params: {id: string}}) {
               </TabsList>
               {/* <div className="mt-5"> */}
                 <TabsContent value="attendants">
-                  <MeetingAttendantsList meeting={meeting.data}></MeetingAttendantsList>
+                  <MeetingAttendantsList meeting={meeting}></MeetingAttendantsList>
                 </TabsContent>
                 <TabsContent value="items">
                   <div className="flex">
                     <div className="ms-auto">
-                    <CreateMeetingItem meeting_id={meeting.data.id} ></CreateMeetingItem>
+                    <CreateMeetingItem meeting_id={meeting.id} ></CreateMeetingItem>
                     </div>
                   </div>
-                  <MeetingDetailItemsTable meeting={meeting.data}></MeetingDetailItemsTable>
+                  <MeetingDetailItemsTable meeting={meeting} role={meetingQ.data.role}></MeetingDetailItemsTable>
                 </TabsContent>
               {/* </div> */}
             </Tabs>

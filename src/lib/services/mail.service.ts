@@ -21,11 +21,21 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 //   secure: true
 // })
 
-async function sendEmail(email: any) {
-if(process.env.DISABLE_EMAIL && email.to !== 'mchrmo@gmail.com') {
-    console.log("Email not send - disabled", email.to)
-    return
-  }
+type SengridEmailParams = {
+  from?: string;
+  to: string;
+  subject: string;
+  text?: string;
+  html?: string;
+}
+
+export async function sendEmail(email: SengridEmailParams) {
+  if (!email.from) email.from = "support@flexishop.online"
+
+    if (process.env.DISABLE_EMAIL && email.to !== 'mchrmo@gmail.com') {
+      console.log("Email not send - disabled", email.to)
+      return
+    }
   try {
 
     email.html += `<br> <br> <i style="color: #7e7e7e;">Email je automaticky generovaný, prosím neodpovedajte naň.</i>`
@@ -34,7 +44,7 @@ if(process.env.DISABLE_EMAIL && email.to !== 'mchrmo@gmail.com') {
     return await sgMail.send(email)
   } catch (error) {
     console.error(error);
-    
+
   }
 }
 
@@ -62,9 +72,9 @@ export async function sendWelcomeEmail(email: string, login: string, password: s
 }
 
 export async function sendAssigneeChangeNotification(user_id: number, taskName: string) {
-  
+
   const user = await getUser(user_id)
-  if(!user) return
+  if (!user) return
   const text = `Bola Vám pridelená úloha: ${taskName}`
   console.log("Sending email to ", user?.email);
 
@@ -73,36 +83,35 @@ export async function sendAssigneeChangeNotification(user_id: number, taskName: 
     to: user?.email,
     subject: `Bola Vám pridelená úloha - ${taskName}`,
     html: text
-  })  
+  })
 }
 
 export async function sendReport(email: string, subject: string, report: string) {
-  
+
   const mail = await sendEmail({
     from: 'support@flexishop.online',
     to: email,
     subject,
     html: report
-  })  
+  })
 
 
 }
 
 // Meetings
-
 export async function newMeetingAttendantEmail(user_id: number, meeting: Meeting) {
 
   const user = await getUser(user_id)
-  if(!user) return
+  if (!user) return
 
   const text = `Boli ste pozvaný na poradu <a href="${process.env.NEXT_PUBLIC_URL}/meetings/${meeting.id}"><b>${meeting.name}</b></a> ktorá sa uskutoční ${formatDateTime(meeting.date)}`
   console.log("Sending email to ", user?.email);
 
-  
+
   const email = await sendEmail({
     from: 'support@flexishop.online',
     to: user?.email,
     subject: `Pozvánka na poradu - ${meeting.name}`,
     html: text
-  })  
+  })
 }
