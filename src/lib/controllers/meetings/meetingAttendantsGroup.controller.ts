@@ -1,4 +1,4 @@
-import { MeetingAttendantsGroupCreateSchema, ZMeetingAttendantsGroupCreateForm } from "@/lib/models/meeting/meetingAttendantsGroup.model";
+import { MeetingAttendantsGroupCreateSchema, MeetingAttendantsGroupUpdateSchema, ZMeetingAttendantsGroupCreateForm } from "@/lib/models/meeting/meetingAttendantsGroup.model";
 import meetingAttendantService from "@/lib/services/meetings/meetingAttendant.service";
 import meetingAttendantsGroupService from "@/lib/services/meetings/meetingAttendantsGroup.service";
 import { NextRequest, NextResponse } from "next/server"
@@ -27,27 +27,25 @@ const createMeetingAttendantsGroup = async (request: NextRequest) => {
   return NextResponse.json(meetingAttendant, { status: 200 })
 };
 
-// const updateMeetingAttendantsGroup = async (request: NextRequest) => {
-//     const body = await request.json()
-//     const parsedSchema = MeetingUpdateSchema.safeParse(body);
+const updateMeetingAttendantsGroup = async (request: NextRequest) => {
+    const body = await request.json()
+    const parsedSchema = MeetingAttendantsGroupUpdateSchema.safeParse(body);
   
-//     if (!parsedSchema.success) {
-//       const { errors } = parsedSchema.error;
+    if (!parsedSchema.success) {
+      const { errors } = parsedSchema.error;
   
-//       return NextResponse.json({
-//         error: { message: "Invalid request", errors },
-//       }, { status: 400 });
-//     }
+      return NextResponse.json({
+        error: { message: "Invalid request", errors },
+      }, { status: 400 });
+    }
   
-  
-//     const updateData = { ...parsedSchema.data }
-  
-//     const meeting = await meetingService.update_meeting(updateData)
+    const updateData = { ...parsedSchema.data }
+    const meeting = await meetingAttendantsGroupService.update_attendantGroup(updateData)
   
   
-//     return NextResponse.json(meeting, { status: 200 })
+    return NextResponse.json(meeting, { status: 200 })
   
-//   };
+};
 
 const deleteMeetingAttendantsGroup = async (req: NextRequest, params: any) => {
   const id = parseInt(params.id)
@@ -59,7 +57,8 @@ const deleteMeetingAttendantsGroup = async (req: NextRequest, params: any) => {
 
 const meetingAttendantsGroupController = {
     createMeetingAttendantsGroup,
-    deleteMeetingAttendantsGroup
+    deleteMeetingAttendantsGroup,
+    updateMeetingAttendantsGroup
 }
 
 export default meetingAttendantsGroupController

@@ -1,3 +1,4 @@
+import { ZMeetingAttendantsGroupUpdateForm } from "@/lib/models/meeting/meetingAttendantsGroup.model";
 import prisma from "@/lib/prisma";
 
 interface CreateAttendantGroupReqs {
@@ -13,8 +14,11 @@ const create_attendantGroup = async (groupData: CreateAttendantGroupReqs) => {
   return group
 }
 
-const update_attendantGroup = async ({name}: {name: string}) => {
+const update_attendantGroup = async ({name, id}: ZMeetingAttendantsGroupUpdateForm) => {
   const group = await prisma.meetingAttendantsGroup.updateMany({
+    where: {
+      id
+    },
     data: {
       name
     }

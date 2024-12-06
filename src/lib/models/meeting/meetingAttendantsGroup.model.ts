@@ -14,4 +14,13 @@ export const MeetingAttendantsGroupCreateSchema = MeetingAttendantsGroupSchema.o
   id: true, // Remove id for creation
 });
 
+export const MeetingAttendantsGroupUpdateSchema = z.object({
+  id: z.number().optional(), 
+  name: z.string(),
+});
+
+// Zod type for UpdateForm
+export type ZMeetingAttendantsGroupUpdateForm = z.infer<typeof MeetingAttendantsGroupUpdateSchema>;
+
+
 export type ZMeetingAttendantsGroupCreateForm = z.infer<typeof MeetingAttendantsGroupCreateSchema>;
