@@ -73,10 +73,10 @@ const createTaskComment = async (request: NextRequest) => {
   }, {status: 403});}
 
   const data: z.infer<typeof TaskCommentCreateServiceSchema> = {
-    creator_id: member.id,
     ...parsedSchema.data
   }
   const taskComment = await taskCommentService.create_taskComment(data)
+
 
 
   return NextResponse.json(taskComment, { status: 200 })
@@ -110,7 +110,6 @@ const deleteTaskComment = async (req: NextRequest, params: any) => {
   const taskComment = await taskCommentService.delete_taskComment(id)  
 
   return NextResponse.json(taskComment, { status: 200 })
-
 }
 
 

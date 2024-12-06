@@ -23,7 +23,7 @@ const columns: ColumnDef<TaskCommentListItem>[] = [
     header: "Správa",
   },
   {
-    accessorKey: "creator.user.name",
+    accessorKey: "user.name",
     header: "Od",
   },
   {

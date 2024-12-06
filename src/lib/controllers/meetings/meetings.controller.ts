@@ -16,6 +16,18 @@ const getMeeting = async (req: NextRequest, params: any) => {
   const user = await getUser()
   const user_id = user?.id
 
+
+  if (!await isRole('admin', user)) {
+    const meeting = await meetingService.get_meeting(id)
+    if (!meeting) throw new ApiError(404, 'Not found')
+  
+    return NextResponse.json({
+        role: "admin",
+        data: meeting
+      }, { status: 200 })
+  }
+
+
   let items_where: Prisma.MeetingItemWhereInput = {}
   const meetingRaw = await prisma.meeting.findUnique({
     where: {
