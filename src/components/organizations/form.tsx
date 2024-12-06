@@ -81,7 +81,7 @@ export default function OrganizationForm({onUpdate, defaultValues: _def, edit}: 
               <FormItem className="col-span-2">
                 <FormLabel>Názov organizáice</FormLabel>
                 <FormControl>
-                  <Input placeholder="Názov porady" {...field} />
+                  <Input placeholder="Názov organizácie" {...field} />
                 </FormControl>
               <FormMessage />
             </FormItem>

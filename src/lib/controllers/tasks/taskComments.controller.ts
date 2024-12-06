@@ -66,17 +66,11 @@ const createTaskComment = async (request: NextRequest) => {
     error: { message: "Forbidden" },
   }, {status: 403});
 
-  const member = await memberService.get_current_member(currentUser.id)
-  
-  if(!member) { return NextResponse.json({
-    error: { message: "No member" },
-  }, {status: 403});}
-
   const data: z.infer<typeof TaskCommentCreateServiceSchema> = {
-    creator_id: member.id,
     ...parsedSchema.data
   }
   const taskComment = await taskCommentService.create_taskComment(data)
+
 
 
   return NextResponse.json(taskComment, { status: 200 })
@@ -110,7 +104,6 @@ const deleteTaskComment = async (req: NextRequest, params: any) => {
   const taskComment = await taskCommentService.delete_taskComment(id)  
 
   return NextResponse.json(taskComment, { status: 200 })
-
 }
 
 
