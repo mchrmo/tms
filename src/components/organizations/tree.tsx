@@ -16,6 +16,8 @@ export default function OrgTree({data}: {data: RawNodeDatum}) {
   const { push } = useRouter();
   const [treeState, setTreeState] = useState({translate: {x: 0, y:0}})
 
+  console.log(data);
+    
   const treeContainer = useRef<HTMLDivElement>(null);
     useEffect(() => {
       if (treeContainer.current) {
@@ -30,7 +32,7 @@ export default function OrgTree({data}: {data: RawNodeDatum}) {
   }, [data]);
 
   const handleNodeClick = (node: any) => {
-    push('/organizations/members/' + node.data.attributes.id)
+    // push('/organizations/members/' + node.data.attributes.id)
   }
 
 
@@ -45,10 +47,11 @@ export default function OrgTree({data}: {data: RawNodeDatum}) {
             pathFunc='step'
             draggable={true} 
             depthFactor={90}
-            scaleExtent={	{min: 0.5, max: 1.5}}
-            collapsible={false}
+            scaleExtent={	{min: 0.1, max: 1.5}}
+            collapsible={true}
             separation={{
-              siblings: 3
+              siblings: 1.3,
+              nonSiblings: 1.5
             }}
             rootNodeClassName="node__root"
             branchNodeClassName="node__branch"
@@ -81,8 +84,8 @@ function CustomNode({ nodeDatum }: {nodeDatum: TreeNodeDatum}) {
     <>
       <g onMouseOver={() => setIsHovering(true)} onMouseOut={() => setIsHovering(false)}>
         <circle r={isHovering ? 7: 3} strokeWidth={2} fill={isHovering ? 'white' : 'black'} stroke="black" />
-        <text x="15" y="0" strokeWidth={isHovering ? 1 : 0.8}>{isHovering ? `${nodeDatum.name}` : (nodeDatum.attributes && nodeDatum.attributes.pos)}</text>
-        <text strokeWidth="0.1" x="15" y="20">{nodeDatum.attributes && nodeDatum.attributes.org}</text>
+        <text x="15" y="0" strokeWidth={isHovering ? 1 : 0.8}>{isHovering ? (nodeDatum.attributes && nodeDatum.attributes.pos) : `${nodeDatum.name}`}</text>
+        {/* <text strokeWidth="0.1" x="15" y="20">{nodeDatum.attributes && nodeDatum.attributes.org}</text> */}
       </g>
     </>
   );
