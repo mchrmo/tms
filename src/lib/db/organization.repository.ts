@@ -40,14 +40,13 @@ export async function getMainOrganization() {
             attributes: {
                 id: member.id,
                 org: member.organization.name,
-                pos: member.position_name + " " + member.user_id,
+                pos: member.position_name,
             },
             children: buildTree(members, member.id)
         }));
   };
   
   const tree = buildTree(await getMembers())
-  
 
   return tree
 }
