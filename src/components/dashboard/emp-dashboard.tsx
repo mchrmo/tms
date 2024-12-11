@@ -95,8 +95,8 @@ export default function EmpDashboard() {
                 {/* Not Finished Tasks Widget */}
                 <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl cursor-pointer" onClick={() => router.push('/tasks')}>
                   <h3 className="text-lg font-semibold mb-2">Nedokončené úlohy</h3>
-                  <p className="text-gray-700">Mne delegované: {data.unfinishedTasksCount?.owned ?? 0}</p>
-                  <p className="text-gray-700">Mnou delegované: {data.unfinishedTasksCount?.assigned ?? 0}</p>
+                  <p className="text-gray-700">Mne delegované: {data.unfinishedTasksCount?.assigned ?? 0}</p>
+                  <p className="text-gray-700">Mnou delegované: {data.unfinishedTasksCount?.owned ?? 0}</p>
                 </div>
 
                 {/* Reminders Widget */}
