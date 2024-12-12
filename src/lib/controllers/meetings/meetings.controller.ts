@@ -14,10 +14,9 @@ const getMeeting = async (req: NextRequest, params: any) => {
   const id = parseInt(params.id)
 
   const user = await getUser()
-  const user_id = user?.id
+  const user_id = user?.id || 0
 
-
-  if (!await isRole('admin', user)) {
+  if (await isRole('admin', user)) {
     const meeting = await meetingService.get_meeting(id)
     if (!meeting) throw new ApiError(404, 'Not found')
   
@@ -27,27 +26,13 @@ const getMeeting = async (req: NextRequest, params: any) => {
       }, { status: 200 })
   }
 
-
   let items_where: Prisma.MeetingItemWhereInput = {}
-  const meetingRaw = await prisma.meeting.findUnique({
+  const attendant = await prisma.meetingAttendant.findUnique({
     where: {
-      id,
-      attendants: {
-        some: {
-          user_id
-        }
-      }
-    }, include: {
-      attendants: {
-        where: {
-          user_id
-        }
-      }
+      meeting_id_user_id: {meeting_id: id, user_id}
     }
   })
-  if (!meetingRaw) throw new ApiError(404, 'Not found')
-
-  const attendant = meetingRaw.attendants[0]
+  if(!attendant) throw new ApiError(404, 'Not found')
 
   if (attendant.role == "ATTENDANT") {
     items_where = {

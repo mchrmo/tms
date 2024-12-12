@@ -243,6 +243,7 @@ model MeetingAttendant {
   user_id    Int
   user       User                 @relation(fields: [user_id], references: [id])
   role       MeetingAttendantRole @default(ATTENDANT)
+  @@unique([meeting_id, user_id])
 }
 
 enum MeetingAttendantRole {
