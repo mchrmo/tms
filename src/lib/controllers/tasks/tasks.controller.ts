@@ -86,6 +86,8 @@ const getTasks = async (req: NextRequest) => {
     }
   } 
 
+  console.log(where);
+  
   const paginate = createPaginator({ page: pagination.page, perPage: pagination.pageSize })
   const data = await paginate<Task, Prisma.TaskFindManyArgs>(
     prisma.task,

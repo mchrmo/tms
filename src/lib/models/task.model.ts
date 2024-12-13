@@ -89,10 +89,16 @@ export const taskColumns: ModelColumns = {
     path: 'assignee.user.name',
     method: 'contains'
   },
-  'organization_name': {
-    label: "Organizácia",
+  // 'organization_name': {
+  //   label: "Organizácia",
+  //   type: 'string',
+  //   path: 'organization.name',
+  //   method: 'contains'
+  // },
+  'source': {
+    label: "Zdroj",
     type: 'string',
-    path: 'organization.name',
+    path: 'source',
     method: 'contains'
   },
   "parent_id": {

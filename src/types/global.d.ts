@@ -21,6 +21,7 @@ export type DefaultFormProps = {
 
 
 import '@tanstack/react-table' 
+import { ClassArray } from 'clsx';
 export type SelectOptionDef = {
   title: string,
   value: string
@@ -29,6 +30,7 @@ export type SelectOptionDef = {
 declare module '@tanstack/react-table' {
   interface ColumnMeta {
     filterVariant?: 'select' | 'range',
-    selectOptions?: SelectOptionDef[]
+    selectOptions?: SelectOptionDef[],
+    classList?: ClassArray
   }
 }

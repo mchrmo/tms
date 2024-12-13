@@ -3,7 +3,7 @@
 import { Meeting  } from "@prisma/client"
 import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, Header, PaginationState, SortingState, Table as TableType, useReactTable } from "@tanstack/react-table"
 import Link from "next/link"
-import {  useMemo, useState } from "react"
+import {  useEffect, useMemo, useState } from "react"
 import TableComponent, { FilteredHeaderCell } from "@/components/common/table/table"
 import { useMeetings } from "@/lib/hooks/meeting/meeting.hooks"
 import TablePagination from "@/components/common/table/pagination"
@@ -49,12 +49,19 @@ export default function MeetingsTable({defaultFilters}: {defaultFilters?: Column
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(defaultFilters || [])
   const [sorting, setSorting] = useState<SortingState>([{
     id: 'date',
-    desc: true
+    desc: false
   }])
   const [pagination, setPagination] = useState<PaginationState>({pageIndex: 0, pageSize: 10})
 
   const query = useMeetings(pagination, columnFilters, sorting[0])
   const { isLoading, isError } = query
+
+  useEffect(() => {
+    setPagination({
+      ...pagination,
+      pageIndex: 0
+    })
+  }, [columnFilters])
 
   const data = useMemo(() => {
     return query.data ? query.data.data : [];
