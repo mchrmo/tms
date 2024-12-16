@@ -63,8 +63,10 @@ export default function TableComponent<TData>({
                 >
                   {row.getVisibleCells().map((cell) => {
                     
+                    const colDef = cell.column.columnDef
+
                     return (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className={colDef.meta && colDef.meta.classList && colDef.meta.classList.join(' ')}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     )

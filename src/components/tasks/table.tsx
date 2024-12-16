@@ -27,7 +27,10 @@ const columns: ColumnDef<Task>[] = [
     cell: (props) => {
       const id = props.row.original.id
       return <Link className="link" href={'/tasks/'+id}>{props.getValue() as string}</Link>
-    }
+    },
+    meta: {
+      classList: ["min-w-[300px]"]
+    } 
   },
   {
     accessorKey: "createdAt",
@@ -57,7 +60,8 @@ const columns: ColumnDef<Task>[] = [
     },
     meta: {
       filterVariant: 'select',
-      selectOptions: (Object.keys(TASK_STATUSES_MAP) as TaskStatus[]).map((k) => ({title: TASK_STATUSES_MAP[k], value: k}))
+      selectOptions: (Object.keys(TASK_STATUSES_MAP) as TaskStatus[]).map((k) => ({title: TASK_STATUSES_MAP[k], value: k})),
+      classList: ["whitespace-nowrap"]
     }
   }, 
   {
@@ -78,17 +82,23 @@ const columns: ColumnDef<Task>[] = [
   {
     id: 'creator_name',
     accessorKey: "creator.user.name",
-    header: "Vytvárateľ"
+    header: "Vytvárateľ",
+    meta: {
+      classList: ["whitespace-nowrap"]
+    }
   },
   {
     id: 'assignee_name',
     accessorKey: "assignee.user.name",
-    header: "Zodpovedná osoba"
+    header: "Zodpovedná osoba",
+    meta: {
+      classList: ["whitespace-nowrap"]
+    }
   },
   {
-    id: 'organization_name',
-    accessorKey: "organization.name",
-    header: "Organizácia",
+    id: 'source',
+    accessorKey: "source",
+    header: "Zdroj",
   },
   {
     id: 'fulltext',
@@ -101,9 +111,16 @@ export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFil
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(defaultFilters || [])
   const [sorting, setSorting] = useState<SortingState>([{
     id: 'deadline',
-    desc: true
+    desc: false
   }])
   const [pagination, setPagination] = useState<PaginationState>({pageIndex: 0, pageSize: 10})
+
+  useEffect(() => {
+    setPagination({
+      ...pagination,
+      pageIndex: 0
+    })
+  }, [columnFilters])
 
   const query = useTasks(pagination, columnFilters, sorting[0])
   const { isLoading, isError } = query
