@@ -147,7 +147,6 @@ const update_task = async (taskData: Partial<Task>) => {
 }
 
 const delete_task = async (task_id: number) => {
-console.log(task_id);
 
   const rels = await prisma.taskRelationship.deleteMany({
     where: {
@@ -172,6 +171,19 @@ console.log(task_id);
       task_id
     }
   })
+
+  const comments = await prisma.taskComment.deleteMany({
+    where: {
+      task_id
+    }
+  })
+
+  const subs = await prisma.taskSubscription.deleteMany({
+    where: {
+      task_id
+    }
+  })
+
 
   const task = await prisma.task.delete({
       where: {
