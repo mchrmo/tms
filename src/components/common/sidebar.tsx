@@ -8,7 +8,7 @@ import { cn, isRole } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import clsx from "clsx";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 
 
@@ -23,7 +23,8 @@ type Menu = {
 type Submenu = {
   name: string
   // icon: React.ReactNode
-  href: string
+  href: string,
+  params?: string
 }
 
 export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction<boolean>> }) {
@@ -31,6 +32,7 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
   const { user } = useUser()
   const pathname = usePathname();
 
+  const router = useRouter();
 
 
   const adminRoutes: Menu[] = [
@@ -120,12 +122,17 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
         },
         {
           name: "Všetky úlohy",
-          href: "/tasks"
+          href: "/tasks",
+          params: '?status=TODO,INPROGRESS,WAITING,CHECKREQ' 
         },
-        // {
-        //   name: "Delegované úlohy",
-        //   href: "/tasks/my"
-        // }
+        {
+          name: "Moje úlohy",
+          href: "/tasks",
+        },
+        {
+          name: "Delegované úlohy",
+          href: "/tasks/my"
+        }
       ]
     },
     {
@@ -218,6 +225,7 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
                                 {menu.submenu.map((submenu) => (
                                   <Link key={submenu.name} href={submenu.href} 
                                   onClick={() => setOpen && setOpen(false)}
+                                  // onClick={() => isActive(submenu.href) && handleRefresh(submenu.href)}
                                   className={clsx(
                                     "mt-0 mb-0 px-2 flex text-md h-9 items-center rounded-md",
                                       {
@@ -226,7 +234,7 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
                                       {
                                         "bg-primary text-white": isActive(submenu.href)
                                       }
-                                    )}>
+                                    )}> tes
                                     {submenu.name}
                                   </Link>
                                 ))}

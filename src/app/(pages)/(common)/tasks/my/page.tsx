@@ -8,8 +8,11 @@ import Link from "next/link"
 
 export default async function Tasks() {
 
+
   const user = await currentUser()
   const isAdmin = isRole(user, 'admin')
+
+
 
   return (
     <>
@@ -22,17 +25,12 @@ export default async function Tasks() {
           </Link>
         }
       </div>
-      <TasksTable
-        // defaultFilters={
-        //   [
-        //     {
-        //       id: 'status',
-        //       value: 'TODO,INPROGRESS'
-        //     }
-        //   ]
-        // }
-
-      />
+      <TasksTable defaultFilters={[
+        {
+          id: 'status',
+          value: ['TODO']
+        }
+      ]}/>
     </>
   )
 
