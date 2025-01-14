@@ -244,7 +244,6 @@ export function TableFilter<TData>(props: TableFilterProps<TData>) {
       </div>
 
       <div className="mt-3 space-x-2 flex">
-        {(props.filterReady !== undefined && props.filterReady) ? 'true' : 'false'}
         {
           activeFilters.map(f => (
             <FilterItem key={f.id} filter={f} onFilterRemove={removeFilter} onFilterUpdate={(val) => updateFilter(f.id, val)} defaultOpen={props.filterReady !== undefined ? props.filterReady : true}></FilterItem>
@@ -328,6 +327,8 @@ function FilterItem({ filter, defaultOpen, onFilterRemove, onFilterUpdate }: { f
     onFilterUpdate(value)
   }, 500);
 
+  console.log(filter.value);
+  
   return (
     <div className={cn(
       "px-5 border-1 gap-0 truncate rounded-full flex items-center space-x-3",

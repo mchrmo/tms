@@ -121,17 +121,16 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
           name: 'Vytvoriť úlohu'
         },
         {
-          name: "Všetky úlohy",
-          href: "/tasks",
-          params: '?status=TODO,INPROGRESS,WAITING,CHECKREQ' 
-        },
-        {
-          name: "Moje úlohy",
-          href: "/tasks",
+          name: "Nedokončené úlohy",
+          href: "/tasks/unfinished",
         },
         {
           name: "Delegované úlohy",
-          href: "/tasks/my"
+          href: "/tasks/delegated",
+        },
+        {
+          name: "Všetky úlohy",
+          href: "/tasks/all?status=DONE",
         }
       ]
     },
@@ -227,14 +226,14 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
                                   onClick={() => setOpen && setOpen(false)}
                                   // onClick={() => isActive(submenu.href) && handleRefresh(submenu.href)}
                                   className={clsx(
-                                    "mt-0 mb-0 px-2 flex text-md h-9 items-center rounded-md",
+                                    "mt-0 mb-1 px-2 flex text-md h-9 items-center rounded-md",
                                       {
                                         "bg-white hover:bg-primary hover:text-white": !isActive(submenu.href)
                                       },
                                       {
                                         "bg-primary text-white": isActive(submenu.href)
                                       }
-                                    )}> tes
+                                    )}>
                                     {submenu.name}
                                   </Link>
                                 ))}
