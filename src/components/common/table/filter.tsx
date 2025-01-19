@@ -105,7 +105,8 @@ type TableFilterProps<TData> = {
   defaultFilters?: ColumnFiltersState,
   advanced?: boolean,
   filterReady?: boolean,
-  setFilterReady?: (value: boolean) => void
+  setFilterReady?: (value: boolean) => void,
+  urlFilters?: boolean
 }
 export function TableFilter<TData>(props: TableFilterProps<TData>) {
   const primaryCol = props.table.getColumn(props.primaryFilterColumn)
@@ -132,11 +133,14 @@ export function TableFilter<TData>(props: TableFilterProps<TData>) {
   const filterableColumns = getFilterableColumns()
 
   useEffect(() => {
-    searchParams.forEach((v, key) => {
-      if (filterableColumns[key]) {
-        addFilter(key, v)
-      }
-    })
+
+    if(props.urlFilters) {
+      searchParams.forEach((v, key) => {
+        if (filterableColumns[key]) {
+          addFilter(key, v)
+        }
+      })
+    }
 
     if(props.defaultFilters) props.defaultFilters.forEach((f) => addFilter(f.id, f.value as string))
     
@@ -146,12 +150,7 @@ export function TableFilter<TData>(props: TableFilterProps<TData>) {
   }, [])
 
   useEffect(() => {
-    console.log("router");
-    
-  }, [pathname])
-
-  useEffect(() => {
-    if(!props.filterReady) return
+    if(!props.filterReady || !props.urlFilters) return
 
     const _filter: { [key: string]: string } = {}
     searchParams.forEach((v, key) => {
@@ -172,6 +171,8 @@ export function TableFilter<TData>(props: TableFilterProps<TData>) {
   }, [searchParams])
 
   useEffect(() => { 
+    if(!props.urlFilters) return
+
     const params = new URLSearchParams()
     for (const f of activeFilters) {
       const tableCol = props.table.getColumn(f.id)
@@ -329,8 +330,8 @@ function FilterItem({ filter, defaultOpen, onFilterRemove, onFilterUpdate }: { f
   
   return (
     <div className={cn(
-      "px-5 border-1 gap-0 truncate rounded-full flex items-center space-x-3",
-      { "bg-black text-white": open }
+      "px-5 border-1 border-gray-300 gap-0 truncate rounded-md flex items-center space-x-3",
+      { "bg-secondary text-white": open }
     )}>
 
       <Popover open={open} onOpenChange={setOpen}>
@@ -349,8 +350,8 @@ function FilterItem({ filter, defaultOpen, onFilterRemove, onFilterUpdate }: { f
           </div>
         </PopoverTrigger>
         <PopoverContent className="space-y-3 p-2 min-w-[12rem] w-auto" >
-          <h5 className="text-sm">{filter.colDef.label}</h5>
-          <Separator />
+          {/* <h5 className="text-sm">{filter.colDef.label}</h5> */}
+          {/* <Separator /> */}
           {
             filter.colDef.type === 'string' && (
               <Input className="h-7" placeholder={filter.colDef.label} defaultValue={filter.value} onChange={(e) => debouncedInput(e.target.value)} />
@@ -442,8 +443,6 @@ function FilterItemSelect({ filter, onFilterUpdate }: { filter: ActiveFilter, on
           {
             Object.entries(filter.colDef.enum!).map(([key, label]) => {
               const isSelected = selectedValues.find(s => s == key)
-
-
               return (
                 <CommandItem
                   key={key}
@@ -480,7 +479,7 @@ function FilterItemSelect({ filter, onFilterUpdate }: { filter: ActiveFilter, on
             })
           }
         </CommandGroup>
-        {selectedValues && (
+        {/* {selectedValues && (
           <>
             <CommandSeparator />
             <CommandGroup>
@@ -488,11 +487,11 @@ function FilterItemSelect({ filter, onFilterUpdate }: { filter: ActiveFilter, on
                 // onSelect={() => column?.setFilterValue(undefined)}
                 className="justify-center text-center"
               >
-                Clear filters
+                Vymazať všetko
               </CommandItem>
             </CommandGroup>
           </>
-        )}
+        )} */}
       </CommandList>
     </Command>
   )

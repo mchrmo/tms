@@ -197,7 +197,8 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
           alt="Task Manager"
           src="/taskmanager.png"
           width={150}
-          height={200}
+          height={0}
+          style={{height: "auto" }}
         />
       </div>
 
