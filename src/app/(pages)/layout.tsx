@@ -15,7 +15,7 @@ import { auth, getAuth } from "@clerk/nextjs/server";
 const inter = Inter({ subsets: ["latin"] });
 const poppins = Poppins({ weight: '500', subsets: ["latin"] });
 export const metadata: Metadata = {
-  title: "TMS Ružomberok",
+  title: "Task Manager",
 };
 
 

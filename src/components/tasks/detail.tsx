@@ -81,7 +81,7 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
           {
             task && taskRole && (
 
-              <div>
+              <div className="flex flex-col">
                 {
                   task.parent && <Label className="text-md">
                     Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${task.parent.id}`}>{task.parent.name}</Link>

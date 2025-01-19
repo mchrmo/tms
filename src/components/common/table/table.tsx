@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table"
 import { flexRender, Header, Table as TableType } from '@tanstack/react-table'
 import { ChevronDown, ChevronUp } from "lucide-react"
-import { ReactNode } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import Filter from "./filter"
 import { cn } from "@/lib/utils"
 import TablePagination from "./pagination"
@@ -26,7 +26,8 @@ export default function TableComponent<TData>({
   isLoading,
   isError,
   templateParts,
-  pagination
+  pagination,
+  tableId
 }: {
   table: TableType<TData>,
   isLoading: boolean,
@@ -34,8 +35,30 @@ export default function TableComponent<TData>({
   children?: ReactNode,
   templateParts?: CustomTableParts,
   pagination?: boolean
+  tableId?: string
 }) {
 
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    if(tableId) {
+      const sorting = localStorage.getItem('table-'+tableId+'-sorting')
+      console.log(sorting);
+      
+      table.setSorting(sorting ? JSON.parse(sorting) : [])  
+    }
+    setLoaded(true)     
+  }, [])
+
+  useEffect(() => {
+    if(!tableId || !loaded) return
+    const sorting = table.getState().sorting
+    localStorage.setItem('table-'+tableId+'-sorting', JSON.stringify(sorting))
+    
+    console.log(sorting[0]);
+    
+  }, [table.getState().sorting])
+  
 
   return <>
       <div className="">
@@ -91,7 +114,6 @@ export default function TableComponent<TData>({
           </TableBody>
         </Table>
         { pagination && <TablePagination table={table} ></TablePagination>}
-
       </div>
   </>
 }
