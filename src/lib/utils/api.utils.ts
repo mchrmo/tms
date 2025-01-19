@@ -245,7 +245,7 @@ export type SingleColumnDef = {
   label?: string, 
   path?: string,
   method?: 'equals' | 'contains',
-  customFilter?: (val: string | number | Date[] | boolean) => any,
+  customFilter?: (val: string | string[] | number | Date[] | boolean) => any,
   customSort?: (dir: 'asc' | 'desc') => any,
   disableSorting?: boolean,
   disableFilter?: boolean,
@@ -277,7 +277,8 @@ const parseValue = (value: string, type: SingleColumnDef['type']) => {
       }
       return splitted // Convert to Date object
     case 'enum':
-      return value
+      const arrVals = value.split(',').map(v => v.trim())
+      return arrVals
     default:
       return value.trim();
   }
@@ -290,9 +291,11 @@ export const getFilters = (params: any, columns: ModelColumns) => {
     let rawVal = params[colName]
     if(!rawVal) continue
 
+    // Find col definition in columns
     const colDef = columns[colName]
     if(colDef.disableFilter) throw new ApiError(400, `neplatný filter - '${colName}'`)
 
+    // Set column path and filter method
     const colPath = (colDef.path && colDef.path.split('.')) || [colName]
     const filterMethod = colDef.method || 'equals'
 
@@ -312,12 +315,15 @@ export const getFilters = (params: any, columns: ModelColumns) => {
     colPath.forEach((part, index) => {
       if (index === colPath.length - 1) {
         // Apply different filter logic based on type
-        if(colDef.type == 'string' || colDef.type == 'enum') {
+        if(colDef.type == 'string') {
           currentLevel[part] = {
             [filterMethod]: val,
           };
+        } 
+        else if(colDef.type == 'enum') {
+          currentLevel[part] = {in: val};
         }
-        if(colDef.type == 'datetime'){
+        else if(colDef.type == 'datetime'){
           const dates = val as Date[]
           let dFilter;
 
@@ -333,8 +339,7 @@ export const getFilters = (params: any, columns: ModelColumns) => {
 
           currentLevel[part] = dFilter;
         }
-
-        if(colDef.type == 'number') {
+        else if(colDef.type == 'number') {
           currentLevel[part] = {
             [filterMethod]: val,
           };

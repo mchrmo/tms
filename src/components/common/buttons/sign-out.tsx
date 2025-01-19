@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useClerk } from '@clerk/nextjs';
+import { LogOut02 } from '@untitled-ui/icons-react';
 import clsx from 'clsx';
 import { Power } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -19,16 +20,8 @@ export default function SignOut({iconOnly}: {iconOnly?: boolean}) {
   };
   
   return (
-    <Button variant="ghost" onClick={handleSignOut}>
-      <Power className={clsx(
-        "h-4 w-4",
-        {
-          "mr-2": !iconOnly
-        }
-      )} /> 
-      {
-        !iconOnly && 'Odhlásiť sa'
-      }
+    <Button variant="ghost" className='p-0 px-1 h-5' onClick={handleSignOut}>
+        <LogOut02 width={20}></LogOut02>
     </Button>
   );
 

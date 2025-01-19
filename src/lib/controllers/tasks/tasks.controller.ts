@@ -13,9 +13,6 @@ import { AuthUser, getMembership, getUser, isSuperior, isRole } from "@/lib/serv
 import taskRelService from "@/lib/services/tasks/taskRelationship.service";
 
 
-
-
-
 const getTask = async (req: NextRequest, params: any) => {
 
   const taskId = parseInt(params.id)
@@ -86,7 +83,7 @@ const getTasks = async (req: NextRequest) => {
     }
   } 
 
-  console.log(where);
+  // console.log(where);
   
   const paginate = createPaginator({ page: pagination.page, perPage: pagination.pageSize })
   const data = await paginate<Task, Prisma.TaskFindManyArgs>(

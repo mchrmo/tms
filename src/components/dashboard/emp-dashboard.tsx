@@ -52,7 +52,7 @@ export default function EmpDashboard() {
 
 
   const taskStatusData = {
-    labels: [TASK_STATUSES_MAP.TODO, TASK_STATUSES_MAP.WAITING, TASK_STATUSES_MAP.INPROGRESS, TASK_STATUSES_MAP.CHECKREQ, TASK_STATUSES_MAP.DONE], // TaskStatus enum
+    labels: [TASK_STATUSES_MAP.TODO, TASK_STATUSES_MAP.WAITING, TASK_STATUSES_MAP.INPROGRESS, TASK_STATUSES_MAP.CHECKREQ], // TaskStatus enum
     datasets: [
       {
         data: data ? [
@@ -60,10 +60,10 @@ export default function EmpDashboard() {
           data.taskStatusCounts?.WAITING ?? 0,
           data.taskStatusCounts?.INPROGRESS ?? 0,
           data.taskStatusCounts?.CHECKREQ ?? 0,
-          data.taskStatusCounts?.DONE ?? 0,
+          // data.taskStatusCounts?.DONE ?? 0,
         ] : [0, 0, 0, 0, 0],
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'], // You can adjust the colors as needed
-        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+        backgroundColor: ['#FBACF8', '#B0B0B0', '#A6E9FB', '#A3C3FE'], // You can adjust the colors as needed
+        hoverBackgroundColor: ['#FBACF8', '#B0B0B0', '#FFCE56', '#A3C3FE'],
       },
     ],
   };

@@ -107,8 +107,9 @@ const columns: ColumnDef<Task>[] = [
 
 
 export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFiltersState}) {
+  const [isFilterReady, setFilterReady] = useState(false)
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(defaultFilters || [])
   const [sorting, setSorting] = useState<SortingState>([{
     id: 'deadline',
     desc: false
@@ -122,7 +123,7 @@ export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFil
     })
   }, [columnFilters])
 
-  const query = useTasks(pagination, columnFilters, sorting[0])
+  const query = useTasks(pagination, columnFilters, sorting[0], {enabled: isFilterReady})
   const { isLoading, isError } = query
 
   const data = useMemo(() => {
@@ -160,7 +161,11 @@ export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFil
   return (
     <div>
       <div className="mb-4">
-        <TableFilter table={table} columns={taskColumns} primaryFilterColumn="fulltext"></TableFilter>
+        <TableFilter 
+          table={table} columns={taskColumns} primaryFilterColumn="fulltext" 
+          defaultFilters={defaultFilters}
+          filterReady={isFilterReady} setFilterReady={(v) => setFilterReady(v)} 
+          ></TableFilter>
       </div>
 
       <div className="">

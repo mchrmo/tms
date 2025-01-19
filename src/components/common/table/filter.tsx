@@ -1,47 +1,49 @@
 'use client'
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label";
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { ModelColumns, SingleColumnDef } from "@/lib/utils/api.utils";
 import { formatDate } from "@/lib/utils/dates";
 import { SelectOptionDef } from "@/types/global";
-import { Column, flexRender, Header, Table } from "@tanstack/react-table"
+import { ColumnFiltersState, Header, Table } from "@tanstack/react-table";
+import { CommandEmpty } from "cmdk";
 import { addDays, format } from "date-fns";
-import { CalendarIcon, ChevronDownIcon,  HashIcon, PlusIcon, SearchIcon, TextIcon, XIcon } from "lucide-react";
+import { CalendarIcon, Check, ChevronDownIcon, HashIcon, PlusIcon, SearchIcon, TextIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { useDebouncedCallback } from "use-debounce";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 
 
-export default function Filter({ header }: { header: Header<any, unknown>}) {
+export default function Filter({ header }: { header: Header<any, unknown> }) {
   const columnFilterValue = header.column.getFilterValue()
   const column = header.column
+
 
   const debounced = useDebouncedCallback((value) => {
     column.setFilterValue(value)
   }, 1000);
-  
+
   let filterVariant: string | undefined;
   let selectOptions: SelectOptionDef[] = [];
-  if(header.column.columnDef.meta) {
+  if (header.column.columnDef.meta) {
     const meta = header.column.columnDef.meta
     filterVariant = meta.filterVariant
-    
-    if(filterVariant == 'select') {
+
+    if (filterVariant == 'select') {
       selectOptions = meta.selectOptions ? meta.selectOptions : []
     }
   }
 
   const handleFilterChange = (value: string) => {
 
-    if(filterVariant == 'select') {
+    if (filterVariant == 'select') {
       column.setFilterValue(value)
     } else {
       debounced(value)
@@ -50,44 +52,44 @@ export default function Filter({ header }: { header: Header<any, unknown>}) {
   }
 
 
-  if(!column.getCanFilter()) return null
+  if (!column.getCanFilter()) return null
 
-  return filterVariant === 'range' ? 
-      <DateRangeFilter></DateRangeFilter> 
-      : filterVariant === 'select' ? (
-      <Select
-        onValueChange={(value) => handleFilterChange(value == 'none' ? '' : value)}
-        value={columnFilterValue?.toString() ? columnFilterValue?.toString() : 'none'}
-      >
-        <SelectTrigger className="h-7 mt-2" >
-          <SelectValue placeholder="Všetko" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectItem value="none">Všetko</SelectItem>
-            {
-              selectOptions?.map(o => <SelectItem key={o.value} value={o.value}>{o.title}</SelectItem>)
-            }
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-    ) : (
-    <div className="">
-      {/* <Label>
-        {flexRender(
-          column.columnDef.header,
-          header.getContext()
-        )}
-      </Label> */}
-      <Input
-      className="p-1 h-auto mb-1 mt-2 border-0 border-b-1 "
-      placeholder={`Filter`}
-      type="text"
-      defaultValue={(header.column.getFilterValue() as string) || ""}
-      onChange={(e) => handleFilterChange(e.target.value)}
-      />
-    </div>
-  )
+  return filterVariant === 'range' ?
+    (
+      <DateRangeFilter></DateRangeFilter>
+    )
+    :
+    filterVariant === 'select' ?
+      (
+        <Select
+          onValueChange={(value) => handleFilterChange(value == 'none' ? '' : value)}
+          value={columnFilterValue?.toString() ? columnFilterValue?.toString() : 'none'}
+        >
+          <SelectTrigger className="h-7 mt-2" >
+            <SelectValue placeholder="Všetko" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="none">Všetko</SelectItem>
+              {
+                selectOptions?.map(o => <SelectItem key={o.value} value={o.value}>{o.title}</SelectItem>)
+              }
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      )
+      :
+      (
+        <div className="">
+          <Input
+            className="p-1 h-auto mb-1 mt-2 border-0 border-b-1 "
+            placeholder={`Filter`}
+            type="text"
+            defaultValue={(header.column.getFilterValue() as string) || ""}
+            onChange={(e) => handleFilterChange(e.target.value)}
+          />
+        </div>
+      )
 }
 
 interface ActiveFilter {
@@ -100,14 +102,22 @@ type TableFilterProps<TData> = {
   table: Table<TData>,
   columns: ModelColumns,
   primaryFilterColumn: string,
-  advanced?: boolean
+  defaultFilters?: ColumnFiltersState,
+  advanced?: boolean,
+  filterReady?: boolean,
+  setFilterReady?: (value: boolean) => void
 }
 export function TableFilter<TData>(props: TableFilterProps<TData>) {
   const primaryCol = props.table.getColumn(props.primaryFilterColumn)
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([])
   const debouncedPrimary = useDebouncedCallback((value) => {
-    if(primaryCol) primaryCol.setFilterValue(value)
+    if (primaryCol) primaryCol.setFilterValue(value)
   }, 1000);
 
   const getFilterableColumns = () => {
@@ -119,56 +129,108 @@ export function TableFilter<TData>(props: TableFilterProps<TData>) {
 
     return resCols
   }
-
   const filterableColumns = getFilterableColumns()
+
+  useEffect(() => {
+    searchParams.forEach((v, key) => {
+      if (filterableColumns[key]) {
+        addFilter(key, v)
+      }
+    })
+
+    if(props.defaultFilters) props.defaultFilters.forEach((f) => addFilter(f.id, f.value as string))
+    
+    if(props.setFilterReady) {
+      setTimeout(() => props.setFilterReady!(true), 10)
+    }
+  }, [])
+
+  useEffect(() => {
+    console.log("router");
+    
+  }, [pathname])
+
+  useEffect(() => {
+    if(!props.filterReady) return
+
+    const _filter: { [key: string]: string } = {}
+    searchParams.forEach((v, key) => {
+      _filter[key] = v
+    })
+
+    const toDelete = activeFilters.filter((f, i) => !_filter[f.id])
+
+    Object.entries(_filter).forEach(([key, v]) => {
+      const inFilters = activeFilters.find(f => f.id == key)
+      if (filterableColumns[key] && !inFilters) {
+        addFilter(key, v)
+      }
+    })
+
+    toDelete.forEach((f) => removeFilter(f.id))
+
+  }, [searchParams])
+
+  useEffect(() => { 
+    const params = new URLSearchParams()
+    for (const f of activeFilters) {
+      const tableCol = props.table.getColumn(f.id)
+      if (!tableCol) continue
+      tableCol.setFilterValue(f.value)
+
+      if (f.value) params.set(f.id, f.value)
+    }
+
+
+    router.push(pathname + '?' + params.toString())
+  }, [activeFilters])
+
 
   const handleFilterChange = (value: string) => {
     debouncedPrimary(value)
   }
 
-  const addFilter = (key: string) => {
+  const addFilter = (key: string, value?: string) => {
 
-    const index = activeFilters.findIndex(f => key === f.id)
-    if (index >= 0) return
 
-    const tableCol = props.table.getColumn(key)
-    if (!tableCol) return
-    const colDef = props.columns[key]
-    console.log(colDef);
+    setActiveFilters((_activeFilters) => {
+      const val = value || ''
+      const index = _activeFilters.findIndex(f => key === f.id)
+      if (index >= 0) return [..._activeFilters]
 
-    if (!colDef) return
+      const tableCol = props.table.getColumn(key)
+      if (!tableCol) return [..._activeFilters]
+      const colDef = props.columns[key]
+      if (!colDef) return [..._activeFilters]
 
-    setActiveFilters([...activeFilters, { colDef, id: key, value: '' }])
+      return [..._activeFilters, { colDef, id: key, value: val }]
+    })
   }
 
   const removeFilter = (id: string) => {
-    setActiveFilters(activeFilters.filter(f => f.id !== id))
+    setActiveFilters(filter => filter.filter(f => f.id !== id))
+
     const tableCol = props.table.getColumn(id)
     if (!tableCol) return
     tableCol.setFilterValue(null)
 
   }
 
-  const updateFilter = (id: string, value: string) => {
+  const updateFilter = (id: string, value: string | string[]) => {
     const aFilters = [...activeFilters]
     const filter = aFilters.find(f => f.id === id)
     if (!filter) return
-    filter!.value = value
-    setActiveFilters(aFilters)
 
+    if (Array.isArray(value)) {
+      filter!.value = value.join(',')
+    } else filter!.value = value
+    setActiveFilters(aFilters)
   }
 
-  useEffect(() => {
-    for (const f of activeFilters) {
-      const tableCol = props.table.getColumn(f.id)
-      if (!tableCol) continue
-      tableCol.setFilterValue(f.value)
-    }
-  }, [activeFilters])
 
-  
-  if(props.primaryFilterColumn) {
-    if (!primaryCol) return <span>Wrong primary filter column name {props.primaryFilterColumn}</span>  
+
+  if (props.primaryFilterColumn) {
+    if (!primaryCol) return <span>Wrong primary filter column name {props.primaryFilterColumn}</span>
   }
 
   return (
@@ -184,8 +246,7 @@ export function TableFilter<TData>(props: TableFilterProps<TData>) {
       <div className="mt-3 space-x-2 flex">
         {
           activeFilters.map(f => (
-            <FilterItem key={f.id} filter={f} onFilterRemove={removeFilter} onFilterUpdate={(val) => updateFilter(f.id, val)} defaultOpen={true}></FilterItem>
-            // <span onClick={() => removeFilter(f.id)} key={f.id}>{f.id} </span>
+            <FilterItem key={f.id} filter={f} onFilterRemove={removeFilter} onFilterUpdate={(val) => updateFilter(f.id, val)} defaultOpen={props.filterReady !== undefined ? props.filterReady : true}></FilterItem>
           ))
         }
       </div>
@@ -259,13 +320,13 @@ function AddFilterCombobox({
   )
 }
 
-function FilterItem({ filter, defaultOpen, onFilterRemove, onFilterUpdate }: { filter: ActiveFilter, defaultOpen: boolean, onFilterRemove: (id: string) => void, onFilterUpdate: (value: string) => void }) {
+function FilterItem({ filter, defaultOpen, onFilterRemove, onFilterUpdate }: { filter: ActiveFilter, defaultOpen: boolean, onFilterRemove: (id: string) => void, onFilterUpdate: (value: string | string[]) => void }) {
   const [open, setOpen] = useState(defaultOpen)
 
   const debouncedInput = useDebouncedCallback((value: string) => {
     onFilterUpdate(value)
   }, 500);
-
+  
   return (
     <div className={cn(
       "px-5 border-1 gap-0 truncate rounded-full flex items-center space-x-3",
@@ -279,7 +340,7 @@ function FilterItem({ filter, defaultOpen, onFilterRemove, onFilterUpdate }: { f
             <span className="text-xs font-light">
               {
                 filter.value &&
-                filter.colDef.type == 'enum' && filter.colDef.enum![filter.value]
+                filter.colDef.type == 'enum' && filter.value.split(',').map(v => filter.colDef.enum![v]).join(', ')
                 ||
                 filter.colDef.type == 'string' && filter.value
                 ||
@@ -287,7 +348,7 @@ function FilterItem({ filter, defaultOpen, onFilterRemove, onFilterUpdate }: { f
               }</span>
           </div>
         </PopoverTrigger>
-        <PopoverContent className="space-y-2 p-2 w-auto" align="start">
+        <PopoverContent className="space-y-3 p-2 min-w-[12rem] w-auto" >
           <h5 className="text-sm">{filter.colDef.label}</h5>
           <Separator />
           {
@@ -296,20 +357,22 @@ function FilterItem({ filter, defaultOpen, onFilterRemove, onFilterUpdate }: { f
             )
           }
           {
-            filter.colDef.type === 'enum' && (
-              <Select onValueChange={(value) => { onFilterUpdate(value); setOpen(false) }} defaultValue={filter.value}>
-                <SelectTrigger className="h-8">
-                  <SelectValue placeholder='Výber' />
-                </SelectTrigger>
-                <SelectContent >
-                  {
-                    Object.entries(filter.colDef.enum!).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>{label}</SelectItem>
-                    ))
-                  }
-                </SelectContent>
-              </Select>
-            )
+            filter.colDef.type === 'enum' &&
+            <FilterItemSelect filter={filter} onFilterUpdate={onFilterUpdate}></FilterItemSelect>
+            // (
+            //   <Select onValueChange={(value) => { onFilterUpdate(value); setOpen(false) }} defaultValue={filter.value}>
+            //     <SelectTrigger className="h-8">
+            //       <SelectValue placeholder='Výber' />
+            //     </SelectTrigger>
+            //     <SelectContent>
+            //       {
+            //         Object.entries(filter.colDef.enum!).map(([key, label]) => (
+            //           <SelectItem key={key} value={key}>{label}</SelectItem>
+            //         ))
+            //       }
+            //     </SelectContent>
+            //   </Select>
+            // )
           }
           {
             filter.colDef.type === 'datetime' && <FilterItemDatetime filter={filter} onFilterUpdate={onFilterUpdate} />
@@ -324,7 +387,7 @@ function FilterItem({ filter, defaultOpen, onFilterRemove, onFilterUpdate }: { f
 }
 
 function FilterItemDatetime({ filter, onFilterUpdate }: { filter: ActiveFilter, onFilterUpdate: (val: string) => void }) {
-  const defDate =  new Date(filter.value && filter.value)
+  const defDate = new Date(filter.value && filter.value)
   const [date, setDate] = useState<Date>(!isNaN(defDate.getTime()) ? defDate : new Date())
 
   const selectDate = (date?: Date) => {
@@ -360,13 +423,88 @@ function FilterItemDatetime({ filter, onFilterUpdate }: { filter: ActiveFilter, 
   )
 }
 
+function FilterItemSelect({ filter, onFilterUpdate }: { filter: ActiveFilter, onFilterUpdate: (val: string[]) => void }) {
+
+  const defSelect = (filter.value && filter.value.split(',')) || []
+
+  const [selectedValues, setSetSelected] = useState<string[]>(defSelect)
+
+
+  // const selectedValues = new Set(
+  //   Array.isArray(unknownValue) ? unknownValue : ['TODO']
+  // )
+
+  return (
+    <Command>
+      <CommandList className="max-h-full">
+        <CommandEmpty>Žiadne možnosti.</CommandEmpty>
+        <CommandGroup className="max-h-[18.75rem] overflow-y-auto overflow-x-hidden">
+          {
+            Object.entries(filter.colDef.enum!).map(([key, label]) => {
+              const isSelected = selectedValues.find(s => s == key)
+
+
+              return (
+                <CommandItem
+                  key={key}
+                  onSelect={() => {
+
+                    let oldValues = [...selectedValues]
+                    if (isSelected) {
+                      oldValues = oldValues.filter(v => v !== key)
+                    } else {
+                      oldValues.push(key)
+                    }
+
+                    setSetSelected(oldValues)
+                    onFilterUpdate(oldValues)
+
+                    // column?.setFilterValue(
+                    //   filterValues.length ? filterValues : undefined
+                    // )
+                  }}
+                >
+                  <div
+                    className={cn(
+                      "mr-2 flex size-4 items-center justify-center rounded-sm border border-primary",
+                      isSelected
+                        ? "bg-primary text-primary-foreground"
+                        : "opacity-50 [&_svg]:invisible"
+                    )}
+                  >
+                    <Check className="size-4" aria-hidden="true" />
+                  </div>
+                  <span>{label}</span>
+                </CommandItem>
+              )
+            })
+          }
+        </CommandGroup>
+        {selectedValues && (
+          <>
+            <CommandSeparator />
+            <CommandGroup>
+              <CommandItem
+                // onSelect={() => column?.setFilterValue(undefined)}
+                className="justify-center text-center"
+              >
+                Clear filters
+              </CommandItem>
+            </CommandGroup>
+          </>
+        )}
+      </CommandList>
+    </Command>
+  )
+}
+
 
 function DateRangeFilter() {
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(2022, 0, 20),
     to: addDays(new Date(2022, 0, 20), 20),
   })
- 
+
   return (
     <div className={cn("grid gap-2")}>
       <Popover>

@@ -60,7 +60,7 @@ export const useTask = (id?: number, options?: UseQueryOptions<DetailResponse<Ta
   return query
 }
 
-export const useTasks = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) => {
+export const useTasks = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort, queryOptions?: Partial<UseQueryOptions<PaginatedResponse<Task>>>) => {
   const { toast } = useToast()
   const { urlParams, params } = parseListHookParamsNew(pagination, filter, sort)
 
@@ -74,6 +74,7 @@ export const useTasks = (pagination: PaginationState, filter?: ColumnFiltersStat
   const query = useQuery<PaginatedResponse<Task>>({
     queryKey: taskQueryKeys.searched(urlParams),
     queryFn: () => getTasksFn(params),
+    ...queryOptions
   })
 
   useEffect(() => {

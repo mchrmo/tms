@@ -49,7 +49,7 @@ export default function MeetingsTable({defaultFilters}: {defaultFilters?: Column
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(defaultFilters || [])
   const [sorting, setSorting] = useState<SortingState>([{
     id: 'date',
-    desc: false
+    desc: true
   }])
   const [pagination, setPagination] = useState<PaginationState>({pageIndex: 0, pageSize: 10})
 
