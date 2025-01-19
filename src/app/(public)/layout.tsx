@@ -10,7 +10,7 @@ import Navbar from "@/components/common/navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "TMS Ružomberok",
+  title: "Task Manager",
 };
 
 export default async function RootLayout({

@@ -102,6 +102,7 @@ export const taskColumns: ModelColumns = {
     method: 'contains'
   },
   "parent_id": {
+    label: "Nadriadená úloha",
     type: "number",
     method: "equals"
   },

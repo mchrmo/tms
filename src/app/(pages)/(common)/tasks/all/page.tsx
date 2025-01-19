@@ -2,14 +2,17 @@ import AddButton from "@/components/common/buttons/add-button"
 import ViewHeadline from "@/components/common/view-haedline"
 import TasksTable from "@/components/tasks/table"
 import { isRole } from "@/lib/utils"
-import { auth, currentUser } from "@clerk/nextjs/server"
+import { currentUser } from "@clerk/nextjs/server"
 import Link from "next/link"
 
 
 export default async function Tasks() {
 
+
   const user = await currentUser()
   const isAdmin = isRole(user, 'admin')
+
+
 
   return (
     <>
@@ -22,17 +25,7 @@ export default async function Tasks() {
           </Link>
         }
       </div>
-      <TasksTable
-        // defaultFilters={
-        //   [
-        //     {
-        //       id: 'status',
-        //       value: 'TODO,INPROGRESS'
-        //     }
-        //   ]
-        // }
-
-      />
+      <TasksTable />
     </>
   )
 

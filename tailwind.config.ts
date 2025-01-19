@@ -1,5 +1,6 @@
 import {nextui} from '@nextui-org/theme';
 import type { Config } from "tailwindcss"
+import { fontFamily } from "tailwindcss/defaultTheme"
 
 const config = {
   darkMode: ["class"],
@@ -21,18 +22,24 @@ const config = {
     },
     extend: {
       colors: {
+        // tms
+        magenta: '#EC35E4',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#7D72FF",
           foreground: "hsl(var(--primary-foreground))",
         },
+        gradient: {
+          from: "#D6DDFD",
+          to: "#FBF4FE"
+        },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "#6E89F5",
+          foreground: "#fff",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -74,6 +81,11 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      fontFamily: {
+        poppins: ["Poppins", ...fontFamily.sans],
+        // Add more custom font families as needed
+      },
+
     },
   },
   plugins: [nextui()],

@@ -103,12 +103,19 @@ const columns: ColumnDef<Task>[] = [
   {
     id: 'fulltext',
   },
+  {
+    id: 'parent_id',
+    // header: "Nadriadená úloha",
+  },
 ]
 
 
-export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFiltersState}) {
+export default function TasksTable({defaultFilters, urlFilters}: {defaultFilters?: ColumnFiltersState, urlFilters?: boolean}) {
+  const [isFilterReady, setFilterReady] = useState(false)
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(defaultFilters || [])
+  if(urlFilters == undefined) urlFilters = true
+  
   const [sorting, setSorting] = useState<SortingState>([{
     id: 'deadline',
     desc: false
@@ -122,8 +129,10 @@ export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFil
     })
   }, [columnFilters])
 
-  const query = useTasks(pagination, columnFilters, sorting[0])
+  const query = useTasks(pagination, columnFilters, sorting[0], {enabled: isFilterReady})
   const { isLoading, isError } = query
+
+
 
   const data = useMemo(() => {
     return query.data ? query.data.data : [];
@@ -158,17 +167,19 @@ export default function TasksTable({defaultFilters}: {defaultFilters?: ColumnFil
 
 
   return (
-    <div>
+    <div className="h-fit">
+
       <div className="mb-4">
-        <TableFilter table={table} columns={taskColumns} primaryFilterColumn="fulltext"></TableFilter>
+        <TableFilter           
+          table={table} columns={taskColumns} primaryFilterColumn="fulltext" 
+          defaultFilters={defaultFilters}
+          filterReady={isFilterReady} setFilterReady={(v) => setFilterReady(v)} 
+          urlFilters={urlFilters}
+          ></TableFilter>
       </div>
 
       <div className="">
-        <TableComponent table={table} isError={isError} isLoading={isLoading}
-          templateParts={{
-            // headerCell: customHeader
-          }}
-        >
+        <TableComponent tableId="tasks" table={table} isError={isError} isLoading={isLoading}>
         </TableComponent>
         <TablePagination table={table}></TablePagination>
       </div>

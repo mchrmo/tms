@@ -1,5 +1,5 @@
 import type { GetServerSideProps, Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import "../globals.css";
 import {
   ClerkProvider,
@@ -10,13 +10,12 @@ import Sidebar from "@/components/common/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import RoleProvider, { Providers } from "../providers";
 import { auth, getAuth } from "@clerk/nextjs/server";
-import NextBreadcrumb from "@/components/common/breadcrumbs";
 
 
 const inter = Inter({ subsets: ["latin"] });
-
+const poppins = Poppins({ weight: '500', subsets: ["latin"] });
 export const metadata: Metadata = {
-  title: "TMS Ružomberok",
+  title: "Task Manager",
 };
 
 
@@ -45,19 +44,19 @@ export default async function RootLayout({
     >
       <html lang='en' className="">
         <Providers>
-          <body className={`bg-gray-50 ${inter.className} flex flex-col min-h-screen`}>
-            <Navbar />
-            <div className="flex flex-1  bg-gray-50 dark:bg-gray-900">
-              <div className="hidden lg:block">
+          <body className={`bg-gray-50 font-poppins flex flex-col min-h-screen`}>
+            <div className="lg:hidden">
+              <Navbar />
+            </div>
+            <div className="flex flex-1 bg-gray-50 dark:bg-gray-900 h-screen">
+              <div className="hidden lg:block border-r-2 shadow-lg h-screen">
                 <Sidebar />
               </div>
-              <main className="w-full py-4 md:p-4 overflow-auto">
-                <div className="p-4 lg:p-8 bg-white block border-b rounded-md border-gray-200 lg:mt-1.5">
-                  <div className="space-y-4 mb-5">
+              <main className="w-full overflow-auto bg-white px-5 py-5 pb-10 h-screen">
+                  {/* <div className="space-y-4 mb-5">
                     <NextBreadcrumb />
-                  </div>
+                  </div> */}
                   {children}
-                </div>
               </main>
             </div>
             <Toaster />

@@ -9,43 +9,44 @@ import { Menu } from "lucide-react";
 import Sidebar from "./sidebar";
 import { getUserRole } from "@/lib/utils";
 import { USER_ROLES_MAP } from "@/lib/models/user.model";
+import Image from "next/image";
 
 
 export default function Navbar() {
   const [opened, setOpen] = useState(false)
 
-  const {user} = useUser()
+  const { user } = useUser()
   const role = getUserRole((user as unknown) as User)
-  
-  
+
+
   return (
-    <header className="sticky top-0 z-50 flex flex-wrap sm:justify-start sm:flex-nowrap w-full bg-white text-sm py-4 dark:border-gray-600 border-b border-gray-600">
-        <nav className="max-w-full w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between" aria-label="Global">
-            <div className="flex items-center justify-between w-full">
-                <div className="flex items-center">
-                    <div className="lg:hidden">
-                        <Sheet open={opened} onOpenChange={setOpen}>
-                            <SheetTrigger className='mt-1'><Menu /></SheetTrigger>
-                            <SheetContent side={"left"} className="w-[300px] sm:w-[340px]">
-                                <SheetHeader>
-                                    <SheetTitle className='text-left text-2xl font-bold ml-3'>TMS</SheetTitle>
-                                </SheetHeader>
-                                <Sidebar setOpen={setOpen}/>
-                            </SheetContent>
-                        </Sheet>
-                    </div>
-                    <a className="flex-none  text-md lg:text-2xl ml-4 font-semibold" href="/">TMS RUŽOMBEROK</a>
-                </div>
-                <div className="items-center flex">
-                  <div>
-                    {
-                      user && <span className="text-lg hidden md:block" >{user.firstName} {user.lastName}, {role && USER_ROLES_MAP[role?.name]}</span>
-                    }
-                  </div>
-                  <SignOut iconOnly></SignOut>
-                </div>
-            </div>
-        </nav>
-    </header>
+    <div className="bg-white p-2 justify-between items-center flex shadow-lg border-b-2">
+      <div>
+        <Image
+          alt="Task Manager"
+          src="/taskmanager.png"
+          className=""
+          width={100}
+          height={200}
+        />
+      </div>
+      <Sheet open={opened} onOpenChange={setOpen}>
+        <SheetTrigger className='mt-1'><Menu size={28}/></SheetTrigger>
+        <SheetContent side={"left"} className="w-[300px]">
+          <SheetHeader>
+            <SheetTitle className='text-left text-2xl font-bold ml-3'>
+              <Image
+                alt="Task Manager"
+                src="/taskmanager.png"
+                className="lg:hidden"
+                width={150}
+                height={200}
+              />
+            </SheetTitle>
+          </SheetHeader>
+          <Sidebar setOpen={setOpen} />
+        </SheetContent>
+      </Sheet>
+    </div>
   )
 } 
