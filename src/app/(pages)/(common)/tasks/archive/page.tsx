@@ -3,7 +3,6 @@ import ViewHeadline from "@/components/common/view-haedline"
 import TasksTable from "@/components/tasks/table"
 import { isRole } from "@/lib/utils"
 import { currentUser } from "@clerk/nextjs/server"
-import { id } from "date-fns/locale"
 import Link from "next/link"
 
 
@@ -16,7 +15,7 @@ export default async function Tasks() {
     return (
         <>
             <div className="flex items-center justify-between">
-                <ViewHeadline>Nedokončené úlohy</ViewHeadline>
+                <ViewHeadline>Dokončené  úlohy</ViewHeadline>
 
                 {!isAdmin &&
                     <Link href={'/tasks/create'}>

@@ -28,13 +28,15 @@ export default async function Tasks() {
                     </Link>
                 }
             </div>
-            <TasksTable defaultFilters={
-                [
-                    {
-                        id: "creator_name",
-                        value: user?.fullName,
-                    }
-                ]} />
+            <TasksTable 
+            // defaultFilters={
+            //     [
+            //         {
+            //             id: "creator_name",
+            //             value: user?.fullName,
+            //         }
+            //     ]} 
+                />
         </>
     )
 

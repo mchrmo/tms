@@ -76,13 +76,13 @@
   }
 
   .link {
-    color: rgb(85, 85, 255);
+    color: #6E89F5;
     cursor: pointer;
   }
   
 
   .link:hover {
-    color: rgb(42, 42, 255);
+    color: #6E89F5;
   }
 
   .link-danger {

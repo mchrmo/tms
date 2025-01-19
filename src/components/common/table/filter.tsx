@@ -326,8 +326,6 @@ function FilterItem({ filter, defaultOpen, onFilterRemove, onFilterUpdate }: { f
   const debouncedInput = useDebouncedCallback((value: string) => {
     onFilterUpdate(value)
   }, 500);
-
-  console.log(filter.value);
   
   return (
     <div className={cn(
