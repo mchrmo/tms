@@ -32,7 +32,10 @@ const config = {
         primary: {
           DEFAULT: "#7D72FF",
           foreground: "hsl(var(--primary-foreground))",
-          
+        },
+        gradient: {
+          from: "#D6DDFD",
+          to: "#FBF4FE"
         },
         secondary: {
           DEFAULT: "#6E89F5",
