@@ -29,13 +29,17 @@ export default async function Tasks() {
                 }
             </div>
             <TasksTable 
-            // defaultFilters={
-            //     [
-            //         {
-            //             id: "creator_name",
-            //             value: user?.fullName,
-            //         }
-            //     ]} 
+            defaultFilters={
+                [
+                    {
+                        id: "creator_name",
+                        value: user?.fullName,
+                    },
+                    {
+                        id: "status",
+                        value: "TODO,WAITING,INPROGRESS,CHECKREQ",
+                    }
+                ]} 
                 />
         </>
     )
