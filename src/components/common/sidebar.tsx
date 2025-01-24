@@ -193,13 +193,15 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
     <div className="lg:h-full flex flex-col min-w-60 max-w-72  bg-white rounded-md ">
       {/* Logo */}
       <div className="px-4 pt-6 hidden lg:block">
-        <Image
-          alt="Task Manager"
-          src="/taskmanager.png"
-          width={150}
-          height={0}
-          style={{height: "auto" }}
-        />
+        <Link href={'/'}>
+          <Image
+            alt="Task Manager"
+            src="/taskmanager.png"
+            width={150}
+            height={0}
+            style={{ height: "auto" }}
+          />
+        </Link>
       </div>
 
       <ScrollArea className="max-h-[calc(100vh-10rem)] overflow-auto">
@@ -286,8 +288,8 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
         <Avatar name={user?.fullName}></Avatar>
         <div className="flex flex-col w-full">
           <div className="flex justify-between items-center">
-             <span className="font-semibold">{user?.fullName}</span>
-             <SignOut></SignOut>
+            <span className="font-semibold">{user?.fullName}</span>
+            <SignOut></SignOut>
           </div>
           <span className="text-gray-500 text-sm">{user?.emailAddresses[0] && user?.emailAddresses[0].emailAddress}</span>
         </div>
