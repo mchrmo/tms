@@ -161,7 +161,7 @@ export const GET = errorHandler(async (req: NextRequest) => {
     unfinishedTasksCount,
     reminders,
     taskStatusCounts,
-    toCheckCount: 10
+    toCheckCount
   };
 
   return NextResponse.json(reports, { status: 200 })
