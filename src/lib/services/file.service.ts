@@ -1,4 +1,4 @@
-import {CreateBucketCommand, GetObjectCommand, GetObjectCommandInput, ListBucketsCommand, PutObjectCommand, S3Client} from '@aws-sdk/client-s3';
+import {CreateBucketCommand, GetObjectCommand, GetObjectCommandInput, ListBucketsCommand, ListObjectsV2Command, PutObjectCommand, S3Client} from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
 import prisma from '../prisma';
 
@@ -83,11 +83,46 @@ const createFile = async (name: string, type: string, path: string, owner_id: nu
   return newFile
 }
 
+const getBucketSize = async () => {
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME, // Your bucket name
+  };
+
+  const command = new ListBucketsCommand({});
+  const buckets = await s3.send(command);
+
+  const bucket = buckets.Buckets?.find(b => b.Name === params.Bucket);
+  if (!bucket) throw new Error("Bucket not found");
+
+  let size = 0;
+  let docs = 0
+  const listObjectsCommand = new ListObjectsV2Command(params);
+  let objects = await s3.send(listObjectsCommand);
+
+  while (objects.Contents) {
+    docs += objects.Contents.length        
+    size += objects.Contents.reduce((acc, obj) => acc + (obj.Size || 0), 0);
+
+    if (objects.IsTruncated) {
+      objects = await s3.send(new ListObjectsV2Command({
+        ...params,
+        ContinuationToken: objects.NextContinuationToken,
+      }));
+    } else {
+      break;
+    }
+  }
+
+  return {size, docs};
+}
 
 const fileService = {
   uploadFile,
   getFile,
-  createFile
+  createFile,
+  getBucketSize
 }
+
+
 
 export default fileService

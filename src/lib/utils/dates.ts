@@ -15,3 +15,14 @@ export function formatDateTime(date: Date) {
 export function formatDateTimeHtml(date: Date) {
   return format(date, 'yyyy-MM-dd') + 'T' + format(date, 'HH:mm')
 }
+
+const monthNames = [
+  "Jan", "Feb", "Mar", "Apr", "Máj", "Jún", "Júl", "Aug", "Sep", "Okt", "Nov", "Dec"
+];
+
+export function formatDateShort(date: Date) {
+  const day = date.getDate();
+  const month = monthNames[date.getMonth()];
+
+  return `${month} ${day}`;
+}
