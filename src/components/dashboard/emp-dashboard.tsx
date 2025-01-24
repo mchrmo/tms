@@ -168,7 +168,7 @@ export default function EmpDashboard() {
                   :
                   <div className="flex flex-col justify-center items-center w-full">
                     {/* <Check width={30} height={30} className="text-green-700" /> */}
-                    <Link href={'/tasks/delegeted'}><span className=" text-[#e29400] hover:underline text-large">Skontrolovať <span className="font-semibold">{data!.toCheckCount}</span> úloh</span></Link>
+                    <Link href={'/tasks/delegated'}><span className=" text-[#e29400] hover:underline text-large">Skontrolovať <span className="font-semibold">{data!.toCheckCount}</span> úloh</span></Link>
                   </div>
                 )
             }
