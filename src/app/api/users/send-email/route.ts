@@ -1,5 +1,3 @@
-import { sendWelcomeEmail } from '@/lib/services/mail.service';
-import { auth, clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import Email from 'vercel-email';
 

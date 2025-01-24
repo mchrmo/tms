@@ -39,8 +39,8 @@ export default async function AdminDashboard() {
                 <div className="flex flex-col w-full">
                   <div className="bg-violet-100 hover:shadow-md border-l-8 border-violet-600 p-2 ps-6 mt-3 rounded-sm w-full">
                     <span>Celkom využitý priestor:</span>
-                    <span className="ms-5  font-semibold">
-                      {(data?.size! / (1024 ** 3)).toFixed(2)}/500GB
+                    <span className="ms-5 font-semibold">
+                      {Math.max((data?.size! / (1024 ** 3)), 0.01).toFixed(2)}/500GB
                     </span>
                   </div>
                   <div className="bg-violet-100 hover:shadow-md border-l-8 border-violet-600 p-2 ps-6 mt-3 rounded-sm w-full">
