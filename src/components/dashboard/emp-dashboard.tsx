@@ -23,6 +23,7 @@ import AddButton from "../common/buttons/add-button";
 import { AlarmClock, CalendarDate, Check, CheckSquareBroken, Flag01 } from "@untitled-ui/icons-react";
 import { Skeleton } from "../ui/skeleton";
 import { format } from "date-fns";
+import DashboardWidgetBox from "./widget";
 
 // Register necessary Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend, Title, CategoryScale, LinearScale);
@@ -188,7 +189,6 @@ export default function EmpDashboard() {
               <Check width={30} height={30} className="text-green-700" />
               <span>Nečakajú na Vás žiadne pripomienky</span>
             </div>
-
           </DashboardWidgetBox>
 
 
@@ -199,28 +199,3 @@ export default function EmpDashboard() {
   );
 }
 
-
-type DashboardWidgetBoxProps = {
-  children?: React.ReactNode,
-  title: string,
-  icon?: React.ReactNode,
-  link?: string,
-  colspan?: number
-}
-
-function DashboardWidgetBox(props: DashboardWidgetBoxProps) {
-
-  let colspanClass = props.colspan ? `col-span-${props.colspan}` : 'col-span-2';
-
-  return (
-    <div className={`p-4 rounded-md border-1 ${colspanClass} flex flex-col`}>
-      <div className="flex space-x-2 items-center">
-        <span className="text-gray-600">{props.icon && props.icon}</span>
-        <h1 className="text-md font-semibold">{props.title}</h1>
-      </div>
-      <div className="flex items-center flex-1 w-full">
-        {props.children}
-      </div>
-    </div>
-  )
-} 
