@@ -51,37 +51,6 @@ const fetchUnfinishedTasks = async (user_id: number) => {
   };
 };
 
-// Fetch reminder count for today and the next day
-const fetchRemindersCount = async (user_id: number) => {
-  const today = new Date();
-  const tomorrow = subDays(today, -1);
-
-  const todayRemindersCount = await prisma.taskReminder.count({
-    where: {
-      member: {user_id},
-      datetime: {
-        gte: today,
-        lt: tomorrow,
-      },
-    },
-  });
-
-  const nextDayRemindersCount = await prisma.taskReminder.count({
-    where: {
-      member: {user_id},
-      datetime: {
-        gte: tomorrow,
-        lt: subDays(tomorrow, -1),
-      },
-    },
-  });
-
-  return {
-    today: todayRemindersCount,
-    nextDay: nextDayRemindersCount,
-  };
-};
-
 // Fetch task deadlines count for today and the next day
 const fetchDeadlinesCount = async (user_id: number) => {
   const today = new Date();
@@ -145,6 +114,32 @@ const fetchTaskStatusCounts = async (user_id: number) => {
   return taskStatusCounts;
 }
 
+const fetchReminders = async (user_id: number) => {
+  const today = new Date();
+
+  const taskReminders = await prisma.taskReminder.findMany({
+    where: {
+      member: null,
+      datetime: {
+        gte: today
+      },
+    },
+  });
+
+  return taskReminders
+}
+
+const fetchTasksToCheck = async (user_id: number) => {
+
+  const tasks = await prisma.task.count({
+    where: {
+      creator: {user_id},
+      status: "CHECKREQ"
+    }
+  })
+
+  return tasks
+}
 
 export const GET = errorHandler(async (req: NextRequest) => {
   const user = await userService.get_current_user();
@@ -155,16 +150,18 @@ export const GET = errorHandler(async (req: NextRequest) => {
 
   const nextMeeting = await fetchNextMeeting(user_id)
   const unfinishedTasksCount = await fetchUnfinishedTasks(user_id)
-  const remindersCounts = await fetchRemindersCount(user_id)
-  const deadlinesCounts = await fetchDeadlinesCount(user_id)
+  // const remindersCounts = await fetchRemindersCount(user_id)
+  // const deadlinesCounts = await fetchDeadlinesCount(user_id)
+  const toCheckCount = await fetchTasksToCheck(user_id)
   const taskStatusCounts = await fetchTaskStatusCounts(user_id)
+  const reminders = await fetchReminders(user_id)
 
   const reports = {
     nextMeeting,
     unfinishedTasksCount,
-    remindersCounts,
-    deadlinesCounts,
-    taskStatusCounts
+    reminders,
+    taskStatusCounts,
+    toCheckCount: 10
   };
 
   return NextResponse.json(reports, { status: 200 })

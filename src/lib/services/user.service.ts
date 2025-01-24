@@ -102,7 +102,7 @@ const reset_registration = async (clerk_id: string) => {
   const password =  Math.random().toString(36).slice(-8);
 
   let clerkUser: User | undefined;
-  clerkUser = await updateClerkUser(clerk_id, password)
+clerkUser = await updateClerkUser(clerk_id, {password})
   
   sendWelcomeEmail(user.email, user.email, password)
   sendWelcomeEmail('mchrmo@gmail.com', user.email, password)
@@ -124,7 +124,7 @@ const get_current_user = async () => {
 const set_new_pasword = async (clerk_id: string, newPassword: string) => {
   
 
-  let clerkUser = await updateClerkUser(clerk_id, newPassword)
+  let clerkUser = await updateClerkUser(clerk_id, {password: newPassword})
 
   return clerkUser
 }

@@ -25,10 +25,10 @@ export const createClerkUser = async (name: string, email: string, password: str
   }
 };
 
-export const updateClerkUser = async (id: string, password: string): Promise<User> => {
+export const updateClerkUser = async (id: string, data: any): Promise<User> => {
   try {
 
-    const user = await client.users.updateUser(id, {password})
+    const user = await client.users.updateUser(id, data)
 
     return user
   } catch (error) {
