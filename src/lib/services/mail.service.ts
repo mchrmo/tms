@@ -71,7 +71,7 @@ export async function sendWelcomeEmail(email: string, login: string, password: s
 
 }
 
-export async function sendAssigneeChangeNotification(user_id: number, taskName: string) {
+export async function sendAssigneeChangeNotification(user_id: number, taskName: string, task_id: number) {
 
   const user = await getUser(user_id)
   if (!user) return
@@ -81,7 +81,7 @@ export async function sendAssigneeChangeNotification(user_id: number, taskName: 
   const email = await sendEmail({
     from: 'support@flexishop.online',
     to: user?.email,
-    subject: `Bola Vám pridelená úloha - ${taskName}`,
+    subject: `Bola Vám pridelená úloha - <a href="${process.env.NEXT_PUBLIC_URL}/tasks/${task_id}"><b>${taskName}</b></a>`,
     html: text
   })
 }
