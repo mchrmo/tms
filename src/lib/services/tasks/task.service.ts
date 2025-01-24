@@ -105,7 +105,9 @@ const create_task = async (taskData: CreateTaskReqs) => {
   
   const task = await createTask(newTaskData);
 
-  await sendAssigneeChangeNotification(assignee?.user_id, taskData.name)
+  if(taskData.assignee_id !== taskData.creator_id) {
+    await sendAssigneeChangeNotification(assignee?.user_id, taskData.name, task.id)
+  }
 
 
   const update = await taskUpdateService.create_taskUpdate(task, currentUser, 'created')
@@ -135,7 +137,7 @@ const update_task = async (taskData: Partial<Task>) => {
   if(Object.keys(updates).includes('assignee_id')) {
     const member = await organizationMemberService.get_organizationMember(taskData.assignee_id!)
     if(member) {
-      await sendAssigneeChangeNotification(member?.user_id, taskData.name! || originalTask?.name!)
+      await sendAssigneeChangeNotification(member?.user_id, taskData.name! || originalTask?.name!, id)
     }
   }
 
