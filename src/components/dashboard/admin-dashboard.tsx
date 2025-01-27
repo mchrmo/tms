@@ -6,7 +6,7 @@ import { Skeleton } from "../ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 
 
-export default async function AdminDashboard() {
+export default function AdminDashboard() {
 
 
   const fetchDashboardData = async () => {
@@ -28,7 +28,7 @@ export default async function AdminDashboard() {
       <div className="flex justify-between  items-start">
         <div className="space-y-1 flex flex-col">
           <h1 className="text-3xl font-bold text-gray-800">Vitajte späť!</h1>
-          <span className="text-muted-foreground">Nachádzate s v administrácií aplikácie Tak Manager.</span>
+          <span className="text-muted-foreground">Nachádzate s v administrácií aplikácie Task Manager.</span>
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 mt-10">

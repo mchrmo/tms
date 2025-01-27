@@ -17,14 +17,26 @@ export default async function Tasks() {
         <>
             <div className="flex items-center justify-between">
                 <ViewHeadline>Nedokončené úlohy</ViewHeadline>
-                
+
                 {!isAdmin &&
                     <Link href={'/tasks/create'}>
                         <AddButton>Pridať</AddButton>
                     </Link>
                 }
             </div>
-            <TasksTable />
+            <TasksTable
+                defaultFilters={
+                    [
+                        {
+                            id: "assignee_name",
+                            value: user?.fullName,
+                        },
+                        {
+                            id: "status",
+                            value: "TODO,WAITING,INPROGRESS,CHECKREQ",
+                        }
+                    ]}
+            />
         </>
     )
 

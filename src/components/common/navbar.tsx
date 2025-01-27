@@ -10,6 +10,7 @@ import Sidebar from "./sidebar";
 import { getUserRole } from "@/lib/utils";
 import { USER_ROLES_MAP } from "@/lib/models/user.model";
 import Image from "next/image";
+import Link from "next/link";
 
 
 export default function Navbar() {
@@ -20,15 +21,17 @@ export default function Navbar() {
 
 
   return (
-    <div className="bg-white p-2 justify-between items-center flex shadow-lg border-b-2">
+    <div className="bg-white p-2 justify-between items-center flex shadow-sm border-b-2 fixed top-0 left-0 right-0">
       <div>
-        <Image
-          alt="Task Manager"
-          src="/taskmanager.png"
-          className=""
-          width={100}
-          height={200}
-        />
+        <Link href={'/'}>
+          <Image
+            alt="Task Manager"
+            src="/taskmanager.png"
+            className=""
+            width={100}
+            height={200}
+          />
+        </Link>
       </div>
       <Sheet open={opened} onOpenChange={setOpen}>
         <SheetTrigger className='mt-1'><Menu size={28}/></SheetTrigger>

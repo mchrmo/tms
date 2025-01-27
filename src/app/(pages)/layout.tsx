@@ -10,6 +10,7 @@ import { Toaster } from "@/components/ui/toaster";
 import RoleProvider, { Providers } from "../providers";
 import { auth} from "@clerk/nextjs/server";
 import { Poppins } from "next/font/google";
+import { env } from "process";
 
 
 export const metadata: Metadata = {
@@ -41,6 +42,7 @@ export default async function RootLayout({
           footer: "hidden",
         }
       }}
+      signUpUrl={env.NEXT_PUBLIC_URL}
     >
       <html lang='en' className="">
         <Providers>
@@ -48,7 +50,7 @@ export default async function RootLayout({
             <div className="lg:hidden">
               <Navbar />
             </div>
-            <div className="flex flex-1 bg-gray-50 dark:bg-gray-900 h-screen">
+            <div className="flex pt-14 lg:pt-1 flex-1 bg-gray-50 dark:bg-gray-900 h-screen">
               <div className="hidden lg:block border-r-2 shadow-lg h-screen">
                 <Sidebar />
               </div>
