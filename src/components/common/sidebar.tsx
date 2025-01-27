@@ -131,7 +131,7 @@ export default function Sidebar({ setOpen }: { setOpen?: Dispatch<SetStateAction
         },
         {
           name: "Delegované úlohy",
-          href: `/tasks/delegated?creator_name=${user?.fullName}`,
+          href: `/tasks/delegated?creator_name=${user?.fullName}&status=TODO,WAITING,INPROGRESS,CHECKREQ`,
         },
         {
           name: "Všetky úlohy",
