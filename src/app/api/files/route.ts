@@ -52,7 +52,6 @@ export const GET = async (req: Request) => {
     const url = new URL(req.url);
     const fileName = url.searchParams.get("file");
 
-    
     if (!fileName) {
       return NextResponse.json({ error: "File name is required" }, { status: 400 });
     }
@@ -63,7 +62,7 @@ export const GET = async (req: Request) => {
     return new Response(buffer, {
       headers: {
         "Content-Type": type || "application/octet-stream",
-        "Content-Disposition": `attachment; filename="${fileName}"`,
+        "Content-Disposition": `attachment;"`,
       },
     });
   } catch (error) {
