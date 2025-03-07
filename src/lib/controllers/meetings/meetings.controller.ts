@@ -162,7 +162,7 @@ const getCSV = async (req: NextRequest) => {
   try {
     // Fetch data from Prisma
     const data = await prisma.meetingItem.findMany({
-      where: {meeting_id: parseInt(meeting_id), status: {not: {in: ['DENIED', 'DRAFT']}}},
+      where: {meeting_id: parseInt(meeting_id), status: "ACCEPTED"},
       include: {
         creator: {
           select: {
