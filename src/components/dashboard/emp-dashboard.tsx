@@ -1,7 +1,4 @@
 'use client'
-
-import { getUserByClerkId } from "@/lib/db/user.repository";
-import ViewHeadline from "@/components/common/view-haedline";
 import { Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -142,13 +139,13 @@ export default function EmpDashboard() {
                     <Link href="/tasks/unfinished">
                       <div className="bg-[#FFF4FF] border-1 border-[#FDD0FE] rounded-md p-2 flex justify-between hover:shadow-md cursor-pointer" >
                         <span className="text-sm text-[#741B6A]">Moje úlohy</span>
-                        <span className="text-lg text-[#EC35E4] font-semibold">{data?.unfinishedTasksCount.owned}</span>
+                        <span className="text-lg text-[#EC35E4] font-semibold">{data?.unfinishedTasksCount.assigned}</span>
                       </div>
                     </Link>
                     <Link href="/tasks/delegated">
                       <div className="bg-[#ECFCFF] border-1 border-[#A6E9FB] rounded-md p-3 flex justify-between hover:shadow-md cursor-pointer">
                         <span className="text-sm text-[#174662]">Delegované úlohy</span>
-                        <span className="text-lg text-[#099FD1] font-semibold">13</span>
+                        <span className="text-lg text-[#099FD1] font-semibold">{data?.unfinishedTasksCount.owned}</span>
                       </div>
                     </Link>
                   </>
