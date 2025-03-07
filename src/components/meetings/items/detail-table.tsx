@@ -55,10 +55,6 @@ const columns: ColumnDef<MeetingDetailItems>[] = [
 
 export default function MeetingDetailItemsTable({ meeting, role }: { meeting?: MeetingDetail, role: MeetingAttendantRole }) {
 
-
-
-  
-
   const columnsIndex = columns.findIndex(c => c.id == 'utils')
   if (columnsIndex > -1) columns.splice(columnsIndex, 1)
 
