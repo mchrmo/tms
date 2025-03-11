@@ -7,6 +7,8 @@ import { Meeting, Prisma } from "@prisma/client"
 import { ApiError } from "next/dist/server/api-utils"
 import { NextRequest, NextResponse } from "next/server"
 import { createPaginator } from "prisma-pagination"
+import { Parser } from 'json2csv';
+import { meetingItemStatusMap } from "@/lib/models/meeting/meetingItem.model"
 
 
 const getMeeting = async (req: NextRequest, params: any) => {
@@ -151,13 +153,63 @@ const deleteMeeting = async (req: NextRequest, params: any) => {
 
 }
 
+const getCSV = async (req: NextRequest) => {
+  const params = req.nextUrl.searchParams
+
+  const meeting_id = params.get('meeting')
+  if(!meeting_id) return NextResponse.json({ error: 'Meeting ID is required' }, { status: 400 })
+
+  try {
+    // Fetch data from Prisma
+    const data = await prisma.meetingItem.findMany({
+      where: {meeting_id: parseInt(meeting_id), status: "ACCEPTED"},
+      include: {
+        creator: {
+          select: {
+            name: true
+          }
+        }
+      },
+      orderBy: {
+        status: 'desc'
+      }
+    }); // Change `yourModel` to your actual model name
+
+    data.forEach((item: any) => {
+      item.status = meetingItemStatusMap[item.status]
+    })
+
+    // Convert JSON to CSV
+    const json2csvParser = new Parser({fields: [
+      {label: "Stav", value: 'status'},
+      {label: 'Navrhovateľ', value: 'creator.name'},
+      {label: "Popis", value: 'description'},
+      {label: "Poznámka", default: '', value: 'poz'},
+    ]});
+    const csv = json2csvParser.parse(data);
+
+
+    return new NextResponse(csv, {
+      headers: {
+        "Content-Type": "text/csv",
+        "Content-Disposition": `attachment; filename=data.csv"`,
+      },
+    });
+
+} catch (error) {
+    console.error('Error generating CSV:', error);
+    return NextResponse.json({ error: 'Chyba pri generovani vypisu' }, { status: 400 })
+}
+
+}
 
 const meetingsController = {
   getMeeting,
   getMeetings,
   createMeeting,
   updateMeeting,
-  deleteMeeting
+  deleteMeeting,
+  getCSV
 }
 
 export default meetingsController

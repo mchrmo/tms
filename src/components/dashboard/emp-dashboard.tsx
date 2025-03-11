@@ -1,7 +1,4 @@
 'use client'
-
-import { getUserByClerkId } from "@/lib/db/user.repository";
-import ViewHeadline from "@/components/common/view-haedline";
 import { Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
