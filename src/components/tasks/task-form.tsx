@@ -289,6 +289,7 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
                       disabled={!fieldsAccess['description']}
                       {...field}
                     />
+                    <p className="">{field.value.length}/500</p>
                     <FormMessage />
                   </FormItem>
                 )}
