@@ -15,7 +15,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 //   host: 'mail.webglobe.sk',
 //   port: 465,
 //   auth: {
-//       user: 'support@flexishop.online',
+//       user: 'system@taskmanager.sk',
 //       pass: 'MGreenlord3'
 //   },
 //   secure: true
@@ -30,7 +30,7 @@ type SengridEmailParams = {
 }
 
 export async function sendEmail(email: SengridEmailParams) {
-  if (!email.from) email.from = "support@flexishop.online"
+  if (!email.from) email.from = "system@taskmanager.sk"
 
     if (process.env.DISABLE_EMAIL && email.to !== 'mchrmo@gmail.com') {
       console.log("Email not send - disabled", email.to)
@@ -57,7 +57,7 @@ export async function sendWelcomeEmail(email: string, login: string, password: s
 
 
   await sendEmail({
-    from: 'support@flexishop.online',
+    from: 'system@taskmanager.sk',
     to: email,
     subject: `Vitajte v systéme TMS mesta Ružomberok`,
     html: `
@@ -75,13 +75,13 @@ export async function sendAssigneeChangeNotification(user_id: number, taskName: 
 
   const user = await getUser(user_id)
   if (!user) return
-  const text = `Bola Vám pridelená úloha: ${taskName}`
+  const text = `Bola Vám pridelená úloha: <a href="${process.env.NEXT_PUBLIC_URL}/tasks/${task_id}"><b>${taskName}</b></a>`
   console.log("Sending email to ", user?.email);
 
   const email = await sendEmail({
-    from: 'support@flexishop.online',
+    from: 'system@taskmanager.sk',
     to: user?.email,
-    subject: `Bola Vám pridelená úloha - <a href="${process.env.NEXT_PUBLIC_URL}/tasks/${task_id}"><b>${taskName}</b></a>`,
+    subject: `Bola Vám pridelená úloha - ${taskName}`,
     html: text
   })
 }
@@ -89,7 +89,7 @@ export async function sendAssigneeChangeNotification(user_id: number, taskName: 
 export async function sendReport(email: string, subject: string, report: string) {
 
   const mail = await sendEmail({
-    from: 'support@flexishop.online',
+    from: 'system@taskmanager.sk',
     to: email,
     subject,
     html: report
@@ -109,7 +109,7 @@ export async function newMeetingAttendantEmail(user_id: number, meeting: Meeting
 
 
   const email = await sendEmail({
-    from: 'support@flexishop.online',
+    from: 'system@taskmanager.sk',
     to: user?.email,
     subject: `Pozvánka na poradu - ${meeting.name}`,
     html: text
