@@ -24,6 +24,7 @@ const config = {
       colors: {
         // tms
         magenta: '#EC35E4',
+        magentaLight: '#FBACF8',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

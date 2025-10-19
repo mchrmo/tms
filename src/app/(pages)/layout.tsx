@@ -1,4 +1,4 @@
-import type {  Metadata } from "next";
+import type { Metadata } from "next";
 import "../globals.css";
 import {
   ClerkProvider,
@@ -8,16 +8,18 @@ import Navbar from "@/components/common/navbar";
 import Sidebar from "@/components/common/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import RoleProvider, { Providers } from "../providers";
-import { auth} from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { Poppins } from "next/font/google";
 import { env } from "process";
+import { headers } from "next/headers";
+import { usePathname } from "next/navigation";
 
 
 export const metadata: Metadata = {
   title: "Task Manager",
 };
 
-const poppins = Poppins({ subsets: ['latin'], weight: ['100', '200', '300','400', '500', '600', '700', '800', '900'] });
+const poppins = Poppins({ subsets: ['latin'], weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'] });
 
 
 export default async function RootLayout({
@@ -44,21 +46,25 @@ export default async function RootLayout({
       }}
       signUpUrl={env.NEXT_PUBLIC_URL}
     >
+
+
+
+
       <html lang='en' className="">
         <Providers>
           <body className={`bg-gray-50 ${poppins.className} flex flex-col min-h-screen`}>
             <div className="lg:hidden">
               <Navbar />
             </div>
-            <div className="flex pt-14 lg:pt-1 flex-1 bg-gray-50 dark:bg-gray-900 h-screen">
+            <div className="flex flex-1 bg-gray-50 dark:bg-gray-900 h-screen">
               <div className="hidden lg:block border-r-2 shadow-lg h-screen">
                 <Sidebar />
               </div>
-              <main className="w-full overflow-auto bg-white px-5 py-7 pb-10 h-screen">
-                  {/* <div className="space-y-4 mb-5">
+              <main className="w-full overflow-auto bg-white h-screen">
+                {/* <div className="space-y-4 mb-5">
                     <NextBreadcrumb />
                   </div> */}
-                  {children}
+                {children}
               </main>
             </div>
             <Toaster />

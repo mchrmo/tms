@@ -35,7 +35,7 @@ export default function OrganizationMemberCombobox({onSelectResult, label, defau
     setOpen(false);
   }, []);
 
-  const displayName = selected ? `${selected.user.name}, ${selected.position_name}` : (label ? label : 'Vybrať');
+  const displayName = selected ? `${selected.user.name}` : (label ? label : 'Vybrať');
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -43,7 +43,7 @@ export default function OrganizationMemberCombobox({onSelectResult, label, defau
         <Button
           variant="outline"
           role="combobox"
-          className={cn('justify-between', POPOVER_WIDTH)}
+          className={cn('justify-between', POPOVER_WIDTH, )}
           disabled={disabled}
         >
           {displayName}

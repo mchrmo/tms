@@ -18,7 +18,7 @@ export default async function Home() {
 
   
   return (
-    <>
+    <div className="px-4 lg:px-8 py-6">
       {
         isAdmin ? 
           <AdminDashboard></AdminDashboard>
@@ -26,6 +26,6 @@ export default async function Home() {
           <EmpDashboard></EmpDashboard>
       }
 
-    </>
+    </div>
   );
 }

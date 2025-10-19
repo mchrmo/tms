@@ -31,7 +31,7 @@ export const TASK_STATUSES_MAP = {
 
 export const TaskSchema = z.object({
   id: z.number().int().optional(), 
-  name: z.string().min(1, "Názov je povinný"),
+  name: z.string().min(1, "Názov je povinný").max(80, "Názov nemôže presiahnuť 80 znakov."),
   status: z.enum(["TODO", "INPROGRESS", "WAITING", "CHECKREQ", "DONE"]).default("TODO"),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
   description: z.string().max(500, "Popis nemôže presiahnuť 500 znakov.").optional().default(''),

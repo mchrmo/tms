@@ -60,7 +60,7 @@ export default function TaskAttachmentsUpload({ task }: { task: TaskDetail }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <AddButton >Pridať súbor</AddButton>
+        <AddButton variant={'outline'}>Pridať súbor</AddButton>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
