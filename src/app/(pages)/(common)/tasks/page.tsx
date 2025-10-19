@@ -12,7 +12,7 @@ export default async function Tasks() {
   const isAdmin = isRole(user, 'admin')
 
   return (
-    <>
+    <div className="px-4 lg:px-8 py-6">
       <div className="flex items-center justify-between">
         <ViewHeadline>Úlohy</ViewHeadline>
 
@@ -33,7 +33,7 @@ export default async function Tasks() {
         // }
 
       />
-    </>
+    </div>
   )
 
 

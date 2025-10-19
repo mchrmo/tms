@@ -10,6 +10,7 @@ import { z } from "zod";
 import { TaskCommentDetail, TaskCommentListItem } from "../../services/tasks/taskComment.service";
 import { TaskCommentCreateSchema, TaskCommentUpdateSchema } from "@/lib/models/taksComment.model";
 import { PaginatedResponse, PaginatedResponseOld } from "@/lib/services/api.service";
+import { taskQueryKeys } from "./task.hooks";
 
 
 const taskCommentsApiClient = getApiClient('/tasks/comments')
@@ -32,14 +33,14 @@ export const useTaskComment = (id?: number, options?: UseQueryOptions<TaskCommen
   };
 
   const query = useQuery<TaskCommentDetail, Error>({
-    queryKey: taskCommentQueryKeys.detail(Number(id)), 
+    queryKey: taskCommentQueryKeys.detail(Number(id)),
     queryFn: getTaskCommentFn,
     enabled: !!id,
     ...options
   });
 
   useEffect(() => {
-    if(!query.error) return
+    if (!query.error) return
     toast({
       title: "Chyba",
       description: `Nepodarilo sa nájsť požadované dáta`
@@ -54,7 +55,7 @@ export const useTaskComments = (pagination: PaginationState, filter?: ColumnFilt
 
   const { urlParams, params } = parseListHookParams(pagination, filter, sort)
 
-  const getTaskCommentsFn = async (params: {[key: string]: string}) => {
+  const getTaskCommentsFn = async (params: { [key: string]: string }) => {
     const response = await taskCommentsApiClient.get('', {
       params
     })
@@ -67,14 +68,14 @@ export const useTaskComments = (pagination: PaginationState, filter?: ColumnFilt
   })
 
   useEffect(() => {
-    if(!query.error) return
+    if (!query.error) return
     toast({
       title: "Chyba",
       description: `Nepodarilo sa načítať dáta - kód chyby: ${query.error.name}`
     })
   }, [query.error])
 
-  return query 
+  return query
 }
 
 export const useUpdateTaskComment = (id: number) => {
@@ -90,7 +91,7 @@ export const useUpdateTaskComment = (id: number) => {
   return useMutation({
     mutationFn: updateTaskCommentFn,
     onMutate: async (updatedUser) => {
-      await queryClient.cancelQueries({queryKey: taskCommentQueryKeys.detail(id)});
+      await queryClient.cancelQueries({ queryKey: taskCommentQueryKeys.detail(id) });
       const previousUser = queryClient.getQueryData(taskCommentQueryKeys.detail(id));
       // queryClient.setQueryData(taskCommentQueryKeys.detail(Number(id)), updatedUser);
       return { previousUser: previousUser, updatedUser: updatedUser };
@@ -107,7 +108,7 @@ export const useUpdateTaskComment = (id: number) => {
       );
     },
     onSettled: () => {
-      queryClient.invalidateQueries({queryKey: taskCommentQueryKeys.all});
+      queryClient.invalidateQueries({ queryKey: taskCommentQueryKeys.all });
     },
   });
 
@@ -122,7 +123,7 @@ export const useCreateTaskComment = () => {
     const response = await taskCommentsApiClient.post('', newTaskComment)
     return response.data
   }
-  
+
   return useMutation({
     mutationFn: createTaskCommentFn,
     onMutate: async () => {
@@ -133,7 +134,7 @@ export const useCreateTaskComment = () => {
         title: "Komentár vytvorený!"
       })
     },
-    onError: (err: AxiosError<{message: string}>, newTaskComment, context?: any) => {
+    onError: (err: AxiosError<{ message: string }>, newTaskComment, context?: any) => {
       const errMessage = err.response?.data ? err.response.data.message : err.message
 
       toast({
@@ -143,48 +144,50 @@ export const useCreateTaskComment = () => {
 
       queryClient.setQueryData(taskCommentQueryKeys.all, context.previousTaskComment)
     },
-    onSettled: () => {
+    onSettled: (data) => {
+      console.log(data);
+      
       queryClient.invalidateQueries({ queryKey: taskCommentQueryKeys.all })
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(data.task_id) });
     }
   })
 }
 
-export const useDeleteTaskComment = (id: number) => {
-    const queryClient = useQueryClient();
-    const { toast } = useToast();
+export const useDeleteTaskComment = (id: number, task_id?: number) => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-    const deleteTaskCommentFn = async () => {
-        const response = await taskCommentsApiClient.delete(`/${id}`);
-        return response.data;
-    };
+  const deleteTaskCommentFn = async () => {
+    const response = await taskCommentsApiClient.delete(`/${id}`);
+    return response.data;
+  };
 
-    return useMutation({
-        mutationFn: deleteTaskCommentFn,
-        onMutate: async () => {
-        if (!confirm("Určite to chcete vymazať?")) {
-            throw new Error('Nič nebolo vymazané');
-        }
-        await queryClient.cancelQueries({ queryKey: taskCommentQueryKeys.detail(id) });
-        const previousUser = queryClient.getQueryData(taskCommentQueryKeys.detail(id));
-        queryClient.removeQueries({ queryKey: taskCommentQueryKeys.detail(id) });
-        return { previousUser };
-        },
-        onSuccess: () => {
-        toast({
-            title: 'Komentár vymazaný!',
-        });
-        },
-        onError: (err: AxiosError<{ message: string }>, _, context?: any) => {
-        const errMessage = err.response?.data ? err.response.data.message : err.message;
-        toast({
-            title: 'Chyba',
-            description: errMessage,
-        });
+  return useMutation({
+    mutationFn: deleteTaskCommentFn,
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: taskCommentQueryKeys.detail(id) });
+      const previousUser = queryClient.getQueryData(taskCommentQueryKeys.detail(id));
+      queryClient.removeQueries({ queryKey: taskCommentQueryKeys.detail(id) });
+      return { previousUser };
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Komentár vymazaný!',
+      });
+    },
+    onError: (err: AxiosError<{ message: string }>, _, context?: any) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message;
+      toast({
+        title: 'Chyba',
+        description: errMessage,
+      });
 
-        queryClient.setQueryData(taskCommentQueryKeys.detail(id), context.previousUser);
-        },
-        onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: taskCommentQueryKeys.all });
-        },
-    });
+      queryClient.setQueryData(taskCommentQueryKeys.detail(id), context.previousUser);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: taskCommentQueryKeys.all });
+      if(task_id) queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(task_id) });
+
+    },
+  });
 }

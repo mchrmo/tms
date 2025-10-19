@@ -11,10 +11,7 @@ const queryClient = new QueryClient();
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      {/* <UserProvider> */}
         {children}
-      {/* </UserProvider> */}
-
     </QueryClientProvider>
   );
 }
@@ -38,7 +35,6 @@ interface UserContextType  {
 const UserContext = createContext<UserContextType  | null>(null);
 
 const UserProvider: React.FC<UserProviderProps> = ({ user, children }) => {
-
   if(!user) return "Error" 
   return <UserContext.Provider value={{user}}>{children}</UserContext.Provider>;
 };

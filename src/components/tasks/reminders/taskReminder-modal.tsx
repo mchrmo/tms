@@ -48,7 +48,7 @@ export function CreateTaskReminder({task_id}: {task_id: number}) {
   return (
     <>
         <TaskReminderModal defaultValues={{task_id}}>
-          <AddButton>Pridať pripomienku</AddButton>
+          <AddButton variant={'outline'}>Pridať pripomienku</AddButton>
           {/* <span>open</span> */}
         </TaskReminderModal>
     </>
