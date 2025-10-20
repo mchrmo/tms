@@ -26,6 +26,7 @@ import { User } from "@clerk/nextjs/server";
 import { useRouter } from "next/navigation";
 import { getMetaValue } from "@/lib/utils/api.utils";
 import TaskDetailSidebar from "./detail/sidebar";
+import { Spinner } from "../ui/spinner";
 
 
 export default function TaskDetail({ params }: { params: { id: string } }) {
@@ -53,7 +54,10 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
   }, [deleteTaskQ.isSuccess])
 
 
-  if (taskQ.isFetching) return <span>Úloha sa načitáva <LoadingSpinner></LoadingSpinner></span>
+  if (taskQ.isFetching) return <div className="h-screen  flex items-center justify-center">
+    <span><Spinner className="size-20 text-[#7b75f9]" /></span>
+  </div>
+
 
   return (
     <>
@@ -80,8 +84,8 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
           {/* Main content */}
           {
             task && taskRole && (
-              <div className="flex gap-6 overflow-hidden flex-grow">
-                <div className="flex flex-col flex-grow gap-5 pl-8 pt-6">
+              <div className="flex overflow-hidden flex-grow">
+                <div className="flex flex-col flex-grow gap-5 pl-8 pt-6 lg:pr-6 overflow-y-auto">
                   {/* {
                     task.parent && <Label className="text-md">
                       Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${task.parent.id}`}>{task.parent.name}</Link>
@@ -109,7 +113,7 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
                     </TabsContent>
                   </Tabs>
 
-                  {/* {isAdmin && <Button onClick={onDelete} variant={"linkDestructive"}>Vymazať úlohu</Button>} */}
+                  {isAdmin && <Button onClick={onDelete} variant={"linkDestructive"}>Vymazať úlohu</Button>}
                 </div>
                 <>
                   <TaskDetailSidebar task_id={task.id} taskUpdates={task.taskUpdates} taskComments={task.taskComments}></TaskDetailSidebar>

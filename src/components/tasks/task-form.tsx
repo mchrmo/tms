@@ -279,13 +279,13 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
                     <CircleUser size={14} />
                     <span className="whitespace-nowrap text-sm font-semibold">Zodpovedná osoba</span>
                   </div>
-                  <div className="w-full sm:w-auto">
+                  <div className="w-full sm:w-auto flex flex-col">
                     <OrganizationMemberCombobox
                       defaultValue={_def ? _def.assignee : null} onSelectResult={(member) => field.onChange(member.id)}
                       disabled={!fieldsAccess['assignee_id']}
                       label="Vybrať osobu"></OrganizationMemberCombobox>
+                      <FormMessage />
                   </div>
-                  <FormMessage />
                 </FormItem>
               )}
             />
