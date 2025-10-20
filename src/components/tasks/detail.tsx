@@ -84,8 +84,8 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
           {/* Main content */}
           {
             task && taskRole && (
-              <div className="flex gap-6 overflow-hidden flex-grow">
-                <div className="flex flex-col flex-grow gap-5 pl-8 pt-6">
+              <div className="flex overflow-hidden flex-grow">
+                <div className="flex flex-col flex-grow gap-5 pl-8 pt-6 lg:pr-6 overflow-y-auto">
                   {/* {
                     task.parent && <Label className="text-md">
                       Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${task.parent.id}`}>{task.parent.name}</Link>
