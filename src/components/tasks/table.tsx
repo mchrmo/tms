@@ -18,6 +18,8 @@ import { PaginatedResponse } from "@/lib/services/api.service"
 import { useTasks } from "@/lib/hooks/task/task.hooks"
 import TablePagination from "@/components/common/table/pagination"
 import { userColumns } from "@/lib/models/user.model"
+import TaskTable from "./table/table"
+// import TaskTable from "./table/table"
 
 
 const columns: ColumnDef<Task>[] = [
@@ -110,78 +112,32 @@ const columns: ColumnDef<Task>[] = [
 ]
 
 
-export default function TasksTable({defaultFilters, urlFilters}: {defaultFilters?: ColumnFiltersState, urlFilters?: boolean}) {
+export function TasksTable({defaultFilters, urlFilters}: {defaultFilters?: ColumnFiltersState, urlFilters?: boolean}) {
   const [isFilterReady, setFilterReady] = useState(false)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   if(urlFilters == undefined) urlFilters = true
   
-  const [sorting, setSorting] = useState<SortingState>([{
-    id: 'deadline',
-    desc: false
-  }])
-  const [pagination, setPagination] = useState<PaginationState>({pageIndex: 0, pageSize: 10})
 
-  useEffect(() => {
-    setPagination({
-      ...pagination,
-      pageIndex: 0
-    })
-  }, [columnFilters])
-
-  const query = useTasks(pagination, columnFilters, sorting[0], {enabled: isFilterReady})
-  const { isLoading, isError } = query
-
-
-
-  const data = useMemo(() => {
-    return query.data ? query.data.data : [];
-  }, [query.data]);
-  
-
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-
-    onColumnFiltersChange: setColumnFilters,
-    manualFiltering: true,
-
-    onSortingChange: setSorting,
-    manualSorting: true,
-
-    onPaginationChange: setPagination,
-    manualPagination: true,
-    rowCount: query.data?.meta.total,
-    pageCount: Math.ceil((query.data?.meta.total || 0) / (pagination.pageSize || 1)),
-
-    state: {
-      columnFilters,
-      sorting,
-      pagination
-    },
-  })
 
 
   return (
     <div className="h-fit">
 
       <div className="mb-4">
-        <TableFilter           
+        {/* <TableFilter
           table={table} columns={taskColumns} primaryFilterColumn="fulltext" 
           defaultFilters={defaultFilters}
           filterReady={isFilterReady} setFilterReady={(v) => setFilterReady(v)} 
           urlFilters={urlFilters}
-          ></TableFilter>
+          ></TableFilter> */}
       </div>
 
       <div className="">
-        <TableComponent tableId="tasks" table={table} isError={isError} isLoading={isLoading}>
+        <TaskTable></TaskTable>
+        {/* <TableComponent tableId="tasks" table={table} isError={isError} isLoading={isLoading}>
         </TableComponent>
-        <TablePagination table={table}></TablePagination>
+        <TablePagination table={table}></TablePagination> */}
       </div>
     </div>
   )
