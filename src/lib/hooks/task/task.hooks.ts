@@ -11,6 +11,7 @@ import { DetailResponse, PaginatedResponse } from "../../services/api.service";
 import { taskUpdateQueryKeys } from "./taskUpdate.hooks";
 import { parseListHookParams, parseListHookParamsNew } from "@/lib/utils/api.utils";
 import { TaskDetail } from "@/lib/services/tasks/task.service";
+import { TaskWithRelations } from "@/lib/types/task.types";
 
 
 const tasksApiClient = getApiClient('/tasks')
@@ -60,9 +61,49 @@ export const useTask = (id?: number, options?: UseQueryOptions<DetailResponse<Ta
   return query
 }
 
-export const useTasks = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort, queryOptions?: Partial<UseQueryOptions<PaginatedResponse<Task>>>) => {
+interface UseTasksParams {
+  page?: number;
+  pageSize?: number;
+  parent_id?: number;
+  filter?: ColumnFiltersState;
+  sort?: { id: string; desc: boolean };
+}
+
+export const useTasks = (
+  params?: UseTasksParams,
+  queryOptions?: Partial<UseQueryOptions<PaginatedResponse<TaskWithRelations>>>
+) => {
   const { toast } = useToast()
-  const { urlParams, params } = parseListHookParamsNew(pagination, filter, sort)
+  
+  // Build query parameters
+  const queryParams: Record<string, string> = {};
+  
+  if (params?.page) {
+    queryParams.page = params.page.toString();
+  }
+  
+  if (params?.pageSize) {
+    queryParams.pageSize = params.pageSize.toString();
+  }
+  
+  if (params?.parent_id !== undefined) {
+    queryParams.parent_id = params.parent_id.toString();
+  }
+  
+  // Handle filters if provided
+  if (params?.filter) {
+    params.filter.forEach(filter => {
+      queryParams[filter.id] = Array.isArray(filter.value) ? filter.value.join(',') : String(filter.value);
+    });
+  }
+  
+  // Handle sorting if provided
+  if (params?.sort) {
+    queryParams.orderBy = params.sort.id;
+    queryParams.orderDir = params.sort.desc ? 'desc' : 'asc';
+  }
+
+  const urlParams = new URLSearchParams(queryParams).toString();
 
   const getTasksFn = async (params: {[key: string]: string}) => {
     const response = await tasksApiClient.get('', {
@@ -71,9 +112,9 @@ export const useTasks = (pagination: PaginationState, filter?: ColumnFiltersStat
     return response.data
   }
 
-  const query = useQuery<PaginatedResponse<Task>>({
+  const query = useQuery<PaginatedResponse<TaskWithRelations>>({
     queryKey: taskQueryKeys.searched(urlParams),
-    queryFn: () => getTasksFn(params),
+    queryFn: () => getTasksFn(queryParams),
     ...queryOptions
   })
 
@@ -199,7 +240,6 @@ export const useDeleteTask = () => {
     }
   })
 }
-// addds
 
 export const useMyTasks = () => {
 

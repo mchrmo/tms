@@ -81,13 +81,15 @@ export const taskColumns: ModelColumns = {
     label: "Vytvárateľ",
     type: 'string',
     path: 'creator.user.name',
-    method: 'contains'
+    method: 'contains',
+    disableSorting: true
   },
   'assignee_name': {
     label: "Zodpovedná osoba",
     type: 'string',
     path: 'assignee.user.name',
-    method: 'contains'
+    method: 'contains',
+    disableSorting: true
   },
   // 'organization_name': {
   //   label: "Organizácia",

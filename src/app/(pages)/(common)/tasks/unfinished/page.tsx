@@ -1,6 +1,6 @@
 import AddButton from "@/components/common/buttons/add-button"
 import ViewHeadline from "@/components/common/view-haedline"
-import TasksTable from "@/components/tasks/table"
+import { TasksTable } from "@/components/tasks/table"
 import { isRole } from "@/lib/utils"
 import { currentUser } from "@clerk/nextjs/server"
 import { id } from "date-fns/locale"
@@ -25,17 +25,17 @@ export default async function Tasks() {
                 }
             </div>
             <TasksTable
-                defaultFilters={
-                    [
-                        {
-                            id: "assignee_name",
-                            value: user?.fullName,
-                        },
-                        {
-                            id: "status",
-                            value: "TODO,WAITING,INPROGRESS,CHECKREQ",
-                        }
-                    ]}
+                // defaultFilters={
+                //     [
+                //         {
+                //             id: "assignee_name",
+                //             value: user?.fullName,
+                //         },
+                //         {
+                //             id: "status",
+                //             value: "TODO,WAITING,INPROGRESS,CHECKREQ",
+                //         }
+                //     ]}
             />
         </>
     )

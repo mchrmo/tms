@@ -1,19 +1,11 @@
 'use client'
 import { useDeleteTask, useTask, useUpdateTaskMeta } from "@/lib/hooks/task/task.hooks";
-import { Task, TaskUserRole } from "@prisma/client";
-import ViewHeadline from "@/components/common/view-haedline";
+import { TaskUserRole } from "@prisma/client";
 import TaskForm from "./task-form";
-import LoadingSpinner from "@/components/ui/loading-spinner";
-import TasksTable from "./table";
-import Link from "next/link";
 import { Label } from "@/components/ui/label";
 import TaskRemindersOverview from "./reminders/taskReminders-overview";
-import AddButton from "@/components/common/buttons/add-button";
-import TaskUpdatesOverview from "./updates/taskUpdates-overview";
 import { useEffect, useState } from "react";
-import clsx from "clsx";
-import { TabsTrigger, Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
-import TaskCommentsOverview from "./comments/taskComments-overview";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import TaskAttachmentsOverview from "./attachments/taskAttachments-overview";
 import { TaskDetail as TaskDetailT } from "@/lib/services/tasks/task.service";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
@@ -27,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { getMetaValue } from "@/lib/utils/api.utils";
 import TaskDetailSidebar from "./detail/sidebar";
 import { Spinner } from "../ui/spinner";
+import { TasksTable } from "./table";
 
 
 export default function TaskDetail({ params }: { params: { id: string } }) {
@@ -85,7 +78,7 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
           {
             task && taskRole && (
               <div className="flex overflow-hidden flex-grow">
-                <div className="flex flex-col flex-grow gap-5 pl-8 pt-6 lg:pr-6 overflow-y-auto">
+                <div className="flex flex-col items-center flex-grow gap-5 pl-8 py-8 lg:pr-6 overflow-y-auto">
                   {/* {
                     task.parent && <Label className="text-md">
                       Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${task.parent.id}`}>{task.parent.name}</Link>
@@ -96,24 +89,31 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
                   <div className="border-t "></div>
 
                   {/* Sub Items */}
-                  <div>
-                    <div className="flex gap-5">
-                      <SubmenuNavigationButton onClick={() => setTab('files')} isActive={tab === 'files'} icon={<PaperclipIcon size={12} />} label="Prílohy" count={task._count.attachments} countClasses="bg-[#FDD0FE] text-magenta" />
-                      <SubmenuNavigationButton onClick={() => setTab('subtasks')} isActive={tab === 'subtasks'} icon={<ListTreeIcon size={12} />} label="Podúlohy" count={task._count.SubTasks} countClasses="bg-[#888888] text-white" />
-                      <SubmenuNavigationButton onClick={() => setTab('reminders')} isActive={tab === 'reminders'} icon={<BadgeAlert size={12} />} label="Pripomienky" count={task._count.Reminders} countClasses="bg-[#FDD0FE] text-magenta" />
+                  <div className="w-full max-w-4xl space-y-4">
+                    <div >
+                      <div className="flex gap-5">
+                        <SubmenuNavigationButton onClick={() => setTab('files')} isActive={tab === 'files'} icon={<PaperclipIcon size={12} />} label="Prílohy" count={task._count.attachments} countClasses="bg-[#FDD0FE] text-magenta" />
+                        <SubmenuNavigationButton onClick={() => setTab('subtasks')} isActive={tab === 'subtasks'} icon={<ListTreeIcon size={12} />} label="Podúlohy" count={task._count.SubTasks} countClasses="bg-[#888888] text-white" />
+                        <SubmenuNavigationButton onClick={() => setTab('reminders')} isActive={tab === 'reminders'} icon={<BadgeAlert size={12} />} label="Pripomienky" count={task._count.Reminders} countClasses="bg-[#FDD0FE] text-magenta" />
+                      </div>
                     </div>
+                    <Tabs value={tab} onValueChange={setTab} className="">
+                      <TabsContent value="reminders">
+                        <TaskRemindersOverview task={task}></TaskRemindersOverview>
+                      </TabsContent>
+                      <TabsContent value="subtasks">
+                        <TasksTable
+                          disableFilter={true}
+                          hiddenFilters={[{ id: 'parent_id', value: task.id.toString() }]}
+                        ></TasksTable>
+                      </TabsContent>
+                      <TabsContent value="files">
+                        <TaskAttachmentsOverview task={task}></TaskAttachmentsOverview>
+                      </TabsContent>
+                    </Tabs>
+
+                    {isAdmin && <Button onClick={onDelete} variant={"linkDestructive"}>Vymazať úlohu</Button>}
                   </div>
-
-                  <Tabs value={tab} onValueChange={setTab} className="">
-                    <TabsContent value="reminders">
-                      <TaskRemindersOverview task={task}></TaskRemindersOverview>
-                    </TabsContent>
-                    <TabsContent value="files">
-                      <TaskAttachmentsOverview task={task}></TaskAttachmentsOverview>
-                    </TabsContent>
-                  </Tabs>
-
-                  {isAdmin && <Button onClick={onDelete} variant={"linkDestructive"}>Vymazať úlohu</Button>}
                 </div>
                 <>
                   <TaskDetailSidebar task_id={task.id} taskUpdates={task.taskUpdates} taskComments={task.taskComments}></TaskDetailSidebar>

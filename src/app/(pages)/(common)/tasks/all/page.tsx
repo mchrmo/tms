@@ -1,6 +1,6 @@
 import AddButton from "@/components/common/buttons/add-button"
 import ViewHeadline from "@/components/common/view-haedline"
-import TasksTable from "@/components/tasks/table"
+import {TasksTable} from "@/components/tasks/table"
 import { isRole } from "@/lib/utils"
 import { currentUser } from "@clerk/nextjs/server"
 import Link from "next/link"
