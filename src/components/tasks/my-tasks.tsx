@@ -1,6 +1,6 @@
 
 "use client";
-import TasksTable from "./table"
+import {TasksTable} from "./table"
 
 export const fetchCache = 'force-no-store'
 
