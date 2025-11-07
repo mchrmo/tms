@@ -1,23 +1,15 @@
 'use client'
 import { useDeleteTask, useTask, useUpdateTaskMeta } from "@/lib/hooks/task/task.hooks";
-import { Task, TaskUserRole } from "@prisma/client";
-import ViewHeadline from "@/components/common/view-haedline";
+import { TaskUserRole } from "@prisma/client";
 import TaskForm from "./task-form";
-import LoadingSpinner from "@/components/ui/loading-spinner";
-import TasksTable from "./table";
-import Link from "next/link";
 import { Label } from "@/components/ui/label";
 import TaskRemindersOverview from "./reminders/taskReminders-overview";
-import AddButton from "@/components/common/buttons/add-button";
-import TaskUpdatesOverview from "./updates/taskUpdates-overview";
 import { useEffect, useState } from "react";
-import clsx from "clsx";
-import { TabsTrigger, Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
-import TaskCommentsOverview from "./comments/taskComments-overview";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import TaskAttachmentsOverview from "./attachments/taskAttachments-overview";
 import { TaskDetail as TaskDetailT } from "@/lib/services/tasks/task.service";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
-import { SettingsIcon } from "lucide-react";
+import { BadgeAlert, ListTreeIcon, PaperclipIcon, SettingsIcon } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
 import { useUser } from "@clerk/nextjs";
@@ -25,6 +17,9 @@ import { isRole } from "@/lib/utils";
 import { User } from "@clerk/nextjs/server";
 import { useRouter } from "next/navigation";
 import { getMetaValue } from "@/lib/utils/api.utils";
+import TaskDetailSidebar from "./detail/sidebar";
+import { Spinner } from "../ui/spinner";
+import { TasksTable } from "./table";
 
 
 export default function TaskDetail({ params }: { params: { id: string } }) {
@@ -36,9 +31,8 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
   // const parent = useTask((task && task.parent_id) ? task.parent_id : undefined)
 
   const deleteTaskQ = useDeleteTask();
-  const [tab, setTab] = useState('subtasks')
+  const [tab, setTab] = useState('files')
 
-  const [variant, setVariant] = useState<'ghost' | 'default'>('ghost')
   const { user } = useUser()
   const isAdmin = isRole((user as unknown) as User, 'admin')
   const router = useRouter()
@@ -53,113 +47,99 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
   }, [deleteTaskQ.isSuccess])
 
 
-  if (taskQ.isFetching) return <span>Úloha sa načitáva <LoadingSpinner></LoadingSpinner></span>
+  if (taskQ.isFetching) return <div className="h-screen  flex items-center justify-center">
+    <span><Spinner className="size-20 text-[#7b75f9]" /></span>
+  </div>
+
 
   return (
     <>
       {taskQ.error instanceof Error && <div>{taskQ.error.message}</div>}
 
       {
-        <>
-          <div className="">
-            <div className="flex justify-between">
-              <ViewHeadline>Detail úlohy</ViewHeadline>
-              <div className="">
-                {
-                  task && taskRole &&
-                  <>
-                    {/* <Button onClick={() => setVariant(variant == 'ghost' ? 'default' : 'ghost')} variant={variant} size={'icon'}>
+        <div className="flex flex-col h-screen ">
+          {/* Topbar */}
+          <div className="flex justify-between border-b py-2 px-8 items-center">
+            <h1 className="font-semibold text-base p-0">Detail úlohy</h1>
+            <div className="">
+              {
+                task && taskRole &&
+                <>
+                  {/* <Button onClick={() => setVariant(variant == 'ghost' ? 'default' : 'ghost')} variant={variant} size={'icon'}>
                       <EyeIcon />
                     </Button> */}
-                    <TaskSettings task={task} role={taskRole} />
-                  </>
-                }
-              </div>
+                  <TaskSettings task={task} role={taskRole} />
+                </>
+              }
             </div>
           </div>
 
+          {/* Main content */}
           {
             task && taskRole && (
+              <div className="flex overflow-hidden flex-grow">
+                <div className="flex flex-col items-center flex-grow gap-5 pl-8 py-8 lg:pr-6 overflow-y-auto">
+                  {/* {
+                    task.parent && <Label className="text-md">
+                      Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${task.parent.id}`}>{task.parent.name}</Link>
+                    </Label>
+                  } */}
+                  <TaskForm defaultValues={task} role={taskRole}></TaskForm>
 
-              <div className="flex flex-col">
-                {
-                  task.parent && <Label className="text-md">
-                    Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${task.parent.id}`}>{task.parent.name}</Link>
-                  </Label>
-                }
+                  <div className="border-t "></div>
 
-                {
-                  task.creator &&
-                  <Label className="text-md">
-                    Vlastník úlohy: {task.creator!.user.name}
-                  </Label>
-                }
-                <TaskForm defaultValues={task} role={taskRole}></TaskForm>
-                <Tabs value={tab} onValueChange={setTab} className="">
-                  <TabsList className="flex gap-4 overflow-x-auto">
-                    <TabsTrigger value="subtasks" className={clsx({ 'border-b-3': tab == 'subtasks', 'mb-1': tab !== 'subtasks' })}>Podúlohy</TabsTrigger>
-                    <TabsTrigger value="reminders" className={clsx({ 'border-b-3': tab == 'reminders', 'mb-1': tab !== 'reminders' })}>Pripomienky</TabsTrigger>
-                    <TabsTrigger value="comments" className={clsx({ 'border-b-3': tab == 'comments', 'mb-1': tab !== 'comments' })}>Komentáre</TabsTrigger>
-                    <TabsTrigger value="updates" className={clsx({ 'border-b-3': tab == 'updates', 'mb-1': tab !== 'updates' })}>História</TabsTrigger>
-                    <TabsTrigger value="files" className={clsx({ 'border-b-3': tab == 'files', 'mb-1': tab !== 'files' })}>Prílohy</TabsTrigger>
-                  </TabsList>
-                  {/* <div className="mt-5"> */}
-                  <TabsContent value="subtasks">
-                    <SubTasksOverview task={task} />
-                  </TabsContent>
-                  <TabsContent value="reminders">
-                    <TaskRemindersOverview task={task}></TaskRemindersOverview>
-                  </TabsContent>
-                  <TabsContent value="comments">
-                    <TaskCommentsOverview task={task}></TaskCommentsOverview>
-                  </TabsContent>
-                  <TabsContent value="updates">
-                    <TaskUpdatesOverview task={task}></TaskUpdatesOverview>
-                  </TabsContent>
-                  <TabsContent value="files">
-                    <TaskAttachmentsOverview task={task}></TaskAttachmentsOverview>
-                  </TabsContent>
+                  {/* Sub Items */}
+                  <div className="w-full max-w-4xl space-y-4">
+                    <div >
+                      <div className="flex gap-5">
+                        <SubmenuNavigationButton onClick={() => setTab('files')} isActive={tab === 'files'} icon={<PaperclipIcon size={12} />} label="Prílohy" count={task._count.attachments} countClasses="bg-[#FDD0FE] text-magenta" />
+                        <SubmenuNavigationButton onClick={() => setTab('subtasks')} isActive={tab === 'subtasks'} icon={<ListTreeIcon size={12} />} label="Podúlohy" count={task._count.SubTasks} countClasses="bg-[#888888] text-white" />
+                        <SubmenuNavigationButton onClick={() => setTab('reminders')} isActive={tab === 'reminders'} icon={<BadgeAlert size={12} />} label="Pripomienky" count={task._count.Reminders} countClasses="bg-[#FDD0FE] text-magenta" />
+                      </div>
+                    </div>
+                    <Tabs value={tab} onValueChange={setTab} className="">
+                      <TabsContent value="reminders">
+                        <TaskRemindersOverview task={task}></TaskRemindersOverview>
+                      </TabsContent>
+                      <TabsContent value="subtasks">
+                        <TasksTable
+                          disableFilter={true}
+                          hiddenFilters={[{ id: 'parent_id', value: task.id.toString() }]}
+                        ></TasksTable>
+                      </TabsContent>
+                      <TabsContent value="files">
+                        <TaskAttachmentsOverview task={task}></TaskAttachmentsOverview>
+                      </TabsContent>
+                    </Tabs>
 
-                  {/* </div> */}
-                </Tabs>
-
-                {isAdmin && <Button onClick={onDelete} variant={"linkDestructive"}>Vymazať úlohu</Button>}
+                    {isAdmin && <Button onClick={onDelete} variant={"linkDestructive"}>Vymazať úlohu</Button>}
+                  </div>
+                </div>
+                <>
+                  <TaskDetailSidebar task_id={task.id} taskUpdates={task.taskUpdates} taskComments={task.taskComments}></TaskDetailSidebar>
+                </>
               </div>
             )}
 
-        </>
+        </div>
       }
     </>
   )
 }
 
 
-function SubTasksOverview({ task }: { task: Task }) {
-  return (
-    <>
-      <div className="flex justify-between items-center ">
-        <h2 className="text-lg">Podriadené úlohy</h2>
-        <Link href={`/tasks/create?parent_id=${task.id}`}><AddButton>Vytvoriť pod úlohu</AddButton></Link>
-      </div>
-      <div className="mt-5">
-        <TasksTable defaultFilters={[{ id: 'parent_id', value: task.id }]}></TasksTable>
-      </div>
-    </>
-  )
-}
-
-function TaskSettings({ task, role }: { task: TaskDetailT, role: TaskUserRole  }) {
+function TaskSettings({ task, role }: { task: TaskDetailT, role: TaskUserRole }) {
 
   const updateMetaQ = useUpdateTaskMeta()
 
 
-  if(!task) return <></>
+  if (!task) return <></>
 
   let requiredCheck = false
   const checkReqMeta = getMetaValue(task.meta, 'checkRequired')
-    if(checkReqMeta) {
-      requiredCheck = (checkReqMeta === "true")
-    }
+  if (checkReqMeta) {
+    requiredCheck = (checkReqMeta === "true")
+  }
 
   return (
     <>
@@ -169,14 +149,14 @@ function TaskSettings({ task, role }: { task: TaskDetailT, role: TaskUserRole  }
             <SettingsIcon />
           </Button>
         </DialogTrigger>
-        <DialogContent  className="w-screen lg:max-w-[600px]">
+        <DialogContent className="w-screen lg:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Nastavenia úlohy</DialogTitle>
           </DialogHeader>
 
           <div>
             <div className="flex items-center space-x-2">
-              <Checkbox defaultChecked={requiredCheck}  onCheckedChange={(checked) => updateMetaQ.mutate({key: 'checkRequired', value: checked.toString(), taskId: task.id})} id="terms" disabled={!['OWNER', 'PERSONAL'].includes(role)} />
+              <Checkbox defaultChecked={requiredCheck} onCheckedChange={(checked) => updateMetaQ.mutate({ key: 'checkRequired', value: checked.toString(), taskId: task.id })} id="terms" disabled={!['OWNER', 'PERSONAL'].includes(role)} />
               <Label
                 htmlFor="terms"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -194,5 +174,23 @@ function TaskSettings({ task, role }: { task: TaskDetailT, role: TaskUserRole  }
         </DialogContent>
       </Dialog>
     </>
+  )
+}
+
+
+function SubmenuNavigationButton(props: { isActive: boolean, icon: React.ReactNode, label: string, count?: number, countClasses: string, onClick?: () => void }) {
+
+
+  return (
+    <div onClick={props.onClick} className={`h-9 flex items-center gap-2 px-3  rounded-md hover:bg-gray-100 cursor-pointer ${props.isActive ? 'bg-[#E7E7E7]' : ''}`}>
+      {props.icon}
+      <span>{props.label}</span>
+      {
+        (props.count && props.count > 0) ? (
+          <div className={`text-xs ${props.countClasses} w-5 h-5 rounded-full font-semibold flex items-center justify-center`}>{props.count}</div>
+        ) : null
+      }
+
+    </div>
   )
 }

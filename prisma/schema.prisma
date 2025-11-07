@@ -113,8 +113,8 @@ model Task {
   updateAt          DateTime            @default(now())
   deadline          DateTime
   completition_date DateTime?
-  TaskUpdate        TaskUpdate[]
-  TaskComment       TaskComment[]
+  taskUpdates       TaskUpdate[]
+  taskComments      TaskComment[]
   SubTasks          Task[]              @relation("ParentTask")
   Subscriptions     TaskSubscription[]
   Reminders         TaskReminder[]

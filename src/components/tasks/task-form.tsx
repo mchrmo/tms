@@ -10,7 +10,7 @@ import { TaskPriority, TaskStatus, TaskUserRole } from "@prisma/client";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCreateTask, useTask, useUpdateTask } from "@/lib/hooks/task/task.hooks";
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SubmitButton from "@/components/common/buttons/submit";
@@ -20,6 +20,8 @@ import { GenericMeta, getMetaValue } from "@/lib/utils/api.utils";
 import { isTaskRole } from "@/lib/utils/auth";
 import { parseBoolean } from "@/lib/utils";
 import { format } from "date-fns";
+import Link from "next/link";
+import { CalendarIcon, CircleUser, FlagIcon, ListMinusIcon, MoveUpLeftIcon, TargetIcon } from "lucide-react";
 
 export type TaskFormInputs = {
   id?: number;
@@ -138,6 +140,7 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
     const source = searchParams.get('source')
     if (source) setValue("source", source)
 
+    console.log("Form values:", errors);
   }, [])
 
   useEffect(() => {
@@ -172,154 +175,281 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
 
   return (
     <Form {...form}>
-      <form id="form" onSubmit={handleSubmit(onSubmit)} className="my-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem className="md:col-span-2">
-              <FormLabel>Názov úlohy</FormLabel>
-              <FormControl>
-                <Input placeholder="Názov úlohy" {...field} disabled={!fieldsAccess['name']} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form className="w-full max-w-screen-md" id="form" onSubmit={handleSubmit(onSubmit)}>
 
-        <FormField
-          control={form.control}
-          name="deadline"
-          render={({ field }) => {
-            const { value, onChange, ...rest } = field;
-            const formattedDate = format(value!, 'yyyy-MM-dd')
+        <div className="flex flex-col gap-3 md:gap-5 ">
+          <div className="flex flex-col md:flex-row justify-between gap-3">
+            {
+              _def && _def.parent ? (
+                <div className="font-semibold text-[#B0B0B0] text-sm flex gap-1">
+                  <MoveUpLeftIcon size={'14px'}></MoveUpLeftIcon><Link href={`/tasks/${_def.parent.id}`} aria-label={_def.parent.name}>Nadradená úloha</Link>
+                </div>
+              ) : <div></div>
+            }
+            <SubmitButton isLoading={updateTask.isPending || createTask.isPending} type="submit" >Uložiť</SubmitButton>
+          </div>
 
-            return (
-              <FormItem className="">
-                <FormLabel>Termín dokončenia</FormLabel>
+
+          {/* Name */}
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field, fieldState: { error } }) => (
+              <FormItem className="w-full">
+                {/* <FormLabel>Názov úlohy</FormLabel> */}
                 <FormControl>
-                  <Input type="date" placeholder=""
-                    value={formattedDate}
-                    onChange={(e) => {
-                      const newDate = e.target.value ? new Date(e.target.value) : undefined;
-                      onChange(newDate);
-                    }}
-                    disabled={!fieldsAccess['deadline']}
-                    {...rest}
-                  />
+                  <AutoExpandTextarea placeholder="Zadajte názov úlohy" isError={!!error} {...field} disabled={!fieldsAccess['name']} />
                 </FormControl>
-                <FormMessage />
+                {
+                  error && <span className="text-sm font-semibold text-red-400">
+                    {field.value.length}/80
+                  </span>
+                }
               </FormItem>
-            )
-          }}
-        />
+            )}
+          />
 
 
-        <FormField
-          control={form.control}
-          name="assignee_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Zodpovedná osoba</FormLabel>
-              <OrganizationMemberCombobox
-                defaultValue={_def ? _def.assignee : null} onSelectResult={(member) => field.onChange(member.id)}
-                disabled={!fieldsAccess['assignee_id']}
-                label="Vybrať osobu"></OrganizationMemberCombobox>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-x-5 ">
 
-        <FormField
-          control={form.control}
-          name="priority"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Priorita</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!fieldsAccess['priority']}>
-                <SelectTrigger className="">
-                  <SelectValue placeholder="Priorita" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="LOW">Nízka</SelectItem>
-                  <SelectItem value="MEDIUM">Stredná</SelectItem>
-                  <SelectItem value="HIGH">Vysoká</SelectItem>
-                  <SelectItem value="CRITICAL">Kritická</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            {/* Creator */}
+            <div className="flex flex-col md:flex-row md:items-center gap-2 sm:gap-3 sm:justify-between">
+              <div className="flex items-center text-[#B0B0B0] gap-1">
+                <CircleUser size={14} />
+                <span className="whitespace-nowrap text-sm font-semibold">Vlastník úlohy</span>
+              </div>
+              <div className="text-sm">
+                {_def && _def.creator &&
+                  <span>{_def.creator.user.name}</span>
+                }
+              </div>
+            </div>
 
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!fieldsAccess['status']}>
-                <SelectTrigger className="">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {
-                    statusItems.map((item) => <SelectItem disabled={item.disabled} key={item.key} value={item.key}>{item.label}</SelectItem>)
-                  }
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            {/* Priority */}
+            <FormField
+              control={form.control}
+              name="priority"
+              render={({ field }) => (
+                <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 sm:justify-between">
+                  <div className="flex items-center text-[#B0B0B0] gap-1">
+                    <FlagIcon size={12} />
+                    <span className="whitespace-nowrap text-sm font-semibold">Priorita</span>
+                  </div>
+                  <div className="w-full sm:w-56">
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!fieldsAccess['priority']}>
+                      <SelectTrigger className="">
+                        <SelectValue placeholder="Priorita" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="LOW" >
+                          <div className="flex gap-2">
+                            <FlagIcon className="text-green-600" size={20} /><span>Nízka</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="MEDIUM">
+                          <div className="flex gap-2">
+                            <FlagIcon className="text-yellow-600" size={20} /><span>Stredná</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="HIGH">
+                          <div className="flex gap-2">
+                            <FlagIcon className="text-red-600" size={20} /><span>Vysoká</span>
+                          </div>
+                        </SelectItem>
+                        {/* <SelectItem value="CRITICAL">
+                        <div className="flex gap-2">
+                          <FlagIcon className="text-red-800" size={20} /><span>Kritická</span>
+                        </div>
+                      </SelectItem> */}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
 
-        <Accordion type="single" className="col-span-full" collapsible>
-          <AccordionItem value="item-1">
-            <AccordionTrigger>Podrobnosti</AccordionTrigger>
-            <AccordionContent className="p-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>Popis</FormLabel>
-                    <Textarea
-                      id="task-description"
-                      placeholder="Popis zadania úlohy..."
-                      disabled={!fieldsAccess['description']}
-                      {...field}
-                    />
-                    <p className="">{field.value.length}/500</p>
+            {/* Assignee */}
+            <FormField
+              control={form.control}
+              name="assignee_id"
+              render={({ field }) => (
+                <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 sm:justify-between">
+                  <div className="flex items-center text-[#B0B0B0] gap-1">
+                    <CircleUser size={14} />
+                    <span className="whitespace-nowrap text-sm font-semibold">Zodpovedná osoba</span>
+                  </div>
+                  <div className="w-full sm:w-auto flex flex-col">
+                    <OrganizationMemberCombobox
+                      defaultValue={_def ? _def.assignee : null} onSelectResult={(member) => field.onChange(member.id)}
+                      disabled={!fieldsAccess['assignee_id']}
+                      label="Vybrať osobu"></OrganizationMemberCombobox>
+                      <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
+
+
+            {/* Status */}
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 sm:justify-between">
+                  <div className="flex items-center text-[#B0B0B0] gap-1">
+                    <TargetIcon size={14} />
+                    <span className="whitespace-nowrap text-sm font-semibold">Status</span>
+                  </div>
+                  <div className="w-full sm:w-56">
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!fieldsAccess['status']}>
+                      <SelectTrigger className="">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {
+                          statusItems.map((item) => <SelectItem disabled={item.disabled} key={item.key} value={item.key}>{item.label}</SelectItem>)
+                        }
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </div>
+
+                </FormItem>
+              )}
+            />
+
+
+            {/* Deadline */}
+            <FormField
+              control={form.control}
+              name="deadline"
+              render={({ field }) => {
+                const { value, onChange, ...rest } = field;
+                const formattedDate = format(value!, 'yyyy-MM-dd')
+
+                return (
+                  <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 sm:justify-between md:col-start-2">
+                    <div className="flex items-center text-[#B0B0B0] gap-1">
+                      <CalendarIcon size={14} />
+                      <span className="whitespace-nowrap text-sm font-semibold">Termín</span>
+                    </div>
+                    <div className="w-full sm:w-56">
+                      <Input type="date" placeholder=""
+                        value={formattedDate}
+                        onChange={(e) => {
+                          const newDate = e.target.value ? new Date(e.target.value) : undefined;
+                          onChange(newDate);
+                        }}
+                        disabled={!fieldsAccess['deadline']}
+                        {...rest}
+                      />
+                    </div>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="source"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>Zdroj úlohy</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Zdroj úlohy" disabled={!fieldsAccess['source']} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                )
+              }}
+            />
 
+          </div>
 
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+          {/* Details */}
+          <div className="flex flex-col gap-3">
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-2">
+                  <div className="flex items-center text-[#B0B0B0] gap-1">
+                    <ListMinusIcon size={14} />
+                    <span className="whitespace-nowrap text-sm font-semibold">Podrobnosti úlohy</span>
+                  </div>
+                  <Textarea
+                    id="task-description"
+                    placeholder="Sem napíšte podrobnosti o úlohe"
+                    disabled={!fieldsAccess['description']}
+                    className="min-h-[100px]"
+                    {...field}
+                  />
+                  <p className="text-[#B0B0B0] text-xs">{field.value.length}/500</p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        {isDirty && <div className="space-x-3 col-span-full flex mt-5">
-          <Button variant="secondary" type="button" onClick={() => { onCancel(); }}>Zrušiť</Button>
-          <SubmitButton isLoading={updateTask.isPending || createTask.isPending} type="submit" >Uložiť</SubmitButton>
-        </div>}
+            <FormField
+              control={form.control}
+              name="source"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-2">
+                  <div className="flex items-center text-[#B0B0B0] gap-1">
+                    <ListMinusIcon size={14} />
+                    <span className="whitespace-nowrap text-sm font-semibold">Zdroj úlohy</span>
+                  </div>
+                  <FormControl>
+                    <Input placeholder="Zdroj úlohy" disabled={!fieldsAccess['source']} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
+          {/* {isDirty && <div className="space-x-3 col-span-full flex mt-5">
+            <Button variant="secondary" type="button" onClick={() => { onCancel(); }}>Zrušiť</Button>
+            <SubmitButton isLoading={updateTask.isPending || createTask.isPending} type="submit" >Uložiť</SubmitButton>
+          </div>} */}
+
+        </div>
       </form>
     </Form>
   )
 
 }
+
+
+
+interface AutoExpandTextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  isError?: boolean;
+}
+
+export const AutoExpandTextarea = forwardRef<
+  HTMLTextAreaElement,
+  AutoExpandTextareaProps
+>(({ isError = false, ...props }, ref) => {
+  const innerRef = useRef<HTMLTextAreaElement>(null);
+
+  // Expose innerRef to parent
+  useImperativeHandle(ref, () => innerRef.current as HTMLTextAreaElement);
+
+  const handleInput = () => {
+    const textarea = innerRef.current;
+    if (textarea) {
+      textarea.style.height = "auto"; // reset height
+      textarea.style.height = `${textarea.scrollHeight + 10}px`; // set to content height
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") e.preventDefault(); // block line breaks
+  };
+
+  useEffect(() => {
+    handleInput(); // adjust height if there's defaultValue
+  }, []);
+
+  return (
+    <textarea
+      {...props}
+      ref={innerRef}
+      rows={1}
+      onInput={handleInput}
+      onKeyDown={handleKeyDown}
+      className={` w-full resize-none overflow-hidden outline-none focus:ring-0 text-2xl font-semibold leading-tight placeholder:text-gray-400 transition-colors duration-200
+        ${isError ? "bg-red-100" : "bg-transparent text-gray-900"}`}
+    />
+  );
+});
+
+AutoExpandTextarea.displayName = "AutoExpandTextarea";

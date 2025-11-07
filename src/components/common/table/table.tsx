@@ -41,51 +41,51 @@ export default function TableComponent<TData>({
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    if(tableId) {
-      const sorting = localStorage.getItem('table-'+tableId+'-sorting')
+    if (tableId) {
+      const sorting = localStorage.getItem('table-' + tableId + '-sorting')
       console.log(sorting);
-      
-      table.setSorting(sorting ? JSON.parse(sorting) : [])  
+
+      table.setSorting(sorting ? JSON.parse(sorting) : [])
     }
-    setLoaded(true)     
+    setLoaded(true)
   }, [])
 
   useEffect(() => {
-    if(!tableId || !loaded) return
+    if (!tableId || !loaded) return
     const sorting = table.getState().sorting
-    localStorage.setItem('table-'+tableId+'-sorting', JSON.stringify(sorting))
-    
+    localStorage.setItem('table-' + tableId + '-sorting', JSON.stringify(sorting))
+
     console.log(sorting[0]);
-    
+
   }, [table.getState().sorting])
-  
+
 
   return <>
-      <div className="">
-        <Table className="">
-          <TableHeader className="">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {
-                  headerGroup.headers.map((header) => 
-                    templateParts && templateParts.headerCell ? 
-                      templateParts.headerCell(header) : 
-                      <DefaultHeaderCell key={header.id} header={header}></DefaultHeaderCell>)
-                }
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {(table.getRowModel().rows?.length && !isLoading) ? (
-              table.getRowModel().rows.map((row) => {
-                                
-                return (
+    <div className="">
+      <Table className="">
+        <TableHeader className="">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {
+                headerGroup.headers.map((header) =>
+                  templateParts && templateParts.headerCell ?
+                    templateParts.headerCell(header) :
+                    <DefaultHeaderCell key={header.id} header={header}></DefaultHeaderCell>)
+              }
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {(table.getRowModel().rows?.length && !isLoading) ? (
+            table.getRowModel().rows.map((row) => {
+
+              return (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => {
-                    
+
                     const colDef = cell.column.columnDef
 
                     return (
@@ -96,46 +96,47 @@ export default function TableComponent<TData>({
                   }
                   )}
                 </TableRow>
-              )})
-            ) : (
-              <TableRow>
-                <TableCell colSpan={table.getAllColumns().length} className=" text-center">
-                  {
-                    (isLoading) ? 
-                      <span> <LoadingSpinner/></span>
-                      :
-                      (
-                        isError ? "Chyba pri načítaní." : "Žiadne záznamy."
-                      )
-                  }
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-        { pagination && <TablePagination table={table} ></TablePagination>}
-      </div>
+              )
+            })
+          ) : (
+            <TableRow>
+              <TableCell colSpan={table.getAllColumns().length} className=" text-center">
+                {
+                  (isLoading) ?
+                    <span> <LoadingSpinner /></span>
+                    :
+                    (
+                      isError ? "Chyba pri načítaní." : "Žiadne záznamy."
+                    )
+                }
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      {pagination && <TablePagination table={table} ></TablePagination>}
+    </div>
   </>
 }
 
 
-export function DefaultHeaderCell({header}: {header: Header<any, unknown>}) {
+export function DefaultHeaderCell({ header }: { header: Header<any, unknown> }) {
 
   return (
-    <TableHead  className="align-middle">
+    <TableHead className="align-middle">
       <div className={cn("flex", header.column.getCanSort() && "cursor-pointer")} onClick={header.column.getToggleSortingHandler()}>
         <h4 className="font-medium text-muted-foreground" >
           {header.isPlaceholder
-          ? null
-          : flexRender(
+            ? null
+            : flexRender(
               header.column.columnDef.header,
               header.getContext()
-          )}
+            )}
         </h4>
         <span className="">
           {{
-            asc: <ChevronUp/>,
-            desc: <ChevronDown/>,
+            asc: <ChevronUp />,
+            desc: <ChevronDown />,
           }[header.column.getIsSorted() as string] ?? null}
         </span>
       </div>
@@ -143,23 +144,23 @@ export function DefaultHeaderCell({header}: {header: Header<any, unknown>}) {
   )
 }
 
-export function FilteredHeaderCell({header}: {header: Header<any, unknown>}) {
+export function FilteredHeaderCell({ header }: { header: Header<any, unknown> }) {
 
   return (
-    <TableHead  className="align-top">
+    <TableHead className="align-top">
       <div className={cn("flex", header.column.getCanSort() && "cursor-pointer")} onClick={header.column.getToggleSortingHandler()}>
         <h4 className="text-medium" >
           {header.isPlaceholder
-          ? null
-          : flexRender(
+            ? null
+            : flexRender(
               header.column.columnDef.header,
               header.getContext()
-          )}
+            )}
         </h4>
         <span className="">
           {{
-            asc: <ChevronUp/>,
-            desc: <ChevronDown/>,
+            asc: <ChevronUp />,
+            desc: <ChevronDown />,
           }[header.column.getIsSorted() as string] ?? null}
         </span>
       </div>

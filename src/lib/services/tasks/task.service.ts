@@ -69,6 +69,30 @@ const get_task = async (id: number, options?: GetDetailOptions) => {
             }
           }
         }
+      },
+      taskUpdates: {
+        select: {
+          createdAt: true,
+          title: true,
+          description: true
+        }
+      },
+      taskComments: {
+        select: {
+          user: {
+            select: {name: true}
+          },
+          createdAt: true,
+          message: true,
+          id: true
+        }
+      },
+      _count: {
+        select: {
+          SubTasks: true,
+          attachments: true,
+          Reminders: true,
+        }
       }
     }
   })

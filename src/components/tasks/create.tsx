@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { TaskDetail } from "@/lib/services/tasks/task.service";
+import { useUser } from "@clerk/nextjs";
 
 
 export default function CreateTask() {
@@ -20,7 +21,10 @@ export default function CreateTask() {
 
   const parentQ = useTask(parentId ? parseInt(parentId) : undefined)  
   const parent: TaskDetail | undefined = parentQ.data ? parentQ.data.data : undefined
+  const { user } = useUser()
+  
 
+  
   useEffect(() => {
     
     if(parent === null && parentId) {
@@ -39,7 +43,10 @@ export default function CreateTask() {
         Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${parent.id}`}>{parent.name}</Link>
       </Label>
     }
-    <TaskForm></TaskForm>
+
+    <div className="max-w-screen-xl mx-auto">
+      <TaskForm defaultValues={{ creator: {user: {name: (user && user.fullName) || ''}} }}></TaskForm>
+    </div>
 
   </>
 
