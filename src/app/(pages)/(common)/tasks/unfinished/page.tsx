@@ -25,17 +25,17 @@ export default async function Tasks() {
                 }
             </div>
             <TasksTable
-                defaultFilters={
-                    [
-                        {
-                            id: "assignee_name",
-                            value: user?.fullName,
-                        },
-                        {
-                            id: "status",
-                            value: "TODO,WAITING,INPROGRESS,CHECKREQ",
-                        }
-                    ]}
+                // defaultFilters={
+                //     [
+                //         {
+                //             id: "assignee_name",
+                //             value: user?.fullName,
+                //         },
+                //         {
+                //             id: "status",
+                //             value: "TODO,WAITING,INPROGRESS,CHECKREQ",
+                //         }
+                //     ]}
             />
         </>
     )

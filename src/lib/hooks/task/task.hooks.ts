@@ -99,8 +99,8 @@ export const useTasks = (
   
   // Handle sorting if provided
   if (params?.sort) {
-    queryParams.sortBy = params.sort.id;
-    queryParams.sortOrder = params.sort.desc ? 'desc' : 'asc';
+    queryParams.orderBy = params.sort.id;
+    queryParams.orderDir = params.sort.desc ? 'desc' : 'asc';
   }
 
   const urlParams = new URLSearchParams(queryParams).toString();

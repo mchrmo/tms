@@ -175,10 +175,10 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
 
   return (
     <Form {...form}>
-      <form id="form" onSubmit={handleSubmit(onSubmit)} className="">
+      <form className="w-full max-w-screen-md" id="form" onSubmit={handleSubmit(onSubmit)}>
 
-        <div className="flex flex-col gap-3 md:gap-5">
-          <div className="flex flex-col sm:flex-row justify-between gap-3">
+        <div className="flex flex-col gap-3 md:gap-5 ">
+          <div className="flex flex-col md:flex-row justify-between gap-3">
             {
               _def && _def.parent ? (
                 <div className="font-semibold text-[#B0B0B0] text-sm flex gap-1">
@@ -210,10 +210,10 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
           />
 
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-x-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-x-5 ">
 
             {/* Creator */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 sm:justify-between">
+            <div className="flex flex-col md:flex-row md:items-center gap-2 sm:gap-3 sm:justify-between">
               <div className="flex items-center text-[#B0B0B0] gap-1">
                 <CircleUser size={14} />
                 <span className="whitespace-nowrap text-sm font-semibold">Vlastník úlohy</span>
