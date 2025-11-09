@@ -10,6 +10,7 @@ import { z } from "zod";
 import { TaskReminderDetail, TaskReminderListItem } from "../../services/tasks/taskReminder.service";
 import { TaskReminderUpdateSchema } from "../../models/taskReminder.model";
 import { PaginatedResponse, PaginatedResponseOld } from "@/lib/services/api.service";
+import { taskQueryKeys } from "./task.hooks";
 
 
 const taskRemindersApiClient = getApiClient('/tasks/reminders')
@@ -132,6 +133,9 @@ export const useCreateTaskReminder = () => {
       toast({
         title: "Pripomienka vytvorená!"
       })
+
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(data.task_id) })
+
     },
     onError: (err: AxiosError<{message: string}>, newTaskReminder, context?: any) => {
       const errMessage = err.response?.data ? err.response.data.message : err.message

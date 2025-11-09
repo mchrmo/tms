@@ -134,9 +134,15 @@ function CommentItem({ comment, task_id }: { comment: TaskDetailSidebarComments[
 function UpdateItem({ update }: { update: TaskDetailSidebarUpdates[number] }) {
 
   return (
-    <div className="flex justify-between gap-1 text-xs text-[#3C618D]">
+    <div className="flex justify-between gap-2 text-xs text-[#3C618D]">
       <span>{update.description}</span>
-      <span className="whitespace-nowrap">{new Date(update.createdAt).toLocaleDateString()}</span>
+      <span className="whitespace-nowrap">{new Date(update.createdAt).toLocaleTimeString('sk-SK', {
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })}</span>
     </div>
   )
 }
