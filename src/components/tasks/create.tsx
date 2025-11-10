@@ -45,7 +45,7 @@ export default function CreateTask() {
     }
 
     <div className="max-w-screen-xl mx-auto">
-      <TaskForm defaultValues={{ creator: {user: {name: (user && user.fullName) || ''}}, deadline: parent ? parent.deadline : undefined }}></TaskForm>
+      <TaskForm defaultValues={{ creator: {user: {name: (user && user.fullName) || ''}}, deadline: parent ? parent.deadline : new Date() }}></TaskForm>
     </div>
 
   </>
