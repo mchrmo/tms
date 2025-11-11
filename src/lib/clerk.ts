@@ -32,8 +32,6 @@ export const updateClerkUser = async (id: string, data: any): Promise<User> => {
 
     return user
   } catch (error) {
-    
-    console.log(error);
     throw new Error("Nepodarilo sa upraviť užívatela")
 
   }
