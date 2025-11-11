@@ -205,6 +205,19 @@ const delete_task = async (task_id: number) => {
     }
   })
 
+  const comments = await prisma.taskComment.deleteMany({
+    where: {
+      task_id
+    }
+  })
+
+  const subs = await prisma.taskSubscription.deleteMany({
+    where: {
+      task_id
+    }
+  })
+
+
   const task = await prisma.task.delete({
     where: {
       id: task_id
