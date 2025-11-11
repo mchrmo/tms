@@ -35,18 +35,18 @@ const get_task = async (id: number, options?: GetDetailOptions) => {
     where,
     include: {
       assignee: {
-        select: {user: true, user_id: true, position_name: true},
+        select: { user: true, user_id: true, position_name: true },
       },
       creator: {
         select: {
           user_id: true,
           user: {
-            select: {name: true}
+            select: { name: true }
           }
         }
       },
       parent: {
-        select: {name: true, id: true}
+        select: { name: true, id: true }
       },
       meta: {
         select: {
@@ -64,7 +64,7 @@ const get_task = async (id: number, options?: GetDetailOptions) => {
               createdAt: true,
               path: true,
               owner: {
-                select: {name: true}
+                select: { name: true }
               }
             }
           }
@@ -80,7 +80,7 @@ const get_task = async (id: number, options?: GetDetailOptions) => {
       taskComments: {
         select: {
           user: {
-            select: {name: true}
+            select: { name: true }
           },
           createdAt: true,
           message: true,
@@ -104,10 +104,10 @@ export type TaskDetail = Prisma.PromiseReturnType<typeof get_task>
 const create_task = async (taskData: CreateTaskReqs) => {
 
   const currentUser = await userService.get_current_user()
-  if(!currentUser) return null
+  if (!currentUser) return null
 
   const assignee = await organizationMemberService.get_organizationMember(taskData.assignee_id)
-  if(!assignee) return null
+  if (!assignee) return null
 
   const member = await organizationMemberService.get_organizationMember(taskData.creator_id)
 
@@ -126,10 +126,10 @@ const create_task = async (taskData: CreateTaskReqs) => {
     source: taskData.source
   }
 
-  
+
   const task = await createTask(newTaskData);
 
-  if(taskData.assignee_id !== taskData.creator_id) {
+  if (taskData.assignee_id !== taskData.creator_id) {
     await sendAssigneeChangeNotification(assignee?.user_id, taskData.name, task.id)
   }
 
@@ -141,26 +141,26 @@ const create_task = async (taskData: CreateTaskReqs) => {
 
 const update_task = async (taskData: Partial<Task>) => {
 
-  if(!taskData.id) return null
+  if (!taskData.id) return null
 
   const currentUser = await userService.get_current_user()
-  if(!currentUser) return null
+  if (!currentUser) return null
 
 
   const id = taskData.id
   const originalTask = await get_task(id)
   const task = await updateTask(id, taskData);
 
-  const updates: {[key: string]: any}= {}
-  if(taskData.assignee_id && taskData.assignee_id !== originalTask?.assignee_id) updates.assignee_id = taskData.assignee_id
-  if(taskData.creator_id && taskData.creator_id !== originalTask?.creator_id) updates.creator_id = taskData.creator_id
-  if(taskData.status && taskData.status !== originalTask?.status) updates.status = taskData.status
-  if(taskData.priority && taskData.priority !== originalTask?.priority) updates.priority = taskData.priority
+  const updates: { [key: string]: any } = {}
+  if (taskData.assignee_id && taskData.assignee_id !== originalTask?.assignee_id) updates.assignee_id = taskData.assignee_id
+  if (taskData.creator_id && taskData.creator_id !== originalTask?.creator_id) updates.creator_id = taskData.creator_id
+  if (taskData.status && taskData.status !== originalTask?.status) updates.status = taskData.status
+  if (taskData.priority && taskData.priority !== originalTask?.priority) updates.priority = taskData.priority
 
-  
-  if(Object.keys(updates).includes('assignee_id')) {
+
+  if (Object.keys(updates).includes('assignee_id')) {
     const member = await organizationMemberService.get_organizationMember(taskData.assignee_id!)
-    if(member) {
+    if (member) {
       await sendAssigneeChangeNotification(member?.user_id, taskData.name! || originalTask?.name!, id)
     }
   }
@@ -173,24 +173,30 @@ const update_task = async (taskData: Partial<Task>) => {
 }
 
 const delete_task = async (task_id: number) => {
-console.log(task_id);
+  console.log(task_id);
 
   const rels = await prisma.taskRelationship.deleteMany({
     where: {
-        task_id
+      task_id
     }
   })
 
   const reminders = await prisma.taskReminder.deleteMany({
-      where: {
-          task_id
-      }
+    where: {
+      task_id
+    }
   })
 
   const updates = await prisma.taskUpdate.deleteMany({
-      where: {
-        task_id
-      }
+    where: {
+      task_id
+    }
+  })
+
+  const attachments = await prisma.taskAttachment.deleteMany({
+    where: {
+      task_id
+    }
   })
 
   const metadata = await prisma.taskMeta.deleteMany({
@@ -200,9 +206,9 @@ console.log(task_id);
   })
 
   const task = await prisma.task.delete({
-      where: {
-          id: task_id
-      }
+    where: {
+      id: task_id
+    }
   })
 
   return task
