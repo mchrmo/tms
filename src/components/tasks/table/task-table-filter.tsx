@@ -99,10 +99,16 @@ export function TaskTableFilter({
   isInitialized = true
 }: TaskTableFilterProps) {
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
+  const [localSearchValue, setLocalSearchValue] = useState(searchValue);
 
   const debouncedSearch = useDebouncedCallback((value: string) => {
     onSearchChange(value);
   }, 500);
+
+  // Sync local search value with prop changes
+  useEffect(() => {
+    setLocalSearchValue(searchValue);
+  }, [searchValue]);
 
   // Convert filters to active filters on mount and when filters change
   useEffect(() => {
@@ -182,8 +188,11 @@ export function TaskTableFilter({
           <Input
             className="pl-10"
             placeholder="Vyhľadávanie úloh..."
-            value={searchValue}
-            onChange={(e) => debouncedSearch(e.target.value)}
+            value={localSearchValue}
+            onChange={(e) => {
+              setLocalSearchValue(e.target.value);
+              debouncedSearch(e.target.value);
+            }}
           />
         </div>
         <AddFilterCombobox

@@ -1,4 +1,6 @@
+import PageLoader from "@/components/common/page-loader";
 
 export default function Loading() {
-  return <span>Načítavam</span>;
+    return <PageLoader />;
+
 }

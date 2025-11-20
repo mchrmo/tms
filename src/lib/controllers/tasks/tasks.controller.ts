@@ -52,9 +52,8 @@ const getTasks = async (req: NextRequest): Promise<NextResponse<TasksResponse>> 
 
   const user = await getUser()
   let isAdmin = await isRole('admin', user)
-  isAdmin = false
-  // console.log(user.id);
-  
+  // isAdmin = false
+
 
   let where: Prisma.TaskWhereInput = {
   }
@@ -73,22 +72,25 @@ const getTasks = async (req: NextRequest): Promise<NextResponse<TasksResponse>> 
     }
 
     // Filter for first level tasks only
-    where = {
-      AND: [
-        conditionScheme,
-        paramsWhere.parent_id ? {} : {
-          OR: [
-            // Tasks with no parent
-            { parent_id: null },
-            // Tasks where user has no relationship to the parent
-            {
-              parent: {
-                NOT: conditionScheme
+
+    if (!paramsWhere['name']) {
+      where = {
+        AND: [
+          conditionScheme,
+          paramsWhere.parent_id ? {} : {
+            OR: [
+              // Tasks with no parent
+              { parent_id: null },
+              // Tasks where user has no relationship to the parent
+              {
+                parent: {
+                  NOT: conditionScheme
+                }
               }
-            }
-          ]
-        }
-      ]
+            ]
+          }
+        ]
+      }
     }
   }
 
@@ -97,6 +99,7 @@ const getTasks = async (req: NextRequest): Promise<NextResponse<TasksResponse>> 
     ...where
   }
 
+  // console.log(JSON.stringify(where, null, 2))
   const include: Prisma.TaskInclude = {
     assignee: {
       select: { user: { select: { name: true } } }
@@ -157,7 +160,7 @@ const getTasks = async (req: NextRequest): Promise<NextResponse<TasksResponse>> 
       // Check if user has relationship with parent task
       else if (task.parent.TaskRelationship?.length > 0) {
         parent_role = 'VIEWER';
-      } 
+      }
     }
 
     return {
@@ -174,7 +177,7 @@ const getTasks = async (req: NextRequest): Promise<NextResponse<TasksResponse>> 
     ...result,
     data: dataWithParentRole
   };
-  
+
   return NextResponse.json(data, { status: 200 })
 }
 

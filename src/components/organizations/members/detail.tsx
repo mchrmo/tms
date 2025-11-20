@@ -222,7 +222,7 @@ function SwapMemberDialog({ member }: { member: OrganizationMemberDetail }) {
             Výmena člena organizácie
           </DialogTitle>
           <DialogDescription>
-            Vyberte užívateľa, ktorý nahradí člena na pozící '{member.position_name}' v organizácií '{member.organization.name}'.
+            Vyberte užívateľa, ktorý nahradí člena na pozící &quot;{member.position_name}&quot; v organizácií &quot;{member.organization.name}&quot;.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">

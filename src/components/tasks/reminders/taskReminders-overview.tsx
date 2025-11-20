@@ -9,7 +9,7 @@ export default function TaskRemindersOverview({task}: {task: Task}) {
   return (
     <>
       <div className="flex justify-between ">
-        <h3 className="text-lg">Pripomieky</h3>
+        <h3 className="text-lg">Pripomienky</h3>
         <CreateTaskReminder task_id={task.id}></CreateTaskReminder>
       </div>
       <div className="mt-5">

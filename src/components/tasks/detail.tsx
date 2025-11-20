@@ -20,6 +20,8 @@ import { getMetaValue } from "@/lib/utils/api.utils";
 import TaskDetailSidebar from "./detail/sidebar";
 import { Spinner } from "../ui/spinner";
 import { TasksTable } from "./table";
+import AddButton from "../common/buttons/add-button";
+import Link from "next/link";
 
 
 export default function TaskDetail({ params }: { params: { id: string } }) {
@@ -102,10 +104,19 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
                         <TaskRemindersOverview task={task}></TaskRemindersOverview>
                       </TabsContent>
                       <TabsContent value="subtasks">
-                        <TasksTable
-                          disableFilter={true}
-                          hiddenFilters={[{ id: 'parent_id', value: task.id.toString() }]}
-                        ></TasksTable>
+                        <div className="flex flex-col gap-5">
+                          <div className="flex justify-between">
+                            <h3 className="text-lg">Podradené úlohy</h3>
+                            <Link href={`/tasks/create?parent_id=${task.id}`}>
+                              <AddButton variant={'outline'}>Pridať úlohu</AddButton>
+                            </Link>
+                          </div>
+
+                          <TasksTable
+                            disableFilter={true}
+                            hiddenFilters={[{ id: 'parent_id', value: task.id.toString() }]}
+                          ></TasksTable>
+                        </div>
                       </TabsContent>
                       <TabsContent value="files">
                         <TaskAttachmentsOverview task={task}></TaskAttachmentsOverview>

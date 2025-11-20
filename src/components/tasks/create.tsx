@@ -40,12 +40,12 @@ export default function CreateTask() {
   return <>
     {
       parent && <Label className="text-md">
-        Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${parent.id}`}>{parent.name}</Link>
+        Úloha podradená pod úlohu <Link className="link" href={`/tasks/${parent.id}`}>{parent.name}</Link>
       </Label>
     }
 
     <div className="max-w-screen-xl mx-auto">
-      <TaskForm defaultValues={{ creator: {user: {name: (user && user.fullName) || ''}} }}></TaskForm>
+      <TaskForm defaultValues={{ creator: {user: {name: (user && user.fullName) || ''}}, deadline: parent ? parent.deadline : new Date(), name: parent ? parent.name : '' }}></TaskForm>
     </div>
 
   </>
