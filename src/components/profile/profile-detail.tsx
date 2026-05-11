@@ -11,7 +11,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import UnavailabilityForm from "@/components/users/unavailability-form"
-import { Building2, KeyRound, Mail, Phone, ShieldCheck, User } from "lucide-react"
+import { Building2, KeyRound, Mail, Phone, Send, ShieldCheck, Sun, Sunset, User } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
+import { getApiClient } from "@/lib/api-client"
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -41,6 +44,21 @@ export default function ProfileDetail({ userId, canEdit }: { userId: number; can
   const user = userQ.data
   const updateUserQ = useUpdateUser(userId)
   const [pendingField, setPendingField] = useState<string | null>(null)
+  const [sendingReport, setSendingReport] = useState<'morning' | 'afternoon' | null>(null)
+  const { toast } = useToast()
+
+  const sendReport = async (type: 'morning' | 'afternoon') => {
+    setSendingReport(type)
+    try {
+      const client = getApiClient('/reports')
+      await client.get('', { params: { type } })
+      toast({ title: type === 'morning' ? 'Ranný report odoslaný!' : 'Poobedný report odoslaný!' })
+    } catch {
+      toast({ title: 'Chyba', description: 'Report sa nepodarilo odoslať.' })
+    } finally {
+      setSendingReport(null)
+    }
+  }
 
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
@@ -118,49 +136,76 @@ export default function ProfileDetail({ userId, canEdit }: { userId: number; can
           {canEdit && (
             <SectionCard title="Notifikácie">
               <div className="flex flex-col gap-4">
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="morning_report"
-                    checked={!!user.morning_report}
-                    disabled={pendingField === 'morning_report'}
-                    onCheckedChange={(checked) => {
-                      setPendingField('morning_report')
-                      updateUserQ.mutate(
-                        { id: userId, morning_report: !!checked },
-                        { onSettled: () => setPendingField(null) }
-                      )
-                    }}
-                    className="mt-0.5"
-                  />
-                  <div>
-                    <Label htmlFor="morning_report" className={`font-medium ${pendingField === 'morning_report' ? 'opacity-50' : ''}`}>
-                      Ranný report
-                      {pendingField === 'morning_report' && <LoadingSpinner size="sm" className="ml-2" />}
-                    </Label>
-                    <p className="text-xs text-muted-foreground mt-0.5">Dostávať súhrn úloh každé ráno</p>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="morning_report"
+                      checked={!!user.morning_report}
+                      disabled={pendingField === 'morning_report'}
+                      onCheckedChange={(checked) => {
+                        setPendingField('morning_report')
+                        updateUserQ.mutate(
+                          { id: userId, morning_report: !!checked },
+                          { onSettled: () => setPendingField(null) }
+                        )
+                      }}
+                      className="mt-0.5"
+                    />
+                    <div>
+                      <Label htmlFor="morning_report" className={`font-medium ${pendingField === 'morning_report' ? 'opacity-50' : ''}`}>
+                        Ranný report
+                        {pendingField === 'morning_report' && <LoadingSpinner size="sm" className="ml-2" />}
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">Dostávať súhrn úloh každé ráno</p>
+                    </div>
                   </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="shrink-0"
+                    disabled={sendingReport === 'morning'}
+                    onClick={() => sendReport('morning')}
+                  >
+                    {sendingReport === 'morning' ? <LoadingSpinner size="sm" className="mr-1.5" /> : <Sun size={14} className="mr-1.5" />}
+                    Odoslať teraz
+                  </Button>
                 </div>
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="afternoon_report"
-                    checked={!!user.afternoon_report}
-                    disabled={pendingField === 'afternoon_report'}
-                    onCheckedChange={(checked) => {
-                      setPendingField('afternoon_report')
-                      updateUserQ.mutate(
-                        { id: userId, afternoon_report: !!checked },
-                        { onSettled: () => setPendingField(null) }
-                      )
-                    }}
-                    className="mt-0.5"
-                  />
-                  <div>
-                    <Label htmlFor="afternoon_report" className={`font-medium ${pendingField === 'afternoon_report' ? 'opacity-50' : ''}`}>
-                      Poobedný report
-                      {pendingField === 'afternoon_report' && <LoadingSpinner size="sm" className="ml-2" />}
-                    </Label>
-                    <p className="text-xs text-muted-foreground mt-0.5">Dostávať súhrn úloh každé poobede</p>
+
+                <div className="border-t" />
+
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="afternoon_report"
+                      checked={!!user.afternoon_report}
+                      disabled={pendingField === 'afternoon_report'}
+                      onCheckedChange={(checked) => {
+                        setPendingField('afternoon_report')
+                        updateUserQ.mutate(
+                          { id: userId, afternoon_report: !!checked },
+                          { onSettled: () => setPendingField(null) }
+                        )
+                      }}
+                      className="mt-0.5"
+                    />
+                    <div>
+                      <Label htmlFor="afternoon_report" className={`font-medium ${pendingField === 'afternoon_report' ? 'opacity-50' : ''}`}>
+                        Poobedný report
+                        {pendingField === 'afternoon_report' && <LoadingSpinner size="sm" className="ml-2" />}
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">Dostávať súhrn úloh každé poobede</p>
+                    </div>
                   </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="shrink-0"
+                    disabled={sendingReport === 'afternoon'}
+                    onClick={() => sendReport('afternoon')}
+                  >
+                    {sendingReport === 'afternoon' ? <LoadingSpinner size="sm" className="mr-1.5" /> : <Sunset size={14} className="mr-1.5" />}
+                    Odoslať teraz
+                  </Button>
                 </div>
               </div>
             </SectionCard>
