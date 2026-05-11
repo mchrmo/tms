@@ -129,7 +129,7 @@ export const useUpdateUser = (id: number) => {
     onMutate: async (updatedUser) => {
       await queryClient.cancelQueries({queryKey: userQueryKeys.detail(id)});
       const previousUser = queryClient.getQueryData(userQueryKeys.detail(id));
-      queryClient.setQueryData(userQueryKeys.detail(Number(id)), updatedUser);
+      queryClient.setQueryData(userQueryKeys.detail(Number(id)), { ...(previousUser as object), ...updatedUser });
       return { previousUser: previousUser, updatedUser: updatedUser };
     },
     onSuccess: (data) => {

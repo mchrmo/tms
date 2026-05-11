@@ -10,6 +10,8 @@ import TablePagination from "@/components/common/table/pagination"
 import { formatDateTime } from "@/lib/utils/dates"
 import { TableFilter } from "../common/table/filter"
 import { meetingColumns } from "@/lib/models/meeting/meeting.model"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 
 
 const columns: ColumnDef<Meeting>[] = [
@@ -52,8 +54,9 @@ export default function MeetingsTable({defaultFilters}: {defaultFilters?: Column
     desc: true
   }])
   const [pagination, setPagination] = useState<PaginationState>({pageIndex: 0, pageSize: 10})
+  const [showArchived, setShowArchived] = useState(false)
 
-  const query = useMeetings(pagination, columnFilters, sorting[0])
+  const query = useMeetings(pagination, columnFilters, sorting[0], showArchived)
   const { isLoading, isError } = query
 
   useEffect(() => {
@@ -99,8 +102,16 @@ export default function MeetingsTable({defaultFilters}: {defaultFilters?: Column
 
   return (
     <div>
-      <div className="mb-4">
+      <div className="mb-4 flex items-center gap-6">
         <TableFilter table={table} columns={meetingColumns} primaryFilterColumn="name"></TableFilter>
+        <div className="flex items-center gap-2 shrink-0">
+          <Checkbox
+            id="showArchived"
+            checked={showArchived}
+            onCheckedChange={(v) => setShowArchived(!!v)}
+          />
+          <Label htmlFor="showArchived">Zobraziť archivované</Label>
+        </div>
       </div>
 
       <div className="">

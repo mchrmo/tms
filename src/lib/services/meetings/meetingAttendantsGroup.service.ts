@@ -1,5 +1,28 @@
 import { ZMeetingAttendantsGroupUpdateForm } from "@/lib/models/meeting/meetingAttendantsGroup.model";
 import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+
+const groupWithMembers = Prisma.validator<Prisma.MeetingAttendantsGroupDefaultArgs>()({
+  include: {
+    MeetingAttendantsGroupUser: {
+      include: { user: { select: { id: true, name: true, email: true } } }
+    }
+  }
+})
+export type AttendantGroupWithMembers = Prisma.MeetingAttendantsGroupGetPayload<typeof groupWithMembers>
+
+const get_userGroups = async (creator_id: number) => {
+  const groups = await prisma.meetingAttendantsGroup.findMany({
+    where: { creator_id },
+    include: {
+      MeetingAttendantsGroupUser: {
+        include: { user: { select: { id: true, name: true, email: true } } }
+      }
+    },
+    orderBy: { name: 'asc' }
+  })
+  return groups
+}
 
 interface CreateAttendantGroupReqs {
   creator_id: number;
@@ -77,6 +100,7 @@ const remove_groupAttendant = async (user_id: number, group_id: number) => {
 
 
 const meetingAttendantsGroupService = {
+  get_userGroups,
   create_attendantGroup,
   update_attendantGroup,
   delete_attendantGroup,

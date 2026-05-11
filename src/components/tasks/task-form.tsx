@@ -37,10 +37,14 @@ export type TaskFormInputs = {
 
 interface TaskFormProps {
   defaultValues?: any,
-  role?: TaskUserRole
+  role?: TaskUserRole,
+  onSuccess?: (newTaskId: number) => void,
+  hideSubmit?: boolean,
+  formId?: string,
+  onPendingChange?: (isPending: boolean) => void
 }
 
-export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
+export default function TaskForm({ defaultValues: _def, role, onSuccess, hideSubmit, formId = 'form', onPendingChange }: TaskFormProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -146,7 +150,11 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
   useEffect(() => {
     if (createTask.isSuccess) {
       const newId = createTask.data.id
-      if (newId) router.push('/tasks/' + newId)
+      if (onSuccess) {
+        onSuccess(newId)
+      } else if (newId) {
+        router.push('/tasks/' + newId)
+      }
 
       createTask.reset()
     }
@@ -156,6 +164,10 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
 
     }
   }, [createTask.isSuccess, updateTask.isSuccess])
+
+  useEffect(() => {
+    onPendingChange?.(updateTask.isPending || createTask.isPending)
+  }, [updateTask.isPending, createTask.isPending])
 
 
   const onSubmit: SubmitHandler<TaskFormInputs> = async (data) => {
@@ -175,18 +187,18 @@ export default function TaskForm({ defaultValues: _def, role }: TaskFormProps) {
 
   return (
     <Form {...form}>
-      <form className="w-full max-w-screen-md" id="form" onSubmit={handleSubmit(onSubmit)}>
+      <form className="w-full max-w-screen-md" id={formId} onSubmit={handleSubmit(onSubmit)}>
 
         <div className="flex flex-col gap-3 md:gap-5 ">
           <div className="flex flex-col md:flex-row justify-between gap-3">
             {
               _def && _def.parent ? (
                 <div className="font-semibold text-[#B0B0B0] text-sm flex gap-1">
-                  <MoveUpLeftIcon size={'14px'}></MoveUpLeftIcon><Link href={`/tasks/${_def.parent.id}`} aria-label={_def.parent.name}>Nadradená úloha</Link>
+                  <MoveUpLeftIcon size={'14px'}/><Link href={`/tasks/${_def.parent.id}`} aria-label={_def.parent.name}>Nadradená úloha</Link>
                 </div>
               ) : <div></div>
             }
-            <SubmitButton isLoading={updateTask.isPending || createTask.isPending} type="submit" >Uložiť</SubmitButton>
+            {!hideSubmit && <SubmitButton isLoading={updateTask.isPending || createTask.isPending} type="submit" >Uložiť</SubmitButton>}
           </div>
 
 

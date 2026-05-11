@@ -66,14 +66,17 @@ const getMeetings = async (req: NextRequest) => {
   const params = req.nextUrl.searchParams
   const { where: paramsWhere, orderBy, pagination } = parseGetManyParams(params, meetingColumns)
 
+  const showArchived = params.get('showArchived') === 'true'
 
   const user = await getUser()
 
   let where: Prisma.MeetingWhereInput = {
+    ...(showArchived ? {} : { archived: false }),
   }
 
   if (!await isRole('admin', user)) {
     where = {
+      ...(showArchived ? {} : { archived: false }),
       attendants: {
         some: {
           user_id: user?.id
@@ -147,6 +150,21 @@ const updateMeeting = async (request: NextRequest) => {
 
 const deleteMeeting = async (req: NextRequest, params: any) => {
   const id = parseInt(params.id)
+
+  const user = await getUser()
+  const user_id = user?.id || 0
+
+  if (!await isRole('admin', user)) {
+    const attendant = await prisma.meetingAttendant.findUnique({
+      where: {
+        meeting_id_user_id: { meeting_id: id, user_id }
+      }
+    })
+    if (!attendant || attendant.role !== 'CREATOR') {
+      throw new ApiError(403, 'Len vytvárajúci môže vymazať poradu')
+    }
+  }
+
   const meeting = await meetingService.delete_meeting(id)
 
   return NextResponse.json(meeting, { status: 200 })
