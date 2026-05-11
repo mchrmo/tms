@@ -85,12 +85,21 @@ const delete_meetingItem = async (meetingItem_id: number) => {
   return meetingItem
 }
 
+const move_meetingItems = async (itemIds: number[], targetMeetingId: number) => {
+  const updatedItems = await prisma.meetingItem.updateMany({
+    where: { id: { in: itemIds } },
+    data: { meeting_id: targetMeetingId }
+  })
+  return updatedItems
+}
+
 
 const meetingItemService = {
   get_meetingItem,
   create_meetingItem,
   update_meetingItem,
-  delete_meetingItem
+  delete_meetingItem,
+  move_meetingItems
 }
 
 export default meetingItemService;

@@ -2,7 +2,7 @@ import { User } from "@prisma/client";
 import userService from "../user.service";
 import prisma from "@/lib/prisma";
 import { ApiError } from "next/dist/server/api-utils";
-import { newMeetingAttendantEmail } from "../mail.service";
+import { newMeetingAttendantEmail, sendMeetingAttendantRemovedEmail } from "../mail.service";
 
 
 interface CreateAttendantReqs {
@@ -27,14 +27,21 @@ const create_attendant = async (attendantData: CreateAttendantReqs) => {
 
 const delete_attendant = async (id: number) => {
 
-  let attendant = await prisma.meetingAttendant.findUnique({where: {id}})
+  let attendant = await prisma.meetingAttendant.findUnique({
+    where: {id},
+    include: { meeting: true }
+  })
 
   if(!attendant) return null
-  if(attendant?.role == 'CREATOR') throw new ApiError(403, "Unable to delete creator") 
+  if(attendant?.role == 'CREATOR') throw new ApiError(403, "Unable to delete creator")
 
-  attendant = await prisma.meetingAttendant.delete({where: {id}})
+  const { meeting, user_id } = attendant as typeof attendant & { meeting: import('@prisma/client').Meeting }
 
-  return attendant
+  const deleted = await prisma.meetingAttendant.delete({where: {id}})
+
+  await sendMeetingAttendantRemovedEmail(user_id, meeting)
+
+  return deleted
 }
 
 

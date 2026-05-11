@@ -1,104 +1,261 @@
 <!DOCTYPE html>
-<html>
+<html lang="sk">
 <head>
-    <style>
-        /* Add some basic styling */
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .header {
-            background-color: #f8f9fa;
-            padding: 10px;
-            text-align: center;
-        }
-        .content {
-            padding: 20px;
-        }
-        hr.solid {
-          border-top: 3px solid #bbb;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    </style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #f0f2f5;
+      color: #1a1a2e;
+      padding: 32px 16px;
+    }
+
+    .email-wrapper {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+      border-radius: 12px 12px 0 0;
+      padding: 36px 32px;
+      text-align: center;
+      color: #ffffff;
+    }
+    .header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      color: #e0eaff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    /* Body card */
+    .body-card {
+      background: #ffffff;
+      border-radius: 0 0 12px 12px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 28px;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e3a5f;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e8edf5;
+    }
+    .section-title .icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .icon-deadline { background: #fff0f0; }
+    .icon-reminder { background: #fffbeb; }
+    .icon-activity { background: #f0fdf4; }
+
+    /* Sub-group */
+    .group {
+      margin-bottom: 14px;
+    }
+    .group-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #6b7a99;
+      margin-bottom: 6px;
+    }
+
+    /* Task items */
+    .task-list {
+      list-style: none;
+    }
+    .task-list li {
+      padding: 9px 12px;
+      border-radius: 7px;
+      font-size: 14px;
+      margin-bottom: 4px;
+      background: #f7f9fc;
+      border-left: 3px solid #2563eb;
+    }
+    .task-list li.empty {
+      color: #a0aec0;
+      border-left-color: #e2e8f0;
+      font-style: italic;
+      font-size: 13px;
+    }
+    .task-list li a {
+      color: #1e3a5f;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .task-list li a:hover { text-decoration: underline; }
+
+    .task-list.reminder li { border-left-color: #f59e0b; }
+    .task-list.activity li { border-left-color: #10b981; }
+
+    .task-meta {
+      font-size: 12px;
+      color: #6b7a99;
+      margin-top: 2px;
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid #e8edf5;
+      margin: 24px 0;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: #a0aec0;
+    }
+  </style>
 </head>
 <body>
+  <div class="email-wrapper">
+
     <div class="header">
-        <h1>{{title}}</h1>
+      <div class="badge">Ranný report</div>
+      <h1>{{title}}</h1>
     </div>
-    <div class="content">
+
+    <div class="body-card">
+
       {{#with deadlineTasks}}
-      <div style="margin: 3rem 0;">
-        <h2>Termín dokončenia úloh dnes:</h2>
-        
-        <h3>Vlastné úlohy</h3>
-        <ul>
-          {{#each personal}}
+      <div class="section">
+        <div class="section-title">
+          <span class="icon icon-deadline" style="display:inline-block;width:28px;height:28px;border-radius:8px;background:#fff0f0;text-align:center;line-height:28px;vertical-align:middle;flex-shrink:0; margin-right: 10px;"><span style="display:inline-block;width:10px;height:10px;background:#dc2626;border-radius:2px;vertical-align:middle;"></span></span>
+          Termín dokončenia úloh dnes
+        </div>
+
+        <div class="group">
+          <div class="group-label">Vlastné úlohy</div>
+          <ul class="task-list">
+            {{#each personal}}
               <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
-              {{else}}
-              <li>Žiadne úlohy</li>
-          {{/each}}
-        </ul>
+            {{else}}
+              <li class="empty">Žiadne úlohy</li>
+            {{/each}}
+          </ul>
+        </div>
 
-        <h3>Mne delegované úlohy</h3>
-        <ul>
+        <div class="group">
+          <div class="group-label">Mne delegované úlohy</div>
+          <ul class="task-list">
             {{#each assignee_id}}
-                <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
-                {{else}}
-                <li>Žiadne úlohy</li>  
+              <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
+            {{else}}
+              <li class="empty">Žiadne úlohy</li>
             {{/each}}
-        </ul>
+          </ul>
+        </div>
 
-        <h3>Delegované úlohy</h3>
-        <ul>
+        <div class="group">
+          <div class="group-label">Delegované úlohy</div>
+          <ul class="task-list">
             {{#each creator_id}}
-                <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
-                {{else}}
-                <li>Žiadne úlohy</li>  
+              <li><a href="{{../../url}}/tasks/{{this.id}}">{{this.name}}</a></li>
+            {{else}}
+              <li class="empty">Žiadne úlohy</li>
             {{/each}}
-        </ul>
+          </ul>
+        </div>
       </div>
       {{/with}}
 
-      <hr class="solid">
+      <hr class="divider">
 
       {{#with reminders}}
-      <div style="margin: 3rem 0;">
-        <h2>Pripomienky</h2>
+      <div class="section">
+        <div class="section-title">
+          <span class="icon icon-reminder" style="display:inline-block;width:28px;height:28px;border-radius:8px;background:#fffbeb;text-align:center;line-height:28px;vertical-align:middle;flex-shrink:0;margin-right: 10px;"><span style="display:inline-block;width:10px;height:10px;background:#d97706;border-radius:50%;vertical-align:middle;"></span></span>
+          Pripomienky
+        </div>
 
-        <h3>Mne delegované úlohy</h3>
-        <ul>
+        <div class="group">
+          <div class="group-label">Mne delegované úlohy</div>
+          <ul class="task-list reminder">
             {{#each assignee_id}}
-                <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.description}}</a></li>
-                {{else}}
-                <li>Žiadne pripomienky</li>  
+              <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.description}}</a></li>
+            {{else}}
+              <li class="empty">Žiadne pripomienky</li>
             {{/each}}
-        </ul>
+          </ul>
+        </div>
 
-        <h3>Delegované úlohy</h3>
-        <ul>
+        <div class="group">
+          <div class="group-label">Delegované úlohy</div>
+          <ul class="task-list reminder">
             {{#each creator_id}}
-                <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.description}}</a></li>
-                {{else}}
-                <li>Žiadne pripomienky</li>  
+              <li><a href="{{../../url}}/tasks/{{this.task_id}}">{{this.description}}</a></li>
+            {{else}}
+              <li class="empty">Žiadne pripomienky</li>
             {{/each}}
-        </ul>
+          </ul>
+        </div>
       </div>
       {{/with}}
 
-      <hr class="solid">
+      <hr class="divider">
 
-      <div style="margin: 3rem 0;">
-        <h2>Posledná aktivita</h2>
-        <ul>
-            {{#each updates}}
-                <li><a href="{{../url}}/tasks/{{this.task_id}}">{{this.task.name}}</a> {{dateTime this.createdAt}} - {{this.description}}</li>
-                {{else}}
-                <li>Žiadna aktivita</li>  
-            {{/each}}
+      <div class="section">
+        <div class="section-title">
+          <span class="icon icon-activity" style="display:inline-block;width:28px;height:28px;border-radius:8px;background:#f0fdf4;text-align:center;line-height:28px;vertical-align:middle;flex-shrink:0;margin-right: 10px;"><span style="display:inline-block;width:10px;height:10px;background:#059669;border-radius:2px;vertical-align:middle;"></span></span>
+          Posledná aktivita
+        </div>
+        <ul class="task-list activity">
+          {{#each updates}}
+            <li>
+              <a href="{{../url}}/tasks/{{this.task_id}}">{{this.task.name}}</a>
+              <div class="task-meta">{{dateTime this.createdAt}} — {{this.description}}</div>
+            </li>
+          {{else}}
+            <li class="empty">Žiadna aktivita</li>
+          {{/each}}
         </ul>
       </div>
+
     </div>
-    <div>
-      <p style="color: #bbb">Vygenerované pre užívateľa {{user.name}} ({{user.id}})</p>
+
+    <div class="footer">
+      Vygenerované pre užívateľa <strong>{{user.name}}</strong>
     </div>
+
+  </div>
 </body>
 </html>

@@ -47,11 +47,13 @@ export const useMeeting = (id?: number, options?: UseQueryOptions<DetailResponse
   return query
 }
 
-export const useMeetings = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort) => {
+export const useMeetings = (pagination: PaginationState, filter?: ColumnFiltersState, sort?: ColumnSort, showArchived?: boolean) => {
   const { toast } = useToast()
 
   const {params, urlParams} = parseListHookParamsNew(pagination, filter, sort)
 
+  const allParams = { ...params, ...(showArchived ? { showArchived: 'true' } : {}) }
+  const allUrlParams = urlParams + (showArchived ? '&showArchived=true' : '')
 
   const getMeetingsFn = async (params: {[key: string]: string}) => {
     const response = await meetingsApi.get('', {
@@ -61,8 +63,8 @@ export const useMeetings = (pagination: PaginationState, filter?: ColumnFiltersS
   }
 
   const query = useQuery<PaginatedResponse<Meeting>>({
-    queryKey: meetingQueryKeys.searched(urlParams),
-    queryFn: () => getMeetingsFn(params),
+    queryKey: meetingQueryKeys.searched(allUrlParams),
+    queryFn: () => getMeetingsFn(allParams),
   })
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { Prisma, Meeting, MeetingAttendantRole } from "@prisma/client";
-import { sendAssigneeChangeNotification, sendEmail } from "../mail.service";
+import { sendEmail, sendMeetingUpdatedEmail } from "../mail.service";
 import prisma from "../../prisma";
 import userService from "../user.service";
 import meetingAttendantService from "./meetingAttendant.service";
@@ -101,18 +101,12 @@ const update_meeting = async (meetingData: Partial<Meeting>) => {
     data: meetingData
   })
 
-  // check if date has changed
-  if(meetingData.date !== originalMeeting.date) {
-    const url = process.env.NEXT_PUBLIC_URL
-
-    for (const attendant  of originalMeeting.attendants) {
-      await sendEmail({
-        to: attendant.user.email,
-        subject: "Termín porady zmeneý",
-        html: `Porada: <a href="${url}/meetings/${meeting.id}">${originalMeeting.name}</a> <br>
-          Nový termín: <b>${formatDateTime(meeting.date)} </b> <br>
-        `
-      })
+  // notify attendants on any meeting change
+  const dateChanged = meetingData.date && new Date(meetingData.date).getTime() !== new Date(originalMeeting.date).getTime()
+  const nameChanged = meetingData.name && meetingData.name !== originalMeeting.name
+  if (dateChanged || nameChanged) {
+    for (const attendant of originalMeeting.attendants) {
+      await sendMeetingUpdatedEmail(attendant.user.email, meeting)
     }
   }
 

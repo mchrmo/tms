@@ -1,6 +1,8 @@
 import { Prisma, Task, TaskPriority, TaskStatus } from "@prisma/client";
 import { createTask, createTaskUpdate, updateTask } from "../../db/task.repository";
-import { sendAssigneeChangeNotification } from "../mail.service";
+import { sendAssigneeChangeNotification, sendTaskStatusChangeNotification } from "../mail.service";
+import taskSubscriptionService from "./taskSubscription.service";
+import { TASK_STATUSES_MAP } from "../../models/task.model";
 import prisma from "../../prisma";
 import taskUpdateService from "./taskUpdate.service";
 import userService from "../user.service";
@@ -35,7 +37,7 @@ const get_task = async (id: number, options?: GetDetailOptions) => {
     where,
     include: {
       assignee: {
-        select: { user: true, user_id: true, position_name: true },
+        select: { id: true, user: true, user_id: true, position_name: true },
       },
       creator: {
         select: {
@@ -162,6 +164,16 @@ const update_task = async (taskData: Partial<Task>) => {
     const member = await organizationMemberService.get_organizationMember(taskData.assignee_id!)
     if (member) {
       await sendAssigneeChangeNotification(member?.user_id, taskData.name! || originalTask?.name!, id)
+    }
+  }
+
+  if (updates.status) {
+    const newStatus = updates.status as TaskStatus
+    const taskName = task.name || originalTask?.name || ''
+    const subscribers = await taskSubscriptionService.get_subscribers_for_status(id, newStatus)
+    const statusLabel = TASK_STATUSES_MAP[newStatus] || newStatus
+    for (const subscriber of subscribers) {
+      await sendTaskStatusChangeNotification(subscriber.email, subscriber.name, taskName, id, statusLabel)
     }
   }
 

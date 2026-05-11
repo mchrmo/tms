@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import TaskAttachmentsOverview from "./attachments/taskAttachments-overview";
 import { TaskDetail as TaskDetailT } from "@/lib/services/tasks/task.service";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
-import { BadgeAlert, ListTreeIcon, PaperclipIcon, SettingsIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { BadgeAlert, CopyIcon, ListTreeIcon, PaperclipIcon, SettingsIcon } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
 import { useUser } from "@clerk/nextjs";
@@ -22,6 +22,8 @@ import { Spinner } from "../ui/spinner";
 import { TasksTable } from "./table";
 import AddButton from "../common/buttons/add-button";
 import Link from "next/link";
+import SubmitButton from "../common/buttons/submit";
+import TaskStatusNotifications from "./subscriptions/task-status-notifications";
 
 
 export default function TaskDetail({ params }: { params: { id: string } }) {
@@ -34,6 +36,7 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
 
   const deleteTaskQ = useDeleteTask();
   const [tab, setTab] = useState('files')
+  const [taskFormPending, setTaskFormPending] = useState(false)
 
   const { user } = useUser()
   const isAdmin = isRole((user as unknown) as User, 'admin')
@@ -63,14 +66,16 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
           {/* Topbar */}
           <div className="flex justify-between border-b py-2 px-8 items-center">
             <h1 className="font-semibold text-base p-0">Detail úlohy</h1>
-            <div className="">
+            <div className="flex items-center gap-1">
               {
                 task && taskRole &&
                 <>
                   {/* <Button onClick={() => setVariant(variant == 'ghost' ? 'default' : 'ghost')} variant={variant} size={'icon'}>
                       <EyeIcon />
                     </Button> */}
+                  <DuplicateTaskDialog task={task} />
                   <TaskSettings task={task} role={taskRole} />
+                  <SubmitButton type="submit" form="task-detail-form" isLoading={taskFormPending}>Uložiť</SubmitButton>
                 </>
               }
             </div>
@@ -80,13 +85,13 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
           {
             task && taskRole && (
               <div className="flex overflow-hidden flex-grow">
-                <div className="flex flex-col items-center flex-grow gap-5 pl-8 py-8 lg:pr-6 overflow-y-auto">
+                <div className="flex flex-col items-center flex-grow gap-5 pl-8 pb-8 pt-2 lg:pr-6 overflow-y-auto">
                   {/* {
                     task.parent && <Label className="text-md">
                       Úloha podradená pod úlohu: <Link className="link" href={`/tasks/${task.parent.id}`}>{task.parent.name}</Link>
                     </Label>
                   } */}
-                  <TaskForm defaultValues={task} role={taskRole}></TaskForm>
+                  <TaskForm defaultValues={task} role={taskRole} formId="task-detail-form" hideSubmit onPendingChange={setTaskFormPending}></TaskForm>
 
                   <div className="border-t "></div>
 
@@ -139,6 +144,57 @@ export default function TaskDetail({ params }: { params: { id: string } }) {
 }
 
 
+function DuplicateTaskDialog({ task }: { task: NonNullable<TaskDetailT> }) {
+  const [open, setOpen] = useState(false)
+  const [isPending, setIsPending] = useState(false)
+  const [asSubtask, setAsSubtask] = useState(false)
+  const router = useRouter()
+
+  const duplicateDefaults = {
+    name: `Kópia - ${task.name}`,
+    description: task.description || '',
+    deadline: task.deadline ? new Date(task.deadline) : new Date(),
+    assignee_id: task.assignee?.id ?? null,
+    priority: task.priority,
+    status: 'TODO' as const,
+    parent_id: asSubtask ? task.id : (task.parent_id ?? null),
+    source: task.source || '',
+    creator: task.creator,
+    assignee: task.assignee,
+  }
+
+  const handleSuccess = (newTaskId: number) => {
+    setOpen(false)
+    router.push('/tasks/' + newTaskId)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" title="Duplikovať úlohu">
+          <CopyIcon />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="w-screen lg:max-w-[750px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Duplikovať úlohu</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-muted-foreground">Upravte údaje pred uložením novej úlohy.</p>
+        <div className="flex items-center gap-2">
+          <Checkbox id="as-subtask" checked={asSubtask} onCheckedChange={(v) => setAsSubtask(!!v)} />
+          <Label htmlFor="as-subtask" className="text-sm font-medium cursor-pointer">Pridať ako podúlohu</Label>
+        </div>
+        <TaskForm key={String(asSubtask)} defaultValues={duplicateDefaults} onSuccess={handleSuccess} formId="duplicate-task-form" hideSubmit onPendingChange={setIsPending} />
+        <DialogFooter className="pt-2">
+          <Button variant="secondary" type="button" onClick={() => setOpen(false)}>Zrušiť</Button>
+          <SubmitButton type="submit" form="duplicate-task-form" isLoading={isPending}>Uložiť kópiu</SubmitButton>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+
 function TaskSettings({ task, role }: { task: TaskDetailT, role: TaskUserRole }) {
 
   const updateMetaQ = useUpdateTaskMeta()
@@ -175,6 +231,10 @@ function TaskSettings({ task, role }: { task: TaskDetailT, role: TaskUserRole })
                 Vyžadovať kontrolu dokončenia úlohy
               </Label>
             </div>
+          </div>
+
+          <div className="border-t pt-4">
+            <TaskStatusNotifications task_id={task.id} />
           </div>
 
 

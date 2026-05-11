@@ -27,7 +27,13 @@ export const UserCreateSchema = UserSchema.omit({
 
 export type ZUserCreateForm = z.infer<typeof UserCreateSchema>;
 
-export const UserUpdateSchema = UserSchema.partial().merge(z.object({ id: z.number() }));
+export const UserUpdateSchema = UserSchema.partial().merge(z.object({
+  id: z.number(),
+  morning_report: z.boolean().optional(),
+  afternoon_report: z.boolean().optional(),
+  unavailable_from: z.coerce.date().nullable().optional(),
+  unavailable_to: z.coerce.date().nullable().optional(),
+}));
 
 // Zod type for UpdateForm
 export type ZUserUpdateForm = z.infer<typeof UserUpdateSchema>;

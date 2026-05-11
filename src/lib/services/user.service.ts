@@ -25,6 +25,16 @@ const get_user = async (id: number) => {
     }
   })
 
+  // Auto-clear expired unavailability
+  if (user && user.unavailable_to && new Date() > new Date(user.unavailable_to)) {
+    await prisma.user.update({
+      where: {id},
+      data: {unavailable_from: null, unavailable_to: null}
+    })
+    user.unavailable_from = null
+    user.unavailable_to = null
+  }
+
   return user
 }
 export type UserDetail = Prisma.PromiseReturnType<typeof get_user>
