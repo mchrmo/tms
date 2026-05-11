@@ -229,7 +229,7 @@ const moveMeetingItems = async (request: NextRequest) => {
   const items = await prisma.meetingItem.findMany({ where: { id: { in: item_ids } } })
   if (items.length !== item_ids.length) throw new ApiError(404, "Niektoré body porady neboli nájdené")
 
-  const sourceMeetingIds = [...new Set(items.map(i => i.meeting_id))]
+  const sourceMeetingIds = Array.from(new Set(items.map(i => i.meeting_id)))
   if (sourceMeetingIds.length > 1) throw new ApiError(400, "Všetky body musia patriť tej istej porade")
 
   const sourceMeetingId = sourceMeetingIds[0]
