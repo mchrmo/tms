@@ -70,6 +70,11 @@ export default function MeetingItemDetail({ params }: {params: {id: string}}) {
         <ViewHeadline>{meetingItem.data.meeting.name} - Návrh bodu porady</ViewHeadline>
         <div className="flex space-x-4">
           {
+            meetingItem.data.status == 'ACCEPTED' && (
+              <Button variant={'default'} onClick={() => resolveItemQ.mutate({id: itemId, status: 'PASSED'})}>Prerokované</Button>
+            )
+          }
+          {
             meetingItem.data.status == 'DRAFT' && <Button onClick={publishItem}>Publikovať</Button>
           }
           {

@@ -1,5 +1,5 @@
 import { Prisma, Meeting, MeetingAttendantRole } from "@prisma/client";
-import { sendEmail, sendMeetingUpdatedEmail } from "../mail.service";
+import { sendEmail, sendMeetingUpdatedEmail, sendMeetingDeletedEmail } from "../mail.service";
 import prisma from "../../prisma";
 import userService from "../user.service";
 import meetingAttendantService from "./meetingAttendant.service";
@@ -117,7 +117,15 @@ const update_meeting = async (meetingData: Partial<Meeting>) => {
 
 const delete_meeting = async (meeting_id: number) => {
 
- 
+  const meetingWithAttendants = await prisma.meeting.findUnique({
+    where: { id: meeting_id },
+    include: {
+      attendants: {
+        select: { user: { select: { email: true } } }
+      }
+    }
+  })
+
   const items = await prisma.meetingItem.deleteMany({
       where: {
         meeting_id,
@@ -142,6 +150,12 @@ const delete_meeting = async (meeting_id: number) => {
           id: meeting_id
       }
   })
+
+  if (meetingWithAttendants) {
+    for (const attendant of meetingWithAttendants.attendants) {
+      await sendMeetingDeletedEmail(attendant.user.email, meeting)
+    }
+  }
 
   return meeting
 }

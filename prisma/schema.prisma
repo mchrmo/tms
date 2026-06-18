@@ -302,6 +302,7 @@ enum MeetingItemStatus {
   PENDING
   DENIED
   ACCEPTED
+  PASSED
 }
 
 model MeetingItemComment {
