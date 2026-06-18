@@ -85,7 +85,7 @@ function GroupRow({ group }: { group: AttendantGroupWithMembers }) {
               className="h-8 max-w-xs"
             />
             <SubmitButton onClick={handleRename} isLoading={updateGroup.isPending} type="button" className="h-8 text-xs px-3">Uložiť</SubmitButton>
-            <Button size="sm" variant="secondary" onClick={() => { setEditing(false); setNewName(group.name) }}>Zrušiť</Button>
+            <Button size="sm" variant="secondary" className="text-xs" onClick={() => { setEditing(false); setNewName(group.name) }}>Zrušiť</Button>
           </div>
         ) : (
           <button className="font-semibold flex-1 text-left" onClick={() => setExpanded(v => !v)}>

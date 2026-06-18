@@ -8,7 +8,7 @@ import userService from "../user.service";
 
 type CreateMeetingItemReqs = {
   description: string;
-  status: 'DRAFT' | 'PENDING' | 'DENIED' | 'ACCEPTED';
+  status: 'DRAFT' | 'PENDING' | 'DENIED' | 'ACCEPTED' | 'PASSED';
   meeting_id: number;
 }
 
@@ -68,9 +68,12 @@ const update_meetingItem = async (meetingItemData: Partial<MeetingItem>) => {
   if(!meetingItemData.id) return null
 
   const id = meetingItemData.id
+  const { id: _id, ...rest } = meetingItemData
+  const data = Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined))
+
   const meetingItem = await prisma.meetingItem.update({
     where: {id},
-    data: meetingItemData
+    data
   })
 
 

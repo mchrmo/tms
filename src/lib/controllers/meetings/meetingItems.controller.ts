@@ -138,7 +138,7 @@ const publishMeetingItem = async (request: NextRequest) => {
 
 const resolveMeetingItem = async (request: NextRequest) => {
   const body = await request.json()
-  const parsedSchema = MeetingItemUpdateSchema.merge(z.object({ status: z.enum(['DENIED', 'ACCEPTED']) })).safeParse(body);
+  const parsedSchema = MeetingItemUpdateSchema.merge(z.object({ status: z.enum(['DENIED', 'ACCEPTED', 'PASSED']) })).safeParse(body);
 
   if (!parsedSchema.success) {
     const { errors } = parsedSchema.error;

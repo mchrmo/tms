@@ -86,7 +86,7 @@ export default function MeetingDetailItemsTable({ meeting, role, onExport }: { m
       cell: (props) => {
         const status = props.row.original.status
         const itemId = props.row.original.id
-        if (status == "ACCEPTED") {
+        if (status == "PASSED") {
           return (
             <a target="_blank" href={`/tasks/create?source=${meeting?.name} ${formatDate(meeting?.date!)}&name=${props.row.original.description}`}><span className="link">Vytvoriť úlohu</span></a>
           )

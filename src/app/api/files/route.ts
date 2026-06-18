@@ -56,13 +56,14 @@ export const GET = async (req: Request) => {
       return NextResponse.json({ error: "File name is required" }, { status: 400 });
     }
 
+    const displayName = url.searchParams.get("name") ?? fileName.split('/').pop() ?? fileName
     const {buffer, type} = await fileService.getFile(fileName)
 
     // Respond with the file as a download
     return new Response(buffer, {
       headers: {
         "Content-Type": type || "application/octet-stream",
-        "Content-Disposition": `attachment;"`,
+        "Content-Disposition": `attachment; filename="${encodeURIComponent(displayName)}"`,
       },
     });
   } catch (error) {

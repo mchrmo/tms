@@ -218,7 +218,8 @@ export const usePublishMeetingItem = (id: number) => {
       );
     },
     onSettled: () => {
-      queryClient.invalidateQueries({queryKey: meetingQueryKeys.all});
+      queryClient.invalidateQueries({ queryKey: meetingQueryKeys.all, refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: meetingItemQueryKeys.all, refetchType: 'all' });
     },
   });
 }
@@ -228,7 +229,7 @@ export const useResolveMeetingItem = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
-  const resolveMeetingItemFn = async ({id, status}: {id: number, status: 'ACCEPTED' | 'DENIED'}) => {
+  const resolveMeetingItemFn = async ({id, status}: {id: number, status: 'ACCEPTED' | 'DENIED' | 'PASSED'}) => {
     const response = await meetingItemsApi.post(`/resolve`, {id, status})
     return response.data
   }
@@ -242,8 +243,8 @@ export const useResolveMeetingItem = () => {
       return { previousItem: previousItem, updatedItem: updatedItem };
     },
     onSuccess: (data) => {
-
-      let status = data.status && data.status === "ACCEPTED" ? 'schválený' : 'odmietnutý'
+      const statusMap: Record<string, string> = { ACCEPTED: 'schválený', DENIED: 'odmietnutý', PASSED: 'prerokovaný' }
+      const status = data.status ? (statusMap[data.status] ?? data.status) : 'aktualizovaný'
       toast({
         title: `Bod porady bol ${status}!`
       })
@@ -255,7 +256,8 @@ export const useResolveMeetingItem = () => {
       );
     },
     onSettled: () => {
-      queryClient.invalidateQueries({queryKey: meetingQueryKeys.all});
+      queryClient.invalidateQueries({ queryKey: meetingQueryKeys.all, refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: meetingItemQueryKeys.all, refetchType: 'all' });
     },
   });
 }

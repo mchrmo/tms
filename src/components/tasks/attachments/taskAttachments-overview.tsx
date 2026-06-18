@@ -40,19 +40,40 @@ export default function TaskAttachmentsOverview({ task }: { task: TaskDetail }) 
     })
   }
 
-  const handleBulkDownload = () => {
-    attachments
-      .filter(a => selected.has(a.id))
-      .forEach(a => {
-        const link = document.createElement('a')
-        link.href = `${process.env.NEXT_PUBLIC_URL}/api/files?file=${a.file.path}`
-        link.download = a.file.name
-        link.target = '_blank'
-        link.rel = 'noopener noreferrer'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      })
+  const handleBulkDownload = async () => {
+    const selectedAttachments = attachments.filter(a => selected.has(a.id))
+
+    if (selectedAttachments.length === 1) {
+      const a = selectedAttachments[0]
+      const link = document.createElement('a')
+      link.href = `/api/files?file=${encodeURIComponent(a.file.path)}&name=${encodeURIComponent(a.file.name)}`
+      link.download = a.file.name
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      return
+    }
+
+    const selectedFiles = selectedAttachments
+      .map(a => ({ path: a.file.path, name: a.file.name }))
+
+    const response = await fetch('/api/files/zip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ files: selectedFiles }),
+    })
+
+    if (!response.ok) return
+
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'prilohy.zip'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
   }
 
   return (
@@ -103,7 +124,7 @@ export default function TaskAttachmentsOverview({ task }: { task: TaskDetail }) 
                 <TableCell>{attachment.file.owner.name}</TableCell>
                 <TableCell>{formatDate(attachment.file.createdAt)}</TableCell>
                 <TableCell className="flex space-x-3">
-                  <a target="_blank" rel="noopener noreferrer" href={`${process.env.NEXT_PUBLIC_URL}/api/files?file=${attachment.file.path}`}>
+                  <a target="_blank" rel="noopener noreferrer" href={`/api/files?file=${encodeURIComponent(attachment.file.path)}&name=${encodeURIComponent(attachment.file.name)}`}>
                     <DownloadIcon size={20} />
                   </a>
                   <TrashIcon className="cursor-pointer" size={20} onClick={() => deleteAttachmentQ.mutate(attachment.id)} />

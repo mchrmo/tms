@@ -189,3 +189,14 @@ export async function sendMeetingAttendantRemovedEmail(user_id: number, meeting:
     html: text
   })
 }
+
+export async function sendMeetingDeletedEmail(userEmail: string, meeting: Meeting) {
+  const text = `Dobrý deň,<br><br>Porada <b>${meeting.name}</b> (${formatDateTime(meeting.date)}) bola zrušená.`
+
+  await sendEmail({
+    from: 'system@taskmanager.sk',
+    to: userEmail,
+    subject: `Zrušenie porady - ${meeting.name}`,
+    html: text
+  })
+}
