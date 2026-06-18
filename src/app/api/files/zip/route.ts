@@ -1,10 +1,10 @@
 import fileService from "@/lib/services/file.service";
 import { errorHandler } from "@/lib/services/api.service";
 import { ApiError } from "next/dist/server/api-utils";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import JSZip from "jszip";
 
-export const POST = errorHandler(async (req: Request) => {
+export const POST = errorHandler(async (req: NextRequest) => {
   const body = await req.json();
   const files: { path: string; name: string }[] = body.files;
 
@@ -23,7 +23,7 @@ export const POST = errorHandler(async (req: Request) => {
 
   const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
 
-  return new Response(zipBuffer, {
+  return new NextResponse(zipBuffer, {
     headers: {
       "Content-Type": "application/zip",
       "Content-Disposition": `attachment; filename="prilohy.zip"`,
