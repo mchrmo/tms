@@ -40,7 +40,7 @@ export async function sendEmail(email: SengridEmailParams) {
 
     email.html += `<br> <br> <i style="color: #7e7e7e;">Email je automaticky generovaný, prosím neodpovedajte naň.</i>`
 
-
+    console.log(`Sending email to ${email.to} with subject "${email.subject}"`)
     return await sgMail.send(email)
   } catch (error) {
     console.error(error);
@@ -86,6 +86,24 @@ export async function sendAssigneeChangeNotification(user_id: number, taskName: 
   })
 }
 
+export async function sendTaskStatusChangeNotification(
+  userEmail: string,
+  userName: string,
+  taskName: string,
+  task_id: number,
+  newStatus: string
+) {
+  const statusLabel = newStatus;
+  const text = `Dobrý deň ${userName},<br><br>Stav úlohy <a href="${process.env.NEXT_PUBLIC_URL}/tasks/${task_id}"><b>${taskName}</b></a> bol zmenený na: <b>${statusLabel}</b>.`
+
+  await sendEmail({
+    from: 'system@taskmanager.sk',
+    to: userEmail,
+    subject: `Zmena stavu úlohy - ${taskName}`,
+    html: text,
+  });
+}
+
 export async function sendReport(email: string, subject: string, report: string) {
 
   const mail = await sendEmail({
@@ -96,6 +114,34 @@ export async function sendReport(email: string, subject: string, report: string)
   })
 
 
+}
+
+export async function sendReportsBatch(reports: { email: string; subject: string; html: string }[]) {
+  const disclaimer = `<br> <br> <i style="color: #7e7e7e;">Email je automaticky generovaný, prosím neodpovedajte naň.</i>`
+
+  const messages = reports
+    .filter(r => {
+      if (process.env.DISABLE_EMAIL && r.email !== 'mchrmo@gmail.com') {
+        console.log('Email not send - disabled', r.email)
+        return false
+      }
+      return true
+    })
+    .map(r => ({
+      from: 'system@taskmanager.sk',
+      to: r.email,
+      subject: r.subject,
+      html: r.html + disclaimer,
+    }))
+
+  if (!messages.length) return
+
+  try {
+    console.log(`Sending ${messages.length} report emails in batch`)
+    return await sgMail.send(messages)
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 // Meetings
@@ -112,6 +158,45 @@ export async function newMeetingAttendantEmail(user_id: number, meeting: Meeting
     from: 'system@taskmanager.sk',
     to: user?.email,
     subject: `Pozvánka na poradu - ${meeting.name}`,
+    html: text
+  })
+}
+
+export async function sendMeetingUpdatedEmail(userEmail: string, meeting: Meeting) {
+  const url = process.env.NEXT_PUBLIC_URL
+  const text = `Dobrý deň,<br><br>Porada <a href="${url}/meetings/${meeting.id}"><b>${meeting.name}</b></a> bola zmenená.<br>
+    Aktuálny termín: <b>${formatDateTime(meeting.date)}</b>`
+
+  await sendEmail({
+    from: 'system@taskmanager.sk',
+    to: userEmail,
+    subject: `Zmena porady - ${meeting.name}`,
+    html: text
+  })
+}
+
+export async function sendMeetingAttendantRemovedEmail(user_id: number, meeting: Meeting) {
+  const user = await getUser(user_id)
+  if (!user) return
+
+  const url = process.env.NEXT_PUBLIC_URL
+  const text = `Dobrý deň,<br><br>Boli ste odstránený z porady <b>${meeting.name}</b> (${formatDateTime(meeting.date)}).`
+
+  await sendEmail({
+    from: 'system@taskmanager.sk',
+    to: user.email,
+    subject: `Odstránenie z porady - ${meeting.name}`,
+    html: text
+  })
+}
+
+export async function sendMeetingDeletedEmail(userEmail: string, meeting: Meeting) {
+  const text = `Dobrý deň,<br><br>Porada <b>${meeting.name}</b> (${formatDateTime(meeting.date)}) bola zrušená.`
+
+  await sendEmail({
+    from: 'system@taskmanager.sk',
+    to: userEmail,
+    subject: `Zrušenie porady - ${meeting.name}`,
     html: text
   })
 }

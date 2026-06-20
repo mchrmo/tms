@@ -3,12 +3,13 @@ import { title } from 'process';
 import { z } from 'zod';
 
 // MeetingItemStatus Enum (Assumed to be string values, change as needed)
-export const MeetingItemStatusEnum = z.enum(['DRAFT', 'PENDING', 'DENIED', 'ACCEPTED']);
+export const MeetingItemStatusEnum = z.enum(['DRAFT', 'PENDING', 'DENIED', 'ACCEPTED', 'PASSED']);
 export const meetingItemStatusMap: {[key: string]: string} = {
   "DRAFT": "Koncept",
   "PENDING": 'Čaká na schválenie',
   "DENIED": 'Zamietnutý',
-  "ACCEPTED": 'Schválený'
+  "ACCEPTED": 'Schválený',
+  "PASSED": 'Prerokované'
 }
 const MeetingItemSchema = z.object({
   id: z.number().optional(), // Optional for creation (auto-increment)

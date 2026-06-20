@@ -218,7 +218,8 @@ export const usePublishMeetingItem = (id: number) => {
       );
     },
     onSettled: () => {
-      queryClient.invalidateQueries({queryKey: meetingQueryKeys.all});
+      queryClient.invalidateQueries({ queryKey: meetingQueryKeys.all, refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: meetingItemQueryKeys.all, refetchType: 'all' });
     },
   });
 }
@@ -228,7 +229,7 @@ export const useResolveMeetingItem = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
-  const resolveMeetingItemFn = async ({id, status}: {id: number, status: 'ACCEPTED' | 'DENIED'}) => {
+  const resolveMeetingItemFn = async ({id, status}: {id: number, status: 'ACCEPTED' | 'DENIED' | 'PASSED'}) => {
     const response = await meetingItemsApi.post(`/resolve`, {id, status})
     return response.data
   }
@@ -242,8 +243,8 @@ export const useResolveMeetingItem = () => {
       return { previousItem: previousItem, updatedItem: updatedItem };
     },
     onSuccess: (data) => {
-
-      let status = data.status && data.status === "ACCEPTED" ? 'schválený' : 'odmietnutý'
+      const statusMap: Record<string, string> = { ACCEPTED: 'schválený', DENIED: 'odmietnutý', PASSED: 'prerokovaný' }
+      const status = data.status ? (statusMap[data.status] ?? data.status) : 'aktualizovaný'
       toast({
         title: `Bod porady bol ${status}!`
       })
@@ -255,7 +256,32 @@ export const useResolveMeetingItem = () => {
       );
     },
     onSettled: () => {
-      queryClient.invalidateQueries({queryKey: meetingQueryKeys.all});
+      queryClient.invalidateQueries({ queryKey: meetingQueryKeys.all, refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: meetingItemQueryKeys.all, refetchType: 'all' });
     },
   });
+}
+
+export const useMoveMeetingItems = () => {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  const moveMeetingItemsFn = async ({ item_ids, target_meeting_id }: { item_ids: number[], target_meeting_id: number }) => {
+    const response = await meetingItemsApi.post('/move', { item_ids, target_meeting_id })
+    return response.data
+  }
+
+  return useMutation({
+    mutationFn: moveMeetingItemsFn,
+    onSuccess: () => {
+      toast({ title: "Body porady boli presunuté!" })
+    },
+    onError: (err: AxiosError<{ message: string }>) => {
+      const errMessage = err.response?.data ? err.response.data.message : err.message
+      toast({ title: "Chyba", description: errMessage })
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: meetingQueryKeys.all })
+    },
+  })
 }

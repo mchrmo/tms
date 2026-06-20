@@ -45,6 +45,10 @@ model User {
   TaskRelationship           TaskRelationship[]
   MeetingAttendantsGroup     MeetingAttendantsGroup[]
   MeetingAttendantsGroupUser MeetingAttendantsGroupUser[]
+  morning_report             Boolean                      @default(false)
+  afternoon_report           Boolean                      @default(false)
+  unavailable_from           DateTime?
+  unavailable_to             DateTime?
 }
 
 model File {
@@ -139,6 +143,9 @@ model TaskSubscription {
   task      Task               @relation(fields: [task_id], references: [id])
   member_id Int
   member    OrganizationMember @relation(fields: [member_id], references: [id])
+  statuses  String             @default("") @db.VarChar(255)
+
+  @@unique([task_id, member_id])
 }
 
 model TaskUpdate {
@@ -232,6 +239,7 @@ model Meeting {
   attendants MeetingAttendant[]
   name       String
   date       DateTime
+  archived   Boolean            @default(false)
   meta       MeetingMeta[]
   items      MeetingItem[]
 }
@@ -294,6 +302,7 @@ enum MeetingItemStatus {
   PENDING
   DENIED
   ACCEPTED
+  PASSED
 }
 
 model MeetingItemComment {

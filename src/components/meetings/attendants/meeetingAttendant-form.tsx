@@ -29,8 +29,9 @@ export default function MeetingAttendantForm({onUpdate, meeting_id}: {onUpdate?:
   const createMeetingAttendant = useCreateMeetingAttendant();
 
   useEffect(() => {
-    reset()
     if (createMeetingAttendant.isSuccess) { 
+      reset()
+      onUpdate?.()
       createMeetingAttendant.reset()
     }
   }, [createMeetingAttendant.isSuccess])
@@ -46,7 +47,7 @@ export default function MeetingAttendantForm({onUpdate, meeting_id}: {onUpdate?:
   
   return (
     <Form {...form}>
-      <form  id="form" onSubmit={handleSubmit(onSubmit)} className="my-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">    
+      <form  id="form" onSubmit={handleSubmit(onSubmit)} className="">    
         
         <FormField
             control={form.control}
@@ -63,7 +64,6 @@ export default function MeetingAttendantForm({onUpdate, meeting_id}: {onUpdate?:
         />
 
         {isDirty && <div className="space-x-3 col-span-full flex mt-5">
-          <Button variant="secondary" type="button" onClick={() => {onCancel();}}>Zrušiť</Button>
           <SubmitButton isLoading={createMeetingAttendant.isPending} type="submit" >Pridať účastníka</SubmitButton>
         </div>}
       </form>

@@ -1,24 +1,33 @@
 'use client'
 
-import { useMeeting } from "@/lib/hooks/meeting/meeting.hooks"
+import { useDeleteMeeting, useMeeting } from "@/lib/hooks/meeting/meeting.hooks"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import MeetingForm from "./meeting-form"
 import MeetingAttendantsList from "./attendants/list"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import clsx from "clsx"
 import { useState } from "react"
-import CreateMeetingItem from "./items/create"
 import MeetingDetailItemsTable from "./items/detail-table"
 import { Button } from "../ui/button"
-import { Download01 } from "@untitled-ui/icons-react"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import ViewHeadline from "../common/view-haedline"
 
 export default function MeetingDetail({ params }: { params: { id: string } }) {
   const [tab, setTab] = useState('items')
+  const router = useRouter()
 
   const meetingId = parseInt(params.id)
   const meetingQ = useMeeting(meetingId)
+  const deleteMeeting = useDeleteMeeting(meetingId)
 
   const meeting = meetingQ.data && meetingQ.data.data
+  const role = meetingQ.data?.role
+
+  const canDelete = role === 'CREATOR'
+  useEffect(() => {
+    if (deleteMeeting.isSuccess) router.push('/meetings')
+  }, [deleteMeeting.isSuccess])
 
 
   const downloadCSV = async () => {
@@ -44,6 +53,23 @@ export default function MeetingDetail({ params }: { params: { id: string } }) {
   return (
     <>
 
+      <div className="flex justify-between items-end gap-4 mb-6">
+        <div className="">
+          <h1 className="text-2xl">Detail porady</h1>
+        </div>
+        {canDelete && (
+          <div className="">
+            <Button
+              variant="linkDestructive"
+              onClick={() => deleteMeeting.mutate()}
+              disabled={deleteMeeting.isPending}
+            >
+              Vymazať poradu
+            </Button>
+          </div>
+        )}
+      </div>
+
       {meetingQ.error instanceof Error && <div>{meetingQ.error.message}</div>}
 
       {
@@ -62,13 +88,7 @@ export default function MeetingDetail({ params }: { params: { id: string } }) {
                 <MeetingAttendantsList meeting={meeting}></MeetingAttendantsList>
               </TabsContent>
               <TabsContent value="items">
-                <div className="flex">
-                  <div className="ms-auto flex gap-1" >
-                    <Button onClick={downloadCSV} >Export <Download01 height={14}></Download01></Button>
-                    <CreateMeetingItem meeting_id={meeting.id} ></CreateMeetingItem>
-                  </div>
-                </div>
-                <MeetingDetailItemsTable meeting={meeting} role={meetingQ.data.role}></MeetingDetailItemsTable>
+                <MeetingDetailItemsTable meeting={meeting} role={meetingQ.data.role} onExport={downloadCSV} />
               </TabsContent>
               {/* </div> */}
             </Tabs>

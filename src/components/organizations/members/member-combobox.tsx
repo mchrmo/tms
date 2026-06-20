@@ -3,7 +3,7 @@ import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { AlertTriangle, Check, ChevronsUpDown } from "lucide-react";
 import { PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useDebounce } from 'use-debounce';
@@ -12,6 +12,10 @@ import { Payload } from "@prisma/client/runtime/library";
 import { useOrganizationMembers } from "@/lib/hooks/organization/organizationMember.hooks";
 import { ColumnFiltersState } from "@tanstack/react-table";
 import { OrganizationMemberListItem } from "@/lib/services/organizations/organizationMembers.service";
+import { isUserUnavailable } from "@/lib/utils/unavailability";
+import { format } from "date-fns";
+import { sk } from "date-fns/locale";
+import { DATE_FORMAT } from "@/lib/utils";
 
 const POPOVER_WIDTH = 'w-full';
 
@@ -36,26 +40,40 @@ export default function OrganizationMemberCombobox({onSelectResult, label, defau
   }, []);
 
   const displayName = selected ? `${selected.user.name}` : (label ? label : 'Vybrať');
+  const selectedUnavailable = selected && isUserUnavailable(selected.user.unavailable_from, selected.user.unavailable_to)
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          className={cn('justify-between', POPOVER_WIDTH, )}
-          disabled={disabled}
-        >
-          {displayName}
+    <div className="flex flex-col gap-1 w-full">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            className={cn('justify-between', POPOVER_WIDTH, )}
+            disabled={disabled}
+          >
+            {displayName}
 
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-    
-      <PopoverContent side="bottom" className={cn('p-0', POPOVER_WIDTH)}>
-        <Search selectedResult={selected} onSelectResult={handleSetActive} managersToOrg={managersToOrg}/>
-      </PopoverContent>
-    </Popover>
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+      
+        <PopoverContent side="bottom" className={cn('p-0', POPOVER_WIDTH)}>
+          <Search selectedResult={selected} onSelectResult={handleSetActive} managersToOrg={managersToOrg}/>
+        </PopoverContent>
+      </Popover>
+      {selectedUnavailable && selected && (
+        <div className="flex items-center gap-1.5 text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded px-2 py-1">
+          <AlertTriangle size={12} className="shrink-0" />
+          <span>
+            Upozornenie: {selected.user.name} je nedostupný
+            {selected.user.unavailable_from && selected.user.unavailable_to && (
+              <> ({format(new Date(selected.user.unavailable_from), DATE_FORMAT, {locale: sk})} – {format(new Date(selected.user.unavailable_to), DATE_FORMAT, {locale: sk})})</>
+            )}
+          </span>
+        </div>
+      )}
+    </div>
   
   )
 }
@@ -137,6 +155,7 @@ function SearchResults({
       {membersQ.isError && <div className="p-4 text-sm">Niečo sa pokazilo...</div>}
 
       {membersQ.data && membersQ.data.data.map((organizationMember) => {
+        const unavailable = isUserUnavailable(organizationMember.user.unavailable_from, organizationMember.user.unavailable_to)
         return (
           <CommandItem
             key={organizationMember.id}
@@ -149,10 +168,16 @@ function SearchResults({
                 selectedResult?.id === organizationMember.id ? 'opacity-100' : 'opacity-0'
               )}
             />
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <span>{organizationMember.user.name}, <span className="font-light">{organizationMember.position_name}</span></span>
               <span className="font-light">{organizationMember.organization.name}</span>
             </div>
+            {unavailable && (
+              <span className="ml-2 flex items-center gap-1 text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded px-1.5 py-0.5">
+                <AlertTriangle size={10} />
+                Nedostupný
+              </span>
+            )}
           </CommandItem>
         );
       })}

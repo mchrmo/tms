@@ -138,7 +138,7 @@ const publishMeetingItem = async (request: NextRequest) => {
 
 const resolveMeetingItem = async (request: NextRequest) => {
   const body = await request.json()
-  const parsedSchema = MeetingItemUpdateSchema.merge(z.object({ status: z.enum(['DENIED', 'ACCEPTED']) })).safeParse(body);
+  const parsedSchema = MeetingItemUpdateSchema.merge(z.object({ status: z.enum(['DENIED', 'ACCEPTED', 'PASSED']) })).safeParse(body);
 
   if (!parsedSchema.success) {
     const { errors } = parsedSchema.error;
@@ -205,6 +205,54 @@ const deleteComment = async (req: NextRequest, params: any) => {
   return NextResponse.json(meetingItemComment, { status: 200 })
 }
 
+const moveMeetingItems = async (request: NextRequest) => {
+  const body = await request.json()
+
+  const schema = z.object({
+    item_ids: z.array(z.number().int().positive()).min(1, "Musíte vybrať aspoň jeden bod"),
+    target_meeting_id: z.number().int().positive()
+  })
+
+  const parsedSchema = schema.safeParse(body)
+  if (!parsedSchema.success) {
+    return NextResponse.json({ error: { message: "Invalid request", errors: parsedSchema.error.errors } }, { status: 400 })
+  }
+
+  const { item_ids, target_meeting_id } = parsedSchema.data
+
+  const user = await getUser()
+  if (!user) throw new ApiError(401, "Neautorizovaný")
+
+  const admin = await isRole('admin', user)
+
+  // Verify all items come from the same source meeting and user is CREATOR of it (or admin)
+  const items = await prisma.meetingItem.findMany({ where: { id: { in: item_ids } } })
+  if (items.length !== item_ids.length) throw new ApiError(404, "Niektoré body porady neboli nájdené")
+
+  const sourceMeetingIds = Array.from(new Set(items.map(i => i.meeting_id)))
+  if (sourceMeetingIds.length > 1) throw new ApiError(400, "Všetky body musia patriť tej istej porade")
+
+  const sourceMeetingId = sourceMeetingIds[0]
+
+  if (!admin) {
+    const attendant = await prisma.meetingAttendant.findUnique({
+      where: { meeting_id_user_id: { meeting_id: sourceMeetingId, user_id: user.id } }
+    })
+    if (!attendant || attendant.role !== 'CREATOR') {
+      throw new ApiError(403, "Len vlastník porady alebo admin môže presúvať body")
+    }
+  }
+
+  // Verify target meeting exists and hasn't happened yet
+  const targetMeeting = await prisma.meeting.findUnique({ where: { id: target_meeting_id } })
+  if (!targetMeeting) throw new ApiError(404, "Cieľová porada nebola nájdená")
+  if (new Date(targetMeeting.date) <= new Date()) throw new ApiError(400, "Cieľová porada už prebehla")
+  if (targetMeeting.id === sourceMeetingId) throw new ApiError(400, "Zdrojová a cieľová porada sú rovnaké")
+
+  const result = await meetingItemService.move_meetingItems(item_ids, target_meeting_id)
+  return NextResponse.json(result, { status: 200 })
+}
+
 const meetingItemsController = {
   getMeetingItem,
   getMeetingItems,
@@ -214,6 +262,7 @@ const meetingItemsController = {
 
   publishMeetingItem,
   resolveMeetingItem,
+  moveMeetingItems,
 
   addComment,
   deleteComment

@@ -15,7 +15,7 @@ type CreateOrganizationMemberReqs = {
 export const organizationMemberListItem = Prisma.validator<Prisma.OrganizationMemberDefaultArgs>()({
   include: {
     user: {
-      select: {name: true}
+      select: {name: true, unavailable_from: true, unavailable_to: true}
     },
     organization: {
       select: {name: true}

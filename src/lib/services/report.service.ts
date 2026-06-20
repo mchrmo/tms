@@ -4,7 +4,7 @@ import moment from "moment";
 import path from "path";
 import fs from 'fs';
 import handlebars from 'handlebars';
-import { sendReport } from "./mail.service";
+import { sendReportsBatch } from "./mail.service";
 import { format } from "date-fns";
 import { formatDate, formatDateTime } from "../utils/dates";
 
@@ -39,20 +39,23 @@ const process_reports = async (type: 'morning' | 'afternoon') => {
     }
   })
 
-  
-    
+  const reportResults = await Promise.all(
+    users
+      .filter(user => user.OrganizationMember.length > 0)
+      .map(async (user) => {
+        let reportToSend
+        if (type === 'morning') reportToSend = await morning_user_report(user)
+        if (type === 'afternoon') reportToSend = await afternoon_user_report(user)
+        if (!reportToSend) return null
+        return { email: user.email, subject: reportToSend.title, html: reportToSend.html }
+      })
+  )
 
-  for (const user of users) {
-    if (!user.OrganizationMember.length) continue
+  const reports = reportResults.filter((r): r is { email: string; subject: string; html: string } => r !== null)
 
-    let reportToSend
-    if(type == 'morning') reportToSend = await morning_user_report(user)
-    if(type == 'afternoon') reportToSend = await afternoon_user_report(user)
-      
-    if(reportToSend) await sendReport(user.email, reportToSend.title, reportToSend.html)
-      
+  if (reports.length > 0) {
+    await sendReportsBatch(reports)
   }
-
 
 }
 
